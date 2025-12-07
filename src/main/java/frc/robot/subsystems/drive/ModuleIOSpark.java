@@ -73,33 +73,31 @@ public class ModuleIOSpark implements ModuleIO {
           case 3 -> backRightZeroRotation;
           default -> new Rotation2d();
         };
-    driveSpark =
-        new SparkFlex(
-            switch (module) {
-              case 0 -> frontLeftDriveCanId;
-              case 1 -> frontRightDriveCanId;
-              case 2 -> backLeftDriveCanId;
-              case 3 -> backRightDriveCanId;
-              default -> 0;
-            },
-            MotorType.kBrushless);
-    turnSpark =
-        new SparkMax(
-            switch (module) {
-              case 0 -> frontLeftTurnCanId;
-              case 1 -> frontRightTurnCanId;
-              case 2 -> backLeftTurnCanId;
-              case 3 -> backRightTurnCanId;
-              default -> 0;
-            },
-            MotorType.kBrushless);
+    int driveCanId =
+        switch (module) {
+          case 0 -> kFrontLeftDrivingCanId;
+          case 1 -> kFrontRightDrivingCanId;
+          case 2 -> kRearLeftDrivingCanId;
+          case 3 -> kRearRightTurningCanId;
+          default -> 0;
+        };
+    driveSpark = new SparkMax(driveCanId, MotorType.kBrushless);
+    int turnCanId =
+        switch (module) {
+          case 0 -> kFrontLeftTurningCanId;
+          case 1 -> kFrontRightTurningCanId;
+          case 2 -> kRearLeftTurningCanId;
+          case 3 -> kRearRightTurningCanId;
+          default -> 0;
+        };
+    turnSpark = new SparkMax(turnCanId, MotorType.kBrushless);
     driveEncoder = driveSpark.getEncoder();
     turnEncoder = turnSpark.getAbsoluteEncoder();
     driveController = driveSpark.getClosedLoopController();
     turnController = turnSpark.getClosedLoopController();
 
     // Configure drive motor
-    var driveConfig = new SparkFlexConfig();
+    var driveConfig = new SparkMaxConfig();
     driveConfig
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(driveMotorCurrentLimit)

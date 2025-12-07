@@ -21,7 +21,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 public class DriveConstants {
-    // 17.6 ft/s converted to meters per second
+  // 17.6 ft/s converted to meters per second
   public static final double maxSpeedMetersPerSec = 5.36;
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(26.5);
@@ -41,25 +41,25 @@ public class DriveConstants {
   public static final Rotation2d backLeftZeroRotation = new Rotation2d(0.0);
   public static final Rotation2d backRightZeroRotation = new Rotation2d(0.0);
 
-    // Device CAN IDs
-    public static final int pigeonCanId = 9;
+  // Device CAN IDs
+  public static final int pigeonCanId = 9;
 
-    public static final int kFrontLeftDrivingCanId = 1;
-    public static final int kFrontLeftTurningCanId = 2;
+  public static final int kFrontLeftDrivingCanId = 1;
+  public static final int kFrontLeftTurningCanId = 2;
 
-    public static final int kFrontRightDrivingCanId = 3;
-    public static final int kFrontRightTurningCanId = 4;
+  public static final int kFrontRightDrivingCanId = 3;
+  public static final int kFrontRightTurningCanId = 4;
 
-    public static final int kRearLeftDrivingCanId = 5;
-    public static final int kRearLeftTurningCanId = 6;
+  public static final int kRearLeftDrivingCanId = 5;
+  public static final int kRearLeftTurningCanId = 6;
 
-    public static final int kRearRightDrivingCanId = 7;
-    public static final int kRearRightTurningCanId = 8;
+  public static final int kRearRightDrivingCanId = 7;
+  public static final int kRearRightTurningCanId = 8;
 
   // Drive motor configuration
   public static final int driveMotorCurrentLimit = 50;
   public static final double wheelRadiusMeters = Units.inchesToMeters(2);
-  public static final double driveMotorReduction = 6.75; 
+  public static final double driveMotorReduction = 6.75;
   public static final DCMotor driveGearbox = DCMotor.getNEO(1);
 
   // Drive encoder configuration
@@ -81,7 +81,7 @@ public class DriveConstants {
   // Turn motor configuration
   public static final boolean turnInverted = false;
   public static final int turnMotorCurrentLimit = 20;
-  public static final double turnMotorReduction = 155/7.0; //mk4i swerve module
+  public static final double turnMotorReduction = 155 / 7.0; // mk4i swerve module
   public static final DCMotor turnGearbox = DCMotor.getNEO(1);
 
   // Turn encoder configuration
@@ -99,7 +99,7 @@ public class DriveConstants {
 
   // PathPlanner configuration
   public static final double robotMassKg = 37.0; // ~80lbs
-  public static final double robotMOI = 5.835; 
+  public static final double robotMOI = 5.835;
   public static final double wheelCOF = 1.0;
   public static final RobotConfig ppConfig =
       new RobotConfig(
