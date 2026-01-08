@@ -79,6 +79,7 @@ public class ModuleIOSpark implements ModuleIO {
           case 3 -> kRearRightDrivingCanId;
           default -> 0;
         };
+    // TODO: Update to SparkFlex if you are using a spark flex
     driveSpark = new SparkMax(driveCanId, MotorType.kBrushless);
     int turnCanId =
         switch (module) {
@@ -88,6 +89,7 @@ public class ModuleIOSpark implements ModuleIO {
           case 3 -> kRearRightTurningCanId;
           default -> 0;
         };
+    // TODO: Update to SparkFlex if you are using a spark flex
     turnSpark = new SparkMax(turnCanId, MotorType.kBrushless);
     driveEncoder = driveSpark.getEncoder();
     turnEncoder = turnSpark.getAbsoluteEncoder();
@@ -95,6 +97,7 @@ public class ModuleIOSpark implements ModuleIO {
     turnController = turnSpark.getClosedLoopController();
 
     // Configure drive motor
+    // TODO: Update to SparkFlexConfig if you are using a spark flex
     var driveConfig = new SparkMaxConfig();
     driveConfig
         .idleMode(IdleMode.kBrake)
@@ -130,6 +133,7 @@ public class ModuleIOSpark implements ModuleIO {
     tryUntilOk(driveSpark, 5, () -> driveEncoder.setPosition(0.0));
 
     // Configure turn motor
+    // TODO: Update to SparkFlexConfig if you are using a spark flex
     var turnConfig = new SparkMaxConfig();
     turnConfig
         .inverted(turnInverted)
