@@ -40,10 +40,15 @@ public class DriveConstants {
 
   // Zeroed rotation values for each module, see setup instructions
   // TODO: Update these values by following the instructions
-  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.0);
-  public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.0);
-  public static final Rotation2d backLeftZeroRotation = new Rotation2d(0.0);
-  public static final Rotation2d backRightZeroRotation = new Rotation2d(0.0);
+    public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.0); // module 1
+    public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.0); // module 0
+    public static final Rotation2d backLeftZeroRotation = new Rotation2d(0.0); // module 2
+    public static final Rotation2d backRightZeroRotation = new Rotation2d(0.0); // module 3
+
+//   public static final Rotation2d frontLeftZeroRotation = new Rotation2d(-2.384); // module 1
+//   public static final Rotation2d frontRightZeroRotation = new Rotation2d(2.911); // module 0
+//   public static final Rotation2d backLeftZeroRotation = new Rotation2d(-2.114); // module 2
+//   public static final Rotation2d backRightZeroRotation = new Rotation2d(-0.545); // module 3
 
   // Device CAN IDs
   // TODO: Update CAN IDS

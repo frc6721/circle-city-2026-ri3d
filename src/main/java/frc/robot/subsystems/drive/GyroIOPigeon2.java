@@ -35,7 +35,11 @@ public class GyroIOPigeon2 implements GyroIO {
   private final StatusSignal<AngularVelocity> yawVelocity = pigeon.getAngularVelocityZWorld();
 
   public GyroIOPigeon2() {
+    // TODO: Uncomment this line if your pigeon is not inverted
     pigeon.getConfigurator().apply(new Pigeon2Configuration());
+    // TODO: Comment out the below line if your pigeon is not inverted
+    // pigeon.getConfigurator().apply(new Pigeon2Configuration().withMountPose(new
+    // MountPoseConfigs().withMountPoseRoll(180)));
     pigeon.getConfigurator().setYaw(0.0);
     yaw.setUpdateFrequency(odometryFrequency);
     yawVelocity.setUpdateFrequency(50.0);
