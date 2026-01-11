@@ -40,25 +40,25 @@ public class DriveConstants {
 
   // Zeroed rotation values for each module, see setup instructions
   // TODO: Update these values by following the instructions
-    public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.0); // module 1
-    public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.0); // module 0
-    public static final Rotation2d backLeftZeroRotation = new Rotation2d(0.0); // module 2
-    public static final Rotation2d backRightZeroRotation = new Rotation2d(0.0); // module 3
+  //   public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.0); // module 0
+  //   public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.0); // module 1
+  //   public static final Rotation2d backLeftZeroRotation = new Rotation2d(0.0); // module 2
+  //   public static final Rotation2d backRightZeroRotation = new Rotation2d(0.0); // module 3
 
-//   public static final Rotation2d frontLeftZeroRotation = new Rotation2d(-2.384); // module 1
-//   public static final Rotation2d frontRightZeroRotation = new Rotation2d(2.911); // module 0
-//   public static final Rotation2d backLeftZeroRotation = new Rotation2d(-2.114); // module 2
-//   public static final Rotation2d backRightZeroRotation = new Rotation2d(-0.545); // module 3
+  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(-2.86); // module 0
+  public static final Rotation2d frontRightZeroRotation = new Rotation2d(-3.101); // module 1
+  public static final Rotation2d backLeftZeroRotation = new Rotation2d(-2.170); // module 2
+  public static final Rotation2d backRightZeroRotation = new Rotation2d(-0.441); // module 3
 
   // Device CAN IDs
   // TODO: Update CAN IDS
   public static final int pigeonCanId = 57;
 
-  public static final int kFrontLeftDrivingCanId = 3;
-  public static final int kFrontLeftTurningCanId = 2;
+  public static final int kFrontLeftDrivingCanId = 5;
+  public static final int kFrontLeftTurningCanId = 4;
 
-  public static final int kFrontRightDrivingCanId = 5;
-  public static final int kFrontRightTurningCanId = 4;
+  public static final int kFrontRightDrivingCanId = 3;
+  public static final int kFrontRightTurningCanId = 2;
 
   public static final int kRearLeftDrivingCanId = 7;
   public static final int kRearLeftTurningCanId = 6;
