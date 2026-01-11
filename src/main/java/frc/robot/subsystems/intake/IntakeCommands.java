@@ -1,5 +1,5 @@
 package frc.robot.subsystems.intake;
 
-public class RealIntakeArm {
+public class IntakeCommands {
     
 }
