@@ -56,10 +56,10 @@ public class RealIntakeIO implements IntakeIO {
         IntakeConstants.PIVOT_PID_KI.get(),
         IntakeConstants.PIVOT_PID_KD.get(),
         0);
-      config.softLimit.forwardSoftLimitEnabled(true);
-      config.softLimit.forwardSoftLimit(IntakeConstants.MAX_INTAKE_ANGLE);
-      config.softLimit.reverseSoftLimitEnabled(true);
-      config.softLimit.reverseSoftLimit(IntakeConstants.MIN_INTAKE_ANGLE);
+    config.softLimit.forwardSoftLimitEnabled(true);
+    config.softLimit.forwardSoftLimit(IntakeConstants.MAX_INTAKE_ANGLE);
+    config.softLimit.reverseSoftLimitEnabled(true);
+    config.softLimit.reverseSoftLimit(IntakeConstants.MIN_INTAKE_ANGLE);
 
     tryUntilOk(
         _pivotMotor,

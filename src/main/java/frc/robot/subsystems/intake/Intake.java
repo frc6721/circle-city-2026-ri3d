@@ -72,8 +72,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void turnOnIntakeRollers() {
-    _intakeIO.setRollerMotorOutput(
-        IntakeConstants.INTAKE_ACQUIRE_SPEED.get()); 
+    _intakeIO.setRollerMotorOutput(IntakeConstants.INTAKE_ACQUIRE_SPEED.get());
   }
 
   public void stopRollers() {

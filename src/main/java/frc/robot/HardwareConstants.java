@@ -13,7 +13,7 @@ public class HardwareConstants {
     public static int FEEDER_MOTOR_ID = 33;
 
     // |====================== CLIMBER SUBSYSTEM CAN IDs ======================|
-    public static int CLIMBER_MOTOR = 42;
+    public static int CLIMBER_MOTOR_ID = 42;
   }
 
   public class DIOPorts {
