@@ -19,6 +19,5 @@ public interface ClimberIO {
   public default void updateInputs(ClimberIOInputs inputs) {}
 
   // |============================== MOTOR METHODS ============================== |
-  /** Set the climber motor speed as a duty cycle percentage (-1.0 to 1.0) */
   public default void setMotorSpeed(double speed) {}
 }
