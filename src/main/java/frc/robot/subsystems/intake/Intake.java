@@ -73,7 +73,10 @@ public class Intake extends SubsystemBase {
 
   public void turnOnIntakeRollers() {
     _intakeIO.setRollerMotorOutput(
-        IntakeConstants.INTAKE_ACQUIRE_SPEED
-            .get()); // converting from a 0-1 speed to degrees per second
+        IntakeConstants.INTAKE_ACQUIRE_SPEED.get()); 
+  }
+
+  public void stopRollers() {
+    _intakeIO.setRollerMotorOutput(0.0);
   }
 }
