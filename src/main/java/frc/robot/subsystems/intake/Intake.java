@@ -1,7 +1,79 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Degrees;
+
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Intake extends SubsystemBase {
-    
+
+  private final IntakeIO _intakeIO;
+  private final IntakeIOInputsAutoLogged _intakeInputs = new IntakeIOInputsAutoLogged();
+  private IntakePosition _intakePosition;
+  private Debouncer _limitDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kBoth);
+
+  public enum IntakePosition {
+    STOW(IntakeConstants.POSITION_STOW),
+    PICKUP(IntakeConstants.POSITION_PICKUP);
+
+    private final LoggedNetworkNumber _angle;
+
+    /**
+     * These enum represents a prefedined position of the intake. These are what we pass to commands
+     * to set the intake positions
+     *
+     * @param angle
+     */
+    private IntakePosition(LoggedNetworkNumber angle) {
+      this._angle = angle;
+    }
+
+    /**
+     * Return the angle associated with a given position. These angles are defined in
+     * IntakeConstants.java
+     *
+     * @return
+     */
+    public Angle getAngle() {
+      return Degrees.of(this._angle.get());
+    }
+  }
+
+  public Intake(IntakeIO intakeIO) {
+    this._intakeIO = intakeIO;
+
+    // assume that the intake is all the way up when first turned on
+    _intakePosition = IntakePosition.STOW;
+    _intakeIO.zeroPivotEncoder();
+  }
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+    _intakeIO.updateInputs(_intakeInputs);
+    Logger.processInputs("Intake", _intakeInputs);
+
+    if (_limitDebouncer.calculate(_intakeInputs._upperLimitSwitchTriggered)) {
+      _intakeIO.zeroPivotEncoder();
+    }
+
+    // LOGGING
+    Logger.recordOutput(
+        "Intake/Current-Pivot-Angle", _intakeInputs._intakePivotMotorPosition.in(Degrees));
+    Logger.recordOutput("Intake/Desired-Pivot-Angle", _intakePosition.getAngle().in(Degrees));
+  }
+
+  public void setIntakePosition(IntakePosition position) {
+    _intakePosition = position;
+    _intakeIO.setPivotTargetPosition(position.getAngle());
+  }
+
+  public void turnOnIntakeRollers() {
+    _intakeIO.setRollerMotorOutput(
+        IntakeConstants.INTAKE_ACQUIRE_SPEED
+            .get()); // converting from a 0-1 speed to degrees per second
+  }
 }
