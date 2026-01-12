@@ -9,6 +9,7 @@ public class ClimberConstants {
    *
    *************************/
   public static final int CLIMBER_SMART_CURRENT_LIMIT = 40;
+
   public static final double CLIMBER_SECONDARY_CURRENT_LIMIT = 55;
   public static final boolean CLIMBER_INVERTED = false;
 
