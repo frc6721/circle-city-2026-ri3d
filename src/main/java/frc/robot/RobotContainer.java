@@ -13,8 +13,6 @@
 
 package frc.robot;
 
-import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -40,9 +38,6 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.RealIntakeIO;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOLimelight;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -56,7 +51,6 @@ public class RobotContainer {
   private final Drive drive;
   private final Intake intake;
   private final Climber climber;
-  private final Vision vision;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -72,6 +66,7 @@ public class RobotContainer {
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL:
+        // Real robot, instantiate hardware IO implementations
         drive =
             new Drive(
                 // TODO: Change to GyroIONavX if using a NavX
@@ -80,11 +75,6 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-        // Real robot, instantiate hardware IO implementations
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOLimelight(camera0Name, drive::getRotation));
         intake = new Intake(new RealIntakeIO());
         climber = new Climber(new RealClimberIO());
         break;
@@ -98,7 +88,6 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim());
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
         intake = new Intake(new IntakeIO() {});
         climber = new Climber(new ClimberIO() {});
         break;
@@ -112,7 +101,6 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
         intake = new Intake(new IntakeIO() {});
         climber = new Climber(new ClimberIO() {});
         break;
@@ -156,21 +144,6 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    // @SuppressWarnings("resource")
-    // PIDController aimController = new PIDController(0.2, 0.0, 0.0);
-    // aimController.enableContinuousInput(-Math.PI, Math.PI);
-    // controller
-    //     .y()
-    //     .whileTrue(
-    //         Commands.startRun(
-    //             () -> {
-    //               aimController.reset();
-    //             },
-    //             () -> {
-    //               drive.run(0.0, aimController.calculate(vision.getTargetX(0).getRadians()));
-    //             },
-    //             drive));
-
     // Lock to 0° when A button is held
     // controller
     // .x()
@@ -182,7 +155,9 @@ public class RobotContainer {
     //         () -> new Rotation2d()));
 
     // A button: Move intake to PICKUP position (down)
-    controller.a().whileTrue(intakeCommands.setIntakeGoalPosition(intake, IntakePosition.PICKUP));
+    controller
+        .a()
+        .whileTrue(intakeCommands.setIntakeGoalPosition(intake, IntakePosition.PICKUP));
 
     // B button: Move intake to STOW position (up)
     controller.b().whileTrue(intakeCommands.setIntakeGoalPosition(intake, IntakePosition.STOW));
@@ -209,6 +184,9 @@ public class RobotContainer {
         .rightBumper()
         .whileTrue(climberCommands.joystickControl(climber, () -> -controller.getLeftY()));
   }
+
+
+
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

@@ -40,9 +40,7 @@ public class ShooterConstants {
    * SHOOTER SOFTWARE CONSTANTS
    *
    *****************/
-  // flywheel deadband is a percentange now
-  public static final double FLYWHEEL_SPEED_DEADBAND = 0.05;
-  public static final double TIME_TO_SHOOT = 0.2; // In seconds
+  public static final double FLYWHEEL_PID_TOLERANCE = 0.05;
 
   public static final int SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT = 100;
   public static final double SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT = 100;
@@ -51,7 +49,12 @@ public class ShooterConstants {
   // Logs all of the ShooterConstants into Advantage Kit.
   static {
     Logger.recordOutput("Constants/Shooter/FLYWHEEL_GEAR_RATIO", FLYWHEEL_GEAR_RATIO);
-    Logger.recordOutput("Constants/Shooter/FLYWHEEL_SPEED_DEADBAND", FLYWHEEL_SPEED_DEADBAND);
-    Logger.recordOutput("Constants/Shooter/TIME_TO_SHOOT", TIME_TO_SHOOT);
-  }
+    Logger.recordOutput("Constants/Shooter/FLYWHEEL_SPEED_DEADBAND", FLYWHEEL_PID_TOLERANCE);
+    Logger.recordOutput(
+        "Constants/Shooter/SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT", SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT);
+    Logger.recordOutput(
+        "Constants/Shooter/SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT", SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT);
+    Logger.recordOutput("Constants/Shooter/SHOOTER_FLYWHEEL_INVERTED", SHOOTER_FLYWHEEL_INVERTED);
+    Logger.recordOutput("Constants/Shooter/FLYWHEEL_GEAR_RATIO", FLYWHEEL_GEAR_RATIO);
+}
 }

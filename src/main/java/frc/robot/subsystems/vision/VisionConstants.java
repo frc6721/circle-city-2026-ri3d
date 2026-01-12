@@ -15,18 +15,17 @@ import edu.wpi.first.math.geometry.Transform3d;
 
 public class VisionConstants {
 
-    // TODO: tune
-    public static final AprilTag TAG1 = new AprilTag(1, new Pose3d());
-    public static final AprilTag TAG2 = new AprilTag(2, new Pose3d());
-    public static final double FIELD_WIDTH_METERS = 8.23;
-    public static final double FIELD_LENGTH_METERS = 16.46;
-
+  // TODO: tune
+  public static final AprilTag TAG1 = new AprilTag(1, new Pose3d());
+  public static final AprilTag TAG2 = new AprilTag(2, new Pose3d());
+  public static final double FIELD_WIDTH_METERS = 8.23;
+  public static final double FIELD_LENGTH_METERS = 16.46;
 
   // AprilTag layout
   // TODO: if your tags are setup to match the field, then use the field for this year's game
   // otherwise, update the tags to match your shop setup
-//   public static AprilTagFieldLayout aprilTagLayout =
-//       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+  //   public static AprilTagFieldLayout aprilTagLayout =
+  //       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
   public static AprilTagFieldLayout aprilTagLayout =
       new AprilTagFieldLayout(
           java.util.List.of(TAG1, TAG2), FIELD_LENGTH_METERS, FIELD_WIDTH_METERS);
@@ -38,8 +37,8 @@ public class VisionConstants {
   // (Not used by Limelight, configure in web UI instead)
   public static Transform3d robotToCamera0 =
       new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
-//   public static Transform3d robotToCamera1 =
-//       new Transform3d(-0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
+  //   public static Transform3d robotToCamera1 =
+  //       new Transform3d(-0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;

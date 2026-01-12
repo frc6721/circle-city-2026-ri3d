@@ -11,12 +11,12 @@ public interface ShooterIO {
   @AutoLog
   public static class ShooterIOInputs {
 
-    // |================= START LEFT FLYWHEEL MOTOR LOGGING =================|
+    // |================= START FLYWHEEL MOTOR LOGGING =================|
     public Temperature _flywheelMotorTemperature;
     public AngularVelocity _flywheelMotorVelocity;
     public Voltage _flywheelMotorVoltage;
     public Current _flywheelMotorCurrent;
-    // |================= END LEFT FLYWHEEL MOTOR LOGGING =================|
+    // |================= END FLYWHEEL MOTOR LOGGING =================|
 
   }
 
@@ -26,5 +26,5 @@ public interface ShooterIO {
 
   public default void setFlywheelSpeed(AngularVelocity speed) {}
 
-  public default void stopFlywheels() {}
+  public default void stopFlywheel() {}
 }
