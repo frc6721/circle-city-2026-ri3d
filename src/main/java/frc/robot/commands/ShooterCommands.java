@@ -36,7 +36,7 @@ public class ShooterCommands {
   public static Command runFlywheelsAtIdle(Shooter shooter) {
     return Commands.run(
         () -> {
-          shooter.setFlywheelSpeed(ShooterConstants.SHOOTER_IDLE_SPEED);
+          shooter.setFlyWheelDutyCycle(ShooterConstants.SHOOTER_IDLE_DUTY_CYCLE_OUTPUT);
         },
         shooter);
   }

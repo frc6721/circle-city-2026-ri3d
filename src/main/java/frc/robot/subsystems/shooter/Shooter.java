@@ -43,6 +43,7 @@ public class Shooter extends SubsystemBase {
         "Shooter/Desired-Flywheel-Speed", _targetFlywheelSpeed.in(RadiansPerSecond));
     Logger.recordOutput(
         "Shooter/Desired-Flywheel-Speed-RPM", _targetFlywheelSpeed.in(RevolutionsPerSecond) * 60);
+    Logger.recordOutput("Shooter/areFlyWheelsAtTarget", this.areFlywheelsAtTargetSpeed());
   }
 
   public void stopFlywheels() {
@@ -84,5 +85,9 @@ public class Shooter extends SubsystemBase {
         <= Math.abs(
             _targetFlywheelSpeed.in(RadiansPerSecond) * ShooterConstants.FLYWHEEL_PID_TOLERANCE);
     // the tolerance is a percent error of the target speed we are allowed
+  }
+
+  public void setFlyWheelDutyCycle(double output) {
+    this._shooterIO.setFlyWheelDutyCycle(output);
   }
 }

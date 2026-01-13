@@ -25,6 +25,14 @@ public class IntakeCommands {
         intake);
   }
 
+  public static Command setIntakPivotDutyCycle(Intake intake, double output) {
+    return Commands.run(
+        () -> {
+          intake.setIntakePivotDutyCucleOutput(output);
+        },
+        intake);
+  }
+
   public static Command runIntakeRollers(Intake intake) {
     return Commands.run(
         () -> {

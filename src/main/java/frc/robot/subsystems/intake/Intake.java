@@ -63,6 +63,11 @@ public class Intake extends SubsystemBase {
     _intakeIO.setPivotTargetPosition(position.getAngle());
   }
 
+
+  public void setIntakePivotDutyCucleOutput(double output) {
+    _intakeIO.setIntakePivotDutyCucleOutput(output);
+  }
+
   public void turnOnIntakeRollers() {
     _intakeIO.setRollerMotorOutput(IntakeConstants.INTAKE_ACQUIRE_SPEED.get());
   }

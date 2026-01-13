@@ -41,6 +41,8 @@ public interface IntakeIO {
   // |============================== PIVOT MOTOR METHODS ============================== |
   public default void setPivotTargetPosition(Angle angle) {}
 
+  public default void setIntakePivotDutyCucleOutput(double output) {}
+
   // |============================== ROLLER MOTOR METHODS ============================== |
   public default void setRollerMotorOutput(double output) {}
 }

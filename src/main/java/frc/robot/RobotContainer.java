@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -160,6 +161,8 @@ public class RobotContainer {
     // need them
     shooter.setDefaultCommand(ShooterCommands.runFlywheelsAtIdle(shooter));
 
+    controller.x().whileTrue(IntakeCommands.runIntakeRollers(intake));
+
     // Lock to 0° when A button is held
     // controller
     // .x()
@@ -177,18 +180,23 @@ public class RobotContainer {
     controller.b().whileTrue(IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.STOW));
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // controller
+    //     .x()
+    //     .onTrue(FeederCommands.runFeederAtPercentOutput(feeder, .5))
+    //     .onFalse(FeederCommands.stopFeeder(feeder));
 
     controller
         .rightBumper()
         .onTrue(
             ShooterCommands.setFlywheelTargetSpeed(
-                    shooter, RevolutionsPerSecond.of(300 / 60.0)) // 300 RPM
-                .andThen(
-                    ShooterCommands.waitForFlywheelsToReachSpeed(shooter)
-                        .withTimeout(5)
-                        .andThen(FeederCommands.runFeederAtPercentOutput(feeder, 0.75))))
-        .onFalse(FeederCommands.stopFeeder(feeder));
+                    shooter, RevolutionsPerSecond.of(3500 / 60.0)) // 2500 RPM
+                .andThen(ShooterCommands.waitForFlywheelsToReachSpeed(shooter).withTimeout(3)))
+        .onTrue(
+            new WaitCommand(1)
+                .andThen(FeederCommands.runFeederAtPercentOutput(feeder, 0.75).repeatedly()))
+        .onFalse(
+            FeederCommands.stopFeeder(feeder).andThen(ShooterCommands.runFlywheelsAtIdle(shooter)));
 
     // Reset gyro to 0° when left dpad is pressed
     controller

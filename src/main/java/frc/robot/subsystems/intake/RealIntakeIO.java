@@ -2,8 +2,6 @@ package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Celsius;
-import static edu.wpi.first.units.Units.Degree;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.util.SparkUtil.ifOk;
@@ -66,17 +64,17 @@ public class RealIntakeIO implements IntakeIO {
             0);
 
     // Soft limits based on absolute position (accounting for zero offset)
-    double minLimitRad =
-        Degree.of(IntakeConstants.MIN_INTAKE_ANGLE).in(Radians)
-            + IntakeConstants.PIVOT_ZERO_ROTATION.getRadians();
-    double maxLimitRad =
-        Degree.of(IntakeConstants.MAX_INTAKE_ANGLE).in(Radians)
-            + IntakeConstants.PIVOT_ZERO_ROTATION.getRadians();
+    // double minLimitRad =
+    //     Degree.of(IntakeConstants.MIN_INTAKE_ANGLE).in(Radians)
+    //         + IntakeConstants.PIVOT_ZERO_ROTATION.getRadians();
+    // double maxLimitRad =
+    //     Degree.of(IntakeConstants.MAX_INTAKE_ANGLE).in(Radians)
+    //         + IntakeConstants.PIVOT_ZERO_ROTATION.getRadians();
 
-    rightConfig.softLimit.forwardSoftLimitEnabled(true);
-    rightConfig.softLimit.forwardSoftLimit(maxLimitRad);
-    rightConfig.softLimit.reverseSoftLimitEnabled(true);
-    rightConfig.softLimit.reverseSoftLimit(minLimitRad);
+    // rightConfig.softLimit.forwardSoftLimitEnabled(true);
+    // rightConfig.softLimit.forwardSoftLimit(maxLimitRad);
+    // rightConfig.softLimit.reverseSoftLimitEnabled(true);
+    // rightConfig.softLimit.reverseSoftLimit(minLimitRad);
 
     tryUntilOk(
         _rightPivotMotor,
@@ -211,6 +209,10 @@ public class RealIntakeIO implements IntakeIO {
     double targetRad = angle.plus(IntakeConstants.PIVOT_ZERO_ROTATION).getRadians();
     Logger.recordOutput("intake/pivot-target-angle-encoder-space", Math.toDegrees(targetRad));
     _rightPivotMotor.getClosedLoopController().setReference(targetRad, ControlType.kPosition);
+  }
+
+  public void setIntakePivotDutyCucleOutput(double output) {
+    _rightPivotMotor.set(output);
   }
 
   // |============================== ROLLER MOTOR METHODS ============================== |

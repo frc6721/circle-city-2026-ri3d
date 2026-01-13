@@ -2,7 +2,7 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Celsius;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.util.SparkUtil.tryUntilOk;
 
@@ -50,7 +50,8 @@ public class RealShooterIO implements ShooterIO {
   public void updateInputs(ShooterIOInputs inputs) {
     // |================= START SHOOTER FLYWHEEL MOTOR LOGGING =================|
     inputs._flywheelMotorTemperature = Celsius.of(_flywheelMotor.getMotorTemperature());
-    inputs._flywheelMotorVelocity = RadiansPerSecond.of(_flywheelMotor.getEncoder().getVelocity());
+    inputs._flywheelMotorVelocity =
+        RotationsPerSecond.of(_flywheelMotor.getEncoder().getVelocity() / 60.0);
     inputs._flywheelMotorVoltage =
         Volts.of(_flywheelMotor.getAppliedOutput() * _flywheelMotor.getBusVoltage());
     inputs._flywheelMotorCurrent = Amps.of(_flywheelMotor.getOutputCurrent());
@@ -62,7 +63,11 @@ public class RealShooterIO implements ShooterIO {
   public void setFlywheelSpeed(AngularVelocity speed) {
     _flywheelMotor
         .getClosedLoopController()
-        .setReference(speed.in(RadiansPerSecond), ControlType.kVelocity);
+        .setReference(speed.in(RotationsPerSecond) * 60.0, ControlType.kVelocity);
+  }
+
+  public void setFlyWheelDutyCycle(double output) {
+    this._flywheelMotor.set(output);
   }
 
   public void stopFlywheel() {

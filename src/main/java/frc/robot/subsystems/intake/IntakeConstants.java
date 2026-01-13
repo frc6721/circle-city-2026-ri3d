@@ -20,7 +20,7 @@ public class IntakeConstants {
    *
    *************************/
   public static final LoggedNetworkNumber PIVOT_PID_KP =
-      new LoggedNetworkNumber("Intake/Pivot/PID/kP", 0.01);
+      new LoggedNetworkNumber("Intake/Pivot/PID/kP", 0.1);
 
   public static final LoggedNetworkNumber PIVOT_PID_KI =
       new LoggedNetworkNumber("Intake/Pivot/PID/kI", 0.000000);
@@ -62,7 +62,7 @@ public class IntakeConstants {
    *
    **************************/
   public static final LoggedNetworkNumber INTAKE_ACQUIRE_SPEED =
-      new LoggedNetworkNumber("Intake/Roller/Aquire Speed", 0.8);
+      new LoggedNetworkNumber("Intake/Roller/Aquire Speed", 1);
 
   public static final LoggedNetworkNumber INTAKE_CURRENT_CUTOFF =
       new LoggedNetworkNumber("Intake/Roller/Current Cutoff", 40);

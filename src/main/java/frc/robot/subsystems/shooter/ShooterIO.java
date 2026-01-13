@@ -26,5 +26,7 @@ public interface ShooterIO {
 
   public default void setFlywheelSpeed(AngularVelocity speed) {}
 
+  public default void setFlyWheelDutyCycle(double output) {}
+
   public default void stopFlywheel() {}
 }

@@ -15,24 +15,14 @@ public class ShooterConstants {
    *
    *************************/
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KP =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/kP", 0.000);
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/kP", 0.0006);
 
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KI =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/kI", 0.0000);
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/kI", 0.00000006);
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KD =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/kD", 0.0000);
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/kD", 0.0005);
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_FF =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/kFF", 0.00022);
-
-  /***********************
-   *
-   * SHOOTER SPEED SETPOINTS
-   *
-   * units: RPM
-   *
-   **********************/
-  public static final LoggedNetworkNumber FLYWHEEL_SPEED =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_SPEED", 1500);
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/kFF", 0.0000008);
 
   /***************
    *
@@ -53,10 +43,9 @@ public class ShooterConstants {
   public static final AngularVelocity MIN_FLYWHEEL_SPEED =
       RevolutionsPerSecond.of(100 / 60.0); // 100 RPM
   public static final AngularVelocity MAX_FLYWHEEL_SPEED =
-      RevolutionsPerSecond.of(2000 / 60.0); // 5000 RPM
+      RevolutionsPerSecond.of(10000 / 60.0); // 10000 RPM
 
-  public static final AngularVelocity SHOOTER_IDLE_SPEED =
-      RevolutionsPerSecond.of(300 / 60.0); // 300 RPM
+  public static final double SHOOTER_IDLE_DUTY_CYCLE_OUTPUT = 0.1;
 
   /***********************
    *
