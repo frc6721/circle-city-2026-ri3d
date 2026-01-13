@@ -13,6 +13,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.RevolutionsPerSecond;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,9 +24,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.ClimberCommands;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.FeederCommands;
 import frc.robot.commands.IntakeCommands;
+import frc.robot.commands.ShooterCommands;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.RealClimberIO;
@@ -38,11 +41,11 @@ import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.feeder.RealFeederIO;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.RealIntakeIO;
 import frc.robot.subsystems.shooter.RealShooterIO;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.RealIntakeIO;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -56,7 +59,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Intake intake;
   private final Climber climber;
-  private final Feeder  feeder;
+  private final Feeder feeder;
   private final Shooter shooter;
 
   // Controller
@@ -81,7 +84,7 @@ public class RobotContainer {
         intake = new Intake(new RealIntakeIO());
         climber = new Climber(new RealClimberIO());
         shooter = new Shooter(new RealShooterIO());
-        feeder = new Feeder(new RealFeederIO()); 
+        feeder = new Feeder(new RealFeederIO());
         break;
 
       case SIM:
@@ -153,6 +156,10 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
+    // Always run the flywheels a little bit during the match so they can spin up quicker when we
+    // need them
+    shooter.setDefaultCommand(ShooterCommands.runFlywheelsAtIdle(shooter));
+
     // Lock to 0° when A button is held
     // controller
     // .x()
@@ -172,12 +179,20 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when any D-pad button is pressed
     controller
-        .pov(0)
-        .or(controller.pov(90))
-        .or(controller.pov(180))
-        .or(controller.pov(270))
+        .rightBumper()
+        .onTrue(
+            ShooterCommands.setFlywheelTargetSpeed(
+                    shooter, RevolutionsPerSecond.of(300 / 60.0)) // 300 RPM
+                .andThen(
+                    ShooterCommands.waitForFlywheelsToReachSpeed(shooter)
+                        .withTimeout(5)
+                        .andThen(FeederCommands.runFeederAtPercentOutput(feeder, 0.75))))
+        .onFalse(FeederCommands.stopFeeder(feeder));
+
+    // Reset gyro to 0° when left dpad is pressed
+    controller
+        .pov(270)
         .onTrue(
             Commands.runOnce(
                     () ->
@@ -188,10 +203,10 @@ public class RobotContainer {
 
     // Right bumper + Left joystick Y: Control climber
     // No climber is on the robot right now
-//     controller
-//         .rightBumper()
-//         .whileTrue(ClimberCommands.joystickControl(climber, () -> -controller.getLeftY()))
-//         .onFalse(ClimberCommands.stopClimber(climber));
+    //     controller
+    //         .rightBumper()
+    //         .whileTrue(ClimberCommands.joystickControl(climber, () -> -controller.getLeftY()))
+    //         .onFalse(ClimberCommands.stopClimber(climber));
   }
 
   /**

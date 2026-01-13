@@ -55,6 +55,9 @@ public class ShooterConstants {
   public static final AngularVelocity MAX_FLYWHEEL_SPEED =
       RevolutionsPerSecond.of(2000 / 60.0); // 5000 RPM
 
+  public static final AngularVelocity SHOOTER_IDLE_SPEED =
+      RevolutionsPerSecond.of(300 / 60.0); // 300 RPM
+
   /***********************
    *
    * DISTANCE TO SPEED LOOKUP TABLE

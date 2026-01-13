@@ -33,16 +33,6 @@ public class RealShooterIO implements ShooterIO {
         .smartCurrentLimit(ShooterConstants.SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT)
         .secondaryCurrentLimit(ShooterConstants.SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT)
         .voltageCompensation(12.0);
-
-    config
-        .encoder
-        .positionConversionFactor(
-            2 * Math.PI / ShooterConstants.FLYWHEEL_GEAR_RATIO) // motor rotations to flywheel rad
-        .velocityConversionFactor(
-            (2 * Math.PI)
-                / 60.0
-                / ShooterConstants.FLYWHEEL_GEAR_RATIO) // motor RPM to flywheel rad/s
-        .inverted(false);
     config.closedLoop.pidf(
         ShooterConstants.SHOOTER_FLYWHEEL_PID_KP.get(),
         ShooterConstants.SHOOTER_FLYWHEEL_PID_KI.get(),

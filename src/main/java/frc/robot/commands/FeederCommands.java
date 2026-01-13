@@ -9,8 +9,6 @@ import java.util.function.DoubleSupplier;
 public class FeederCommands {
   private static final double DEADBAND = 0.1;
 
-  public FeederCommands() {}
-
   /**
    * Command to run the feeder motor using joystick input. Applies deadband to joystick values for
    * smooth control.
@@ -19,7 +17,7 @@ public class FeederCommands {
    * @param speedSupplier Joystick value supplier (-1.0 to 1.0)
    * @return Command that continuously runs the feeder based on joystick input
    */
-  public Command runFeederWithJoystick(Feeder feeder, DoubleSupplier speedSupplier) {
+  public static Command runFeederWithJoystick(Feeder feeder, DoubleSupplier speedSupplier) {
     return Commands.run(
         () -> {
           // Apply deadband to joystick input (similar to DriveCommands)
@@ -32,13 +30,13 @@ public class FeederCommands {
   }
 
   /**
-   * Command to run the feeder at a fixed speed.
+   * Command to run the feeder at a fixed % output.
    *
    * @param feeder The feeder subsystem
    * @param speed Fixed speed from -1.0 to 1.0
    * @return Command that runs the feeder at the specified speed
    */
-  public Command runFeederAtSpeed(Feeder feeder, double speed) {
+  public static Command runFeederAtPercentOutput(Feeder feeder, double speed) {
     return Commands.run(
         () -> {
           feeder.setFeederSpeed(speed);
@@ -52,7 +50,7 @@ public class FeederCommands {
    * @param feeder The feeder subsystem
    * @return Command that stops the feeder
    */
-  public Command stopFeeder(Feeder feeder) {
+  public static Command stopFeeder(Feeder feeder) {
     return Commands.runOnce(() -> feeder.stop(), feeder);
   }
 }

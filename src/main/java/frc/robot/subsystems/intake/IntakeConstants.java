@@ -12,8 +12,7 @@ public class IntakeConstants {
    ************************/
 
   // Absolute encoder zero position (intake fully stowed position)
-  // TODO: Update this value by manually positioning intake and reading encoder
-  public static final Rotation2d PIVOT_ZERO_ROTATION = new Rotation2d(0.0);
+  public static final Rotation2d PIVOT_ZERO_ROTATION = new Rotation2d(-1.256);
 
   /************************
    *
@@ -21,12 +20,12 @@ public class IntakeConstants {
    *
    *************************/
   public static final LoggedNetworkNumber PIVOT_PID_KP =
-      new LoggedNetworkNumber("Intake/Pivot/PID/kP", 0.0038);
+      new LoggedNetworkNumber("Intake/Pivot/PID/kP", 0.01);
 
   public static final LoggedNetworkNumber PIVOT_PID_KI =
       new LoggedNetworkNumber("Intake/Pivot/PID/kI", 0.000000);
   public static final LoggedNetworkNumber PIVOT_PID_KD =
-      new LoggedNetworkNumber("Intake/Pivot/PID/kD", 0.000085);
+      new LoggedNetworkNumber("Intake/Pivot/PID/kD", 0.00000);
 
   /***********************
    *
@@ -37,10 +36,10 @@ public class IntakeConstants {
    *
    **********************/
   public static final LoggedNetworkNumber POSITION_PICKUP =
-      new LoggedNetworkNumber("Intake/Position/Pickup", 50);
+      new LoggedNetworkNumber("Intake/Position/Pickup", 90);
 
   public static final LoggedNetworkNumber POSITION_STOW =
-      new LoggedNetworkNumber("Intake/Position/Stow", 188);
+      new LoggedNetworkNumber("Intake/Position/Stow", 0);
 
   /*************************
    *
@@ -48,18 +47,14 @@ public class IntakeConstants {
    *
    ************************/
   // Zero degrees for the intake is defined as the intake is stowed
-  public static final double MIN_INTAKE_ANGLE = 0.0;
+  public static final double MIN_INTAKE_ANGLE = -1.0;
 
-  public static final double MAX_INTAKE_ANGLE = 90.0;
+  public static final double MAX_INTAKE_ANGLE = 91.0;
 
   // Absolute encoder configuration
   public static final boolean PIVOT_ENCODER_INVERTED = true;
   public static final double PIVOT_ENCODER_POSITION_FACTOR = 2 * Math.PI; // Rotations -> Radians
   public static final double PIVOT_ENCODER_VELOCITY_FACTOR = (2 * Math.PI) / 60.0; // RPM -> Rad/Sec
-
-  // PID input range for position wrapping
-  public static final double PIVOT_PID_MIN_INPUT = 0; // Radians
-  public static final double PIVOT_PID_MAX_INPUT = 2 * Math.PI; // Radians
 
   /***************************
    *

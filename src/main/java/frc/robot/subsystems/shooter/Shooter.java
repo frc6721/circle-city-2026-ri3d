@@ -77,7 +77,7 @@ public class Shooter extends SubsystemBase {
     return RPM.of(speedRPM);
   }
 
-  private boolean areFlywheelsAtTargetSpeed() {
+  public boolean areFlywheelsAtTargetSpeed() {
     return Math.abs(
             _targetFlywheelSpeed.in(RadiansPerSecond)
                 - _shooterInputs._flywheelMotorVelocity.in(RadiansPerSecond))
