@@ -9,7 +9,7 @@ public class IntakeCommands {
 
   public IntakeCommands() {}
 
-  public Command setIntakeGoalPosition(Intake intake, IntakePosition position) {
+  public static Command setIntakeGoalPosition(Intake intake, IntakePosition position) {
     return Commands.run(
         () -> {
           intake.setIntakePosition(position);
@@ -17,7 +17,7 @@ public class IntakeCommands {
         intake);
   }
 
-  public Command stopIntakeRollers(Intake intake) {
+  public static Command stopIntakeRollers(Intake intake) {
     return Commands.run(
         () -> {
           intake.stopRollers();
@@ -25,7 +25,7 @@ public class IntakeCommands {
         intake);
   }
 
-  public Command runInstakeRollers(Intake intake) {
+  public static Command runIntakeRollers(Intake intake) {
     return Commands.run(
         () -> {
           intake.turnOnIntakeRollers();

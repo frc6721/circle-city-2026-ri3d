@@ -2,7 +2,6 @@ package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Degrees;
 
-import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
@@ -13,7 +12,6 @@ public class Intake extends SubsystemBase {
   private final IntakeIO _intakeIO;
   private final IntakeIOInputsAutoLogged _intakeInputs = new IntakeIOInputsAutoLogged();
   private IntakePosition _intakePosition;
-  private Debouncer _limitDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kBoth);
 
   public enum IntakePosition {
     STOW(IntakeConstants.POSITION_STOW),
@@ -47,7 +45,6 @@ public class Intake extends SubsystemBase {
 
     // assume that the intake is all the way up when first turned on
     _intakePosition = IntakePosition.STOW;
-    _intakeIO.zeroPivotEncoder();
   }
 
   @Override
@@ -56,13 +53,9 @@ public class Intake extends SubsystemBase {
     _intakeIO.updateInputs(_intakeInputs);
     Logger.processInputs("Intake", _intakeInputs);
 
-    if (_limitDebouncer.calculate(_intakeInputs._upperLimitSwitchTriggered)) {
-      _intakeIO.zeroPivotEncoder();
-    }
-
     // LOGGING
     Logger.recordOutput(
-        "Intake/Current-Pivot-Angle", _intakeInputs._intakePivotMotorPosition.in(Degrees));
+        "Intake/Current-Pivot-Angle", _intakeInputs._intakeRightPivotMotorPosition.getDegrees());
     Logger.recordOutput("Intake/Desired-Pivot-Angle", _intakePosition.getAngle().in(Degrees));
   }
 

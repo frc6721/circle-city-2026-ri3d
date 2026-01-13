@@ -1,9 +1,20 @@
 package frc.robot.subsystems.intake;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class IntakeConstants {
+  /*************************
+   *
+   * INTAKE HARDWARE CONSTANTS
+   *
+   ************************/
+
+  // Absolute encoder zero position (intake fully stowed position)
+  // TODO: Update this value by manually positioning intake and reading encoder
+  public static final Rotation2d PIVOT_ZERO_ROTATION = new Rotation2d(0.0);
+
   /************************
    *
    * INTAKE PIVOT PID CONSTANTS
@@ -36,10 +47,19 @@ public class IntakeConstants {
    * INTAKE MECHANICAL CONSTANTS
    *
    ************************/
-  // Zero degrees for the intake is defined as the intake is stowed and against the limit switch
+  // Zero degrees for the intake is defined as the intake is stowed
   public static final double MIN_INTAKE_ANGLE = 0.0;
 
-  public static final double MAX_INTAKE_ANGLE = 45.0;
+  public static final double MAX_INTAKE_ANGLE = 90.0;
+
+  // Absolute encoder configuration
+  public static final boolean PIVOT_ENCODER_INVERTED = true;
+  public static final double PIVOT_ENCODER_POSITION_FACTOR = 2 * Math.PI; // Rotations -> Radians
+  public static final double PIVOT_ENCODER_VELOCITY_FACTOR = (2 * Math.PI) / 60.0; // RPM -> Rad/Sec
+
+  // PID input range for position wrapping
+  public static final double PIVOT_PID_MIN_INPUT = 0; // Radians
+  public static final double PIVOT_PID_MAX_INPUT = 2 * Math.PI; // Radians
 
   /***************************
    *
@@ -63,7 +83,8 @@ public class IntakeConstants {
   public static final double INTAKE_PIVOT_SECONDARY_CURRENT_LIMIT = 55;
   public static final int INTAKE_ROLLER_SMART_CURRENT_LIMIT = 50;
   public static final double INTAKE_ROLLER_SECONDARY_CURRENT_LIMIT = 60;
-  public static final boolean INTAKE_PIVOT_INVERTED = false;
+  public static final boolean INTAKE_RIGHT_PIVOT_INVERTED = false;
+  public static final boolean INTAKE_LEFT_PIVOT_INVERTED = true; // Follower, inverted
   public static final boolean INTAKE_ROLLER_INVERTED = false;
   // Gear ratio from motor to end effector
   public static final double INTAKE_PIVOT_CONVERSION_FACTOR = 1;
