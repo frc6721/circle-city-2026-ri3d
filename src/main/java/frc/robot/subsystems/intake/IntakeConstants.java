@@ -80,9 +80,6 @@ public class IntakeConstants {
   public static final double INTAKE_ROLLER_SECONDARY_CURRENT_LIMIT = 60;
   public static final boolean INTAKE_RIGHT_PIVOT_INVERTED = true;
   public static final boolean INTAKE_ROLLER_INVERTED = false;
-  // Gear ratio from motor to end effector
-  public static final double INTAKE_PIVOT_CONVERSION_FACTOR = 1;
-  public static final double INTAKE_ROLLER_CONVERSION_FACTOR = 1;
 
   // Logs all of the IntakeConstants into Advantage Kit.
   static {
