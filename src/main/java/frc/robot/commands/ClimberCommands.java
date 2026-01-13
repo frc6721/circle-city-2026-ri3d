@@ -19,7 +19,7 @@ public class ClimberCommands {
    * @param speedSupplier Supplier providing joystick value (-1.0 to 1.0)
    * @return Command that runs the climber based on joystick input
    */
-  public Command joystickControl(Climber climber, DoubleSupplier speedSupplier) {
+  public static Command joystickControl(Climber climber, DoubleSupplier speedSupplier) {
     return Commands.run(
             () -> {
               // Get joystick value and apply deadband
@@ -38,7 +38,7 @@ public class ClimberCommands {
    * @param climber The climber subsystem
    * @return Command that stops the climber
    */
-  public Command stopClimber(Climber climber) {
+  public static Command stopClimber(Climber climber) {
     return Commands.runOnce(() -> climber.stopClimber(), climber);
   }
 }
