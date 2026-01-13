@@ -27,9 +27,9 @@ public class ShooterCommands {
   }
 
   /**
-   * Sets the flywheel speed based on distance to target using the lookup table.
-   * The speed is automatically calculated from ShooterConstants interpolation.
-   * 
+   * Sets the flywheel speed based on distance to target using the lookup table. The speed is
+   * automatically calculated from ShooterConstants interpolation.
+   *
    * @param shooter The shooter subsystem
    * @param distance Distance to the target
    * @return Command that continuously sets the flywheel speed
