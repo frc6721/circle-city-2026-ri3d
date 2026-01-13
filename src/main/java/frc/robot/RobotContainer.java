@@ -34,8 +34,13 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
+import frc.robot.subsystems.feeder.Feeder;
+import frc.robot.subsystems.feeder.RealFeederIO;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
+import frc.robot.subsystems.shooter.RealShooterIO;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.RealIntakeIO;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -51,13 +56,11 @@ public class RobotContainer {
   private final Drive drive;
   private final Intake intake;
   private final Climber climber;
+  private final Feeder  feeder;
+  private final Shooter shooter;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
-
-  // Command factories
-  private final IntakeCommands intakeCommands = new IntakeCommands();
-  private final ClimberCommands climberCommands = new ClimberCommands();
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -77,6 +80,8 @@ public class RobotContainer {
                 new ModuleIOSpark(3));
         intake = new Intake(new RealIntakeIO());
         climber = new Climber(new RealClimberIO());
+        shooter = new Shooter(new RealShooterIO());
+        feeder = new Feeder(new RealFeederIO()); 
         break;
 
       case SIM:
@@ -90,6 +95,8 @@ public class RobotContainer {
                 new ModuleIOSim());
         intake = new Intake(new IntakeIO() {});
         climber = new Climber(new ClimberIO() {});
+        shooter = new Shooter(new ShooterIO() {});
+        feeder = new Feeder(new RealFeederIO());
         break;
 
       default:
@@ -103,6 +110,8 @@ public class RobotContainer {
                 new ModuleIO() {});
         intake = new Intake(new IntakeIO() {});
         climber = new Climber(new ClimberIO() {});
+        shooter = new Shooter(new ShooterIO() {});
+        feeder = new Feeder(new RealFeederIO());
         break;
     }
 
@@ -155,10 +164,10 @@ public class RobotContainer {
     //         () -> new Rotation2d()));
 
     // A button: Move intake to PICKUP position (down)
-    controller.a().whileTrue(intakeCommands.setIntakeGoalPosition(intake, IntakePosition.PICKUP));
+    controller.a().whileTrue(IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.PICKUP));
 
     // B button: Move intake to STOW position (up)
-    controller.b().whileTrue(intakeCommands.setIntakeGoalPosition(intake, IntakePosition.STOW));
+    controller.b().whileTrue(IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.STOW));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -178,9 +187,11 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     // Right bumper + Left joystick Y: Control climber
-    controller
-        .rightBumper()
-        .whileTrue(climberCommands.joystickControl(climber, () -> -controller.getLeftY()));
+    // No climber is on the robot right now
+//     controller
+//         .rightBumper()
+//         .whileTrue(ClimberCommands.joystickControl(climber, () -> -controller.getLeftY()))
+//         .onFalse(ClimberCommands.stopClimber(climber));
   }
 
   /**
