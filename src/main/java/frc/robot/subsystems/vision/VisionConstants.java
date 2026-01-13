@@ -7,6 +7,8 @@
 
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Inches;
+
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -16,10 +18,22 @@ import edu.wpi.first.math.geometry.Transform3d;
 public class VisionConstants {
 
   // TODO: tune
-  public static final AprilTag TAG1 = new AprilTag(1, new Pose3d());
-  public static final AprilTag TAG2 = new AprilTag(2, new Pose3d());
-  public static final double FIELD_WIDTH_METERS = 8.23;
-  public static final double FIELD_LENGTH_METERS = 16.46;
+  // tag1 for now is the center of the hub
+  // 0,0 is the bottom right of the blue allaince wall
+  // +x is towards the red allaince
+  // +y is to the "left" or towards the inside of the field
+  // +z is up s
+  public static final AprilTag TAG1 =
+      new AprilTag(
+          1,
+          new Pose3d(
+              Inches.of(182.11).magnitude() - Inches.of(0).magnitude(),
+              Inches.of(158.84).magnitude() - Inches.of(0).magnitude(),
+              Inches.of(0).magnitude() - Inches.of(0).magnitude(),
+              new Rotation3d(0, 0, Math.PI)));
+  //   public static final AprilTag TAG2 = new AprilTag(2, new Pose3d());
+  public static final double FIELD_WIDTH_METERS = Inches.of(317.69).magnitude();
+  public static final double FIELD_LENGTH_METERS = Inches.of(651.2).magnitude();
 
   // AprilTag layout
   // TODO: if your tags are setup to match the field, then use the field for this year's game
@@ -27,8 +41,7 @@ public class VisionConstants {
   //   public static AprilTagFieldLayout aprilTagLayout =
   //       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
   public static AprilTagFieldLayout aprilTagLayout =
-      new AprilTagFieldLayout(
-          java.util.List.of(TAG1, TAG2), FIELD_LENGTH_METERS, FIELD_WIDTH_METERS);
+      new AprilTagFieldLayout(java.util.List.of(TAG1), FIELD_LENGTH_METERS, FIELD_WIDTH_METERS);
 
   // Camera names, must match names configured on coprocessor
   public static String camera0Name = "camera_0";
