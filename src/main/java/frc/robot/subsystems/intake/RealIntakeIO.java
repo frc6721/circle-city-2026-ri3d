@@ -56,7 +56,7 @@ public class RealIntakeIO implements IntakeIO {
     rightConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        .positionWrappingEnabled(false) // Changed: Don't wrap for a limited-range mechanism
+        .positionWrappingEnabled(false)
         .pidf(
             IntakeConstants.PIVOT_PID_KP.get(),
             IntakeConstants.PIVOT_PID_KI.get(),

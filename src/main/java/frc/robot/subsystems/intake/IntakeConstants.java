@@ -12,7 +12,7 @@ public class IntakeConstants {
    ************************/
 
   // Absolute encoder zero position (intake fully stowed position)
-  public static final Rotation2d PIVOT_ZERO_ROTATION = new Rotation2d(-1.256);
+  public static final Rotation2d PIVOT_ZERO_ROTATION = new Rotation2d(-1.256 + Math.PI * 2);
 
   /************************
    *
