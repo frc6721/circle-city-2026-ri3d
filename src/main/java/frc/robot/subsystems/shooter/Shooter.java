@@ -4,10 +4,10 @@
 
 package frc.robot.subsystems.shooter;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -56,30 +56,33 @@ public class Shooter extends SubsystemBase {
   }
 
   /**
-   * Calculates the required flywheel speed for a given distance to target.
-   * Uses the lookup table from ShooterConstants with interpolation.
-   * 
+   * Calculates the required flywheel speed for a given distance to target. Uses the lookup table
+   * from ShooterConstants with interpolation.
+   *
    * @param distance Distance to the target
    * @return Required flywheel speed
    */
   public AngularVelocity getSpeedForDistance(Distance distance) {
     // Convert distance to meters for lookup table
     double distanceMeters = distance.in(Meters);
-    
+
     // Get interpolated speed from lookup table (returns RPM)
     double speedRPM = ShooterConstants.getSpeedForDistance(distanceMeters);
-    
+
     // Log the calculation for debugging
     Logger.recordOutput("Shooter/CalculatedDistance_meters", distanceMeters);
     Logger.recordOutput("Shooter/CalculatedSpeed_RPM", speedRPM);
-    
+
     // Convert RPM to AngularVelocity and return
     return RPM.of(speedRPM);
   }
 
   private boolean areFlywheelsAtTargetSpeed() {
-    return Math.abs( _targetFlywheelSpeed.in(RadiansPerSecond) - _shooterInputs._flywheelMotorVelocity.in(RadiansPerSecond))
-        <= Math.abs(_targetFlywheelSpeed.in(RadiansPerSecond) * ShooterConstants.FLYWHEEL_PID_TOLERANCE);
+    return Math.abs(
+            _targetFlywheelSpeed.in(RadiansPerSecond)
+                - _shooterInputs._flywheelMotorVelocity.in(RadiansPerSecond))
+        <= Math.abs(
+            _targetFlywheelSpeed.in(RadiansPerSecond) * ShooterConstants.FLYWHEEL_PID_TOLERANCE);
     // the tolerance is a percent error of the target speed we are allowed
   }
 }

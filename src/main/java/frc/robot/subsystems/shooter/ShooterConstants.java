@@ -1,15 +1,12 @@
 package frc.robot.subsystems.shooter;
 
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-
-import edu.wpi.first.units.measure.AngularVelocity;
-
-import java.util.TreeMap;
-
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 
+import edu.wpi.first.units.measure.AngularVelocity;
 import java.util.Map;
+import java.util.TreeMap;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ShooterConstants {
   /************************
@@ -53,8 +50,10 @@ public class ShooterConstants {
   public static final int SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT = 100;
   public static final double SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT = 100;
   public static final boolean SHOOTER_FLYWHEEL_INVERTED = false;
-  public static final AngularVelocity MIN_FLYWHEEL_SPEED = RevolutionsPerSecond.of(100 / 60.0); // 100 RPM
-  public static final AngularVelocity MAX_FLYWHEEL_SPEED = RevolutionsPerSecond.of(2000 / 60.0); // 5000 RPM
+  public static final AngularVelocity MIN_FLYWHEEL_SPEED =
+      RevolutionsPerSecond.of(100 / 60.0); // 100 RPM
+  public static final AngularVelocity MAX_FLYWHEEL_SPEED =
+      RevolutionsPerSecond.of(2000 / 60.0); // 5000 RPM
 
   /***********************
    *
@@ -67,6 +66,7 @@ public class ShooterConstants {
   // Data point 1
   public static final LoggedNetworkNumber LOOKUP_DISTANCE_1 =
       new LoggedNetworkNumber("Shooter/Lookup/Distance1_meters", 1.0);
+
   public static final LoggedNetworkNumber LOOKUP_SPEED_1 =
       new LoggedNetworkNumber("Shooter/Lookup/Speed1_RPM", 1500.0);
 
@@ -83,9 +83,9 @@ public class ShooterConstants {
   //     new LoggedNetworkNumber("Shooter/Lookup/Speed3_RPM", 4500.0);
 
   /**
-   * Builds the distance-to-speed lookup table from LoggedNetworkNumbers.
-   * TreeMap automatically sorts by distance for interpolation.
-   * 
+   * Builds the distance-to-speed lookup table from LoggedNetworkNumbers. TreeMap automatically
+   * sorts by distance for interpolation.
+   *
    * @return TreeMap with distance (meters) as key and speed (RPM) as value
    */
   public static TreeMap<Double, Double> buildLookupTable() {
@@ -98,9 +98,9 @@ public class ShooterConstants {
   }
 
   /**
-   * Interpolates shooter speed based on distance using the lookup table.
-   * Clamps to min/max speeds if distance is outside the table range.
-   * 
+   * Interpolates shooter speed based on distance using the lookup table. Clamps to min/max speeds
+   * if distance is outside the table range.
+   *
    * @param distanceMeters Distance to target in meters
    * @return Shooter speed in RPM
    */
@@ -141,7 +141,7 @@ public class ShooterConstants {
       return MAX_FLYWHEEL_SPEED.in(RevolutionsPerSecond) * 60.0;
     } else {
       return speed;
-    } 
+    }
   }
 
   // Logs all of the ShooterConstants into Advantage Kit.
@@ -149,9 +149,11 @@ public class ShooterConstants {
     Logger.recordOutput("Constants/Shooter/FLYWHEEL_GEAR_RATIO", FLYWHEEL_GEAR_RATIO);
     Logger.recordOutput("Constants/Shooter/FLYWHEEL_SPEED_DEADBAND", FLYWHEEL_PID_TOLERANCE);
     Logger.recordOutput(
-        "Constants/Shooter/SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT", SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT);
+        "Constants/Shooter/SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT",
+        SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT);
     Logger.recordOutput(
-        "Constants/Shooter/SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT", SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT);
+        "Constants/Shooter/SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT",
+        SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT);
     Logger.recordOutput("Constants/Shooter/SHOOTER_FLYWHEEL_INVERTED", SHOOTER_FLYWHEEL_INVERTED);
     Logger.recordOutput("Constants/Shooter/FLYWHEEL_GEAR_RATIO", FLYWHEEL_GEAR_RATIO);
   }
