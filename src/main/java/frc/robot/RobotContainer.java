@@ -161,7 +161,10 @@ public class RobotContainer {
     // need them
     shooter.setDefaultCommand(ShooterCommands.runFlywheelsAtIdle(shooter));
 
-    controller.x().whileTrue(IntakeCommands.runIntakeRollers(intake));
+    controller
+        .x()
+        .whileTrue(IntakeCommands.runIntakeRollers(intake))
+        .onFalse(IntakeCommands.stopIntakeRollers(intake));
 
     // Lock to 0° when A button is held
     // controller

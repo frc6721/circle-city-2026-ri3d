@@ -62,7 +62,7 @@ public class IntakeConstants {
    *
    **************************/
   public static final LoggedNetworkNumber INTAKE_ACQUIRE_SPEED =
-      new LoggedNetworkNumber("Intake/Roller/Aquire Speed", 1);
+      new LoggedNetworkNumber("Intake/Roller/Aquire Speed", 0.8);
 
   public static final LoggedNetworkNumber INTAKE_CURRENT_CUTOFF =
       new LoggedNetworkNumber("Intake/Roller/Current Cutoff", 40);

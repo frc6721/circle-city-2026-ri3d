@@ -63,7 +63,6 @@ public class Intake extends SubsystemBase {
     _intakeIO.setPivotTargetPosition(position.getAngle());
   }
 
-
   public void setIntakePivotDutyCucleOutput(double output) {
     _intakeIO.setIntakePivotDutyCucleOutput(output);
   }
