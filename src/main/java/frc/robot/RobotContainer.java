@@ -155,9 +155,7 @@ public class RobotContainer {
     //         () -> new Rotation2d()));
 
     // A button: Move intake to PICKUP position (down)
-    controller
-        .a()
-        .whileTrue(intakeCommands.setIntakeGoalPosition(intake, IntakePosition.PICKUP));
+    controller.a().whileTrue(intakeCommands.setIntakeGoalPosition(intake, IntakePosition.PICKUP));
 
     // B button: Move intake to STOW position (up)
     controller.b().whileTrue(intakeCommands.setIntakeGoalPosition(intake, IntakePosition.STOW));
@@ -184,9 +182,6 @@ public class RobotContainer {
         .rightBumper()
         .whileTrue(climberCommands.joystickControl(climber, () -> -controller.getLeftY()));
   }
-
-
-
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
