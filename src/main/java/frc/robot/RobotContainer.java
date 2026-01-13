@@ -42,7 +42,6 @@ import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.feeder.RealFeederIO;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
-import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.RealIntakeIO;
 import frc.robot.subsystems.shooter.RealShooterIO;
 import frc.robot.subsystems.shooter.Shooter;
@@ -97,7 +96,8 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim());
-        intake = new Intake(new IntakeIO() {});
+        // intake = new Intake(new IntakeIO() {});
+        intake = new Intake(new RealIntakeIO());
         climber = new Climber(new ClimberIO() {});
         shooter = new Shooter(new ShooterIO() {});
         feeder = new Feeder(new RealFeederIO());
@@ -112,7 +112,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        intake = new Intake(new IntakeIO() {});
+        // intake = new Intake(new IntakeIO() {});
+        intake = new Intake(new RealIntakeIO());
         climber = new Climber(new ClimberIO() {});
         shooter = new Shooter(new ShooterIO() {});
         feeder = new Feeder(new RealFeederIO());
@@ -165,6 +166,11 @@ public class RobotContainer {
         .x()
         .whileTrue(IntakeCommands.runIntakeRollers(intake))
         .onFalse(IntakeCommands.stopIntakeRollers(intake));
+
+    controller
+        .y()
+        .onTrue(IntakeCommands.setIntakPivotDutyCycle(intake, 0.05))
+        .onFalse(IntakeCommands.setIntakPivotDutyCycle(intake, 0));
 
     // Lock to 0° when A button is held
     // controller

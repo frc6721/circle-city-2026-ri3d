@@ -20,12 +20,12 @@ public class IntakeConstants {
    *
    *************************/
   public static final LoggedNetworkNumber PIVOT_PID_KP =
-      new LoggedNetworkNumber("Intake/Pivot/PID/kP", 0.1);
+      new LoggedNetworkNumber("Intake/Pivot/PID/kP", 0.03);
 
   public static final LoggedNetworkNumber PIVOT_PID_KI =
       new LoggedNetworkNumber("Intake/Pivot/PID/kI", 0.000000);
   public static final LoggedNetworkNumber PIVOT_PID_KD =
-      new LoggedNetworkNumber("Intake/Pivot/PID/kD", 0.00000);
+      new LoggedNetworkNumber("Intake/Pivot/PID/kD", 0.001);
 
   /***********************
    *
@@ -62,7 +62,7 @@ public class IntakeConstants {
    *
    **************************/
   public static final LoggedNetworkNumber INTAKE_ACQUIRE_SPEED =
-      new LoggedNetworkNumber("Intake/Roller/Aquire Speed", 0.8);
+      new LoggedNetworkNumber("Intake/Roller/Aquire Speed", 0.6);
 
   public static final LoggedNetworkNumber INTAKE_CURRENT_CUTOFF =
       new LoggedNetworkNumber("Intake/Roller/Current Cutoff", 40);
@@ -78,8 +78,7 @@ public class IntakeConstants {
   public static final double INTAKE_PIVOT_SECONDARY_CURRENT_LIMIT = 55;
   public static final int INTAKE_ROLLER_SMART_CURRENT_LIMIT = 50;
   public static final double INTAKE_ROLLER_SECONDARY_CURRENT_LIMIT = 60;
-  public static final boolean INTAKE_RIGHT_PIVOT_INVERTED = false;
-  public static final boolean INTAKE_LEFT_PIVOT_INVERTED = true; // Follower, inverted
+  public static final boolean INTAKE_RIGHT_PIVOT_INVERTED = true;
   public static final boolean INTAKE_ROLLER_INVERTED = false;
   // Gear ratio from motor to end effector
   public static final double INTAKE_PIVOT_CONVERSION_FACTOR = 1;

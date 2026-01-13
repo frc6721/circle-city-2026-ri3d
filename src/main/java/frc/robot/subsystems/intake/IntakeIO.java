@@ -1,7 +1,6 @@
 package frc.robot.subsystems.intake;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
@@ -39,7 +38,7 @@ public interface IntakeIO {
   public default void updateInputs(IntakeIOInputs inputs) {}
 
   // |============================== PIVOT MOTOR METHODS ============================== |
-  public default void setPivotTargetPosition(Angle angle) {}
+  public void setPivotTargetPosition(Rotation2d angle);
 
   public default void setIntakePivotDutyCucleOutput(double output) {}
 

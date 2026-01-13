@@ -91,14 +91,13 @@ public class RealIntakeIO implements IntakeIO {
 
     SparkMaxConfig leftConfig = new SparkMaxConfig();
     leftConfig
-        .inverted(IntakeConstants.INTAKE_LEFT_PIVOT_INVERTED)
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(IntakeConstants.INTAKE_PIVOT_SMART_CURRENT_LIMIT)
         .secondaryCurrentLimit(IntakeConstants.INTAKE_PIVOT_SECONDARY_CURRENT_LIMIT)
         .voltageCompensation(12.0);
 
     // Configure left motor to follow right motor
-    leftConfig.follow(_rightPivotMotor);
+    leftConfig.follow(_rightPivotMotor, true);
 
     tryUntilOk(
         _leftPivotMotor,
@@ -204,10 +203,10 @@ public class RealIntakeIO implements IntakeIO {
 
   // |============================== PIVOT MOTOR METHODS ============================== |
   public void setPivotTargetPosition(Rotation2d angle) {
-    Logger.recordOutput("intake/pivot-target-angle", angle.getDegrees());
+    Logger.recordOutput("Intake/pivot-target-angle", angle.getDegrees());
     // Add zero offset to convert from mechanism angle to encoder angle
     double targetRad = angle.plus(IntakeConstants.PIVOT_ZERO_ROTATION).getRadians();
-    Logger.recordOutput("intake/pivot-target-angle-encoder-space", Math.toDegrees(targetRad));
+    Logger.recordOutput("Intake/pivot-target-angle-encoder-space", Math.toDegrees(targetRad));
     _rightPivotMotor.getClosedLoopController().setReference(targetRad, ControlType.kPosition);
   }
 
