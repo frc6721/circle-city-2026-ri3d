@@ -41,7 +41,6 @@ import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.feeder.RealFeederIO;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.Intake.IntakePosition;
 import frc.robot.subsystems.intake.RealIntakeIO;
 import frc.robot.subsystems.shooter.RealShooterIO;
 import frc.robot.subsystems.shooter.Shooter;
@@ -163,7 +162,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(ShooterCommands.runFlywheelsAtIdle(shooter));
 
     controller
-        .x()
+        .leftBumper()
         .whileTrue(IntakeCommands.runIntakeRollers(intake))
         .onFalse(IntakeCommands.stopIntakeRollers(intake));
 
@@ -183,10 +182,20 @@ public class RobotContainer {
     //         () -> new Rotation2d()));
 
     // A button: Move intake to PICKUP position (down)
-    controller.a().whileTrue(IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.PICKUP));
+    // controller.a().whileTrue(IntakeCommands.setIntakeGoalPosition(intake,
+    // IntakePosition.PICKUP));
+    controller
+        .a()
+        .whileTrue(IntakeCommands.setIntakPivotDutyCycle(intake, 0.4))
+        .onFalse(IntakeCommands.setIntakPivotDutyCycle(intake, 0));
 
     // B button: Move intake to STOW position (up)
-    controller.b().whileTrue(IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.STOW));
+    // controller.b().whileTrue(IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.STOW));
+
+    controller
+        .b()
+        .whileTrue(IntakeCommands.setIntakPivotDutyCycle(intake, -0.35))
+        .onFalse(IntakeCommands.setIntakPivotDutyCycle(intake, 0));
 
     // Switch to X pattern when X button is pressed
     // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -199,10 +208,10 @@ public class RobotContainer {
         .rightBumper()
         .onTrue(
             ShooterCommands.setFlywheelTargetSpeed(
-                    shooter, RevolutionsPerSecond.of(3500 / 60.0)) // 2500 RPM
+                    shooter, RevolutionsPerSecond.of(4000 / 60.0)) // 2500 RPM
                 .andThen(ShooterCommands.waitForFlywheelsToReachSpeed(shooter).withTimeout(3)))
         .onTrue(
-            new WaitCommand(1)
+            new WaitCommand(2.5)
                 .andThen(FeederCommands.runFeederAtPercentOutput(feeder, 0.75).repeatedly()))
         .onFalse(
             FeederCommands.stopFeeder(feeder).andThen(ShooterCommands.runFlywheelsAtIdle(shooter)));

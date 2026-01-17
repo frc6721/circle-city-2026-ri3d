@@ -54,8 +54,12 @@ public class Intake extends SubsystemBase {
     Logger.recordOutput(
         "Intake/Current-Pivot-Angle", _intakeInputs._intakeRightPivotMotorPosition.getDegrees());
     Logger.recordOutput("Intake/Desired-Pivot-Angle", _intakePosition.getAngle().getDegrees());
-    Logger.recordOutput("Intake/raw-Pivot-Position", _intakeInputs._intakeRightPivotMotorPosition.plus(IntakeConstants.PIVOT_ZERO_ROTATION));
-    Logger.recordOutput("Intake/raw-pivot-position-desired", _intakePosition.getAngle().plus(IntakeConstants.PIVOT_ZERO_ROTATION));
+    Logger.recordOutput(
+        "Intake/raw-Pivot-Position",
+        _intakeInputs._intakeRightPivotMotorPosition.plus(IntakeConstants.PIVOT_ZERO_ROTATION));
+    Logger.recordOutput(
+        "Intake/raw-pivot-position-desired",
+        _intakePosition.getAngle().plus(IntakeConstants.PIVOT_ZERO_ROTATION));
   }
 
   public void setIntakePosition(IntakePosition position) {

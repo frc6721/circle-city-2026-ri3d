@@ -8,7 +8,6 @@ import static frc.robot.util.SparkUtil.ifOk;
 import static frc.robot.util.SparkUtil.tryUntilOk;
 
 import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -207,7 +206,7 @@ public class RealIntakeIO implements IntakeIO {
     // Add zero offset to convert from mechanism angle to encoder angle
     double targetRad = angle.plus(IntakeConstants.PIVOT_ZERO_ROTATION).getRadians();
     Logger.recordOutput("Intake/pivot-target-angle-encoder-space", Math.toDegrees(targetRad));
-    _rightPivotMotor.getClosedLoopController().setReference(targetRad, ControlType.kPosition);
+    // _rightPivotMotor.getClosedLoopController().setReference(targetRad, ControlType.kPosition);
   }
 
   public void setIntakePivotDutyCucleOutput(double output) {

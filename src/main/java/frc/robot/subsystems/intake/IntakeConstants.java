@@ -12,7 +12,7 @@ public class IntakeConstants {
    ************************/
 
   // Absolute encoder zero position (intake fully stowed position)
-  public static final Rotation2d PIVOT_ZERO_ROTATION = new Rotation2d(-1.256 + Math.PI * 2);
+  public static final Rotation2d PIVOT_ZERO_ROTATION = new Rotation2d(0);
 
   /************************
    *
@@ -62,7 +62,7 @@ public class IntakeConstants {
    *
    **************************/
   public static final LoggedNetworkNumber INTAKE_ACQUIRE_SPEED =
-      new LoggedNetworkNumber("Intake/Roller/Aquire Speed", 0.6);
+      new LoggedNetworkNumber("Intake/Roller/Aquire Speed", 1);
 
   public static final LoggedNetworkNumber INTAKE_CURRENT_CUTOFF =
       new LoggedNetworkNumber("Intake/Roller/Current Cutoff", 40);

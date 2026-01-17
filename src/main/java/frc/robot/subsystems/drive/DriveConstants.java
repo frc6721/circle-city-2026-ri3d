@@ -23,7 +23,7 @@ import edu.wpi.first.math.util.Units;
 public class DriveConstants {
   // 15.1 ft/s converted to meters per second for a mk4i module with L2 gearing
   // TODO: Update with your max speed from your swerve modules documentation
-  public static final double maxSpeedMetersPerSec = 4.6;
+  public static final double maxSpeedMetersPerSec = 4;
   public static final double odometryFrequency = 100.0; // Hz
 
   // TODO: update based on your robots properties
@@ -45,10 +45,10 @@ public class DriveConstants {
   //   public static final Rotation2d backLeftZeroRotation = new Rotation2d(0.0); // module 2
   //   public static final Rotation2d backRightZeroRotation = new Rotation2d(0.0); // module 3
 
-  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(-2.86); // module 0
-  public static final Rotation2d frontRightZeroRotation = new Rotation2d(-3.101); // module 1
-  public static final Rotation2d backLeftZeroRotation = new Rotation2d(-2.170); // module 2
-  public static final Rotation2d backRightZeroRotation = new Rotation2d(-0.441); // module 3
+  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(1.250); // module 0
+  public static final Rotation2d frontRightZeroRotation = new Rotation2d(-1.47); // module 1
+  public static final Rotation2d backLeftZeroRotation = new Rotation2d(-2.109); // module 2
+  public static final Rotation2d backRightZeroRotation = new Rotation2d(-0.214); // module 3
 
   // Device CAN IDs
   // TODO: Update CAN IDS
@@ -106,7 +106,7 @@ public class DriveConstants {
 
   // Turn PID configuration
   // TODO: Tune these after initial setup by following the instructions
-  public static final double turnKp = 2.0;
+  public static final double turnKp = 3.5;
   public static final double turnKd = 0.0;
   public static final double turnSimP = 8.0;
   public static final double turnSimD = 0.0;

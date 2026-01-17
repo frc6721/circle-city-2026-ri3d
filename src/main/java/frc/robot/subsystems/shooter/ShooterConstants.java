@@ -45,7 +45,7 @@ public class ShooterConstants {
   public static final AngularVelocity MAX_FLYWHEEL_SPEED =
       RevolutionsPerSecond.of(10000 / 60.0); // 10000 RPM
 
-  public static final double SHOOTER_IDLE_DUTY_CYCLE_OUTPUT = 0.1;
+  public static final double SHOOTER_IDLE_DUTY_CYCLE_OUTPUT = 0.0;
 
   /***********************
    *
