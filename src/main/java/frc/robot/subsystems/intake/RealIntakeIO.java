@@ -8,8 +8,12 @@ import static frc.robot.util.SparkUtil.ifOk;
 import static frc.robot.util.SparkUtil.tryUntilOk;
 
 import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
@@ -17,13 +21,13 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.HardwareConstants;
-import org.littletonrobotics.junction.Logger;
 
 public class RealIntakeIO implements IntakeIO {
   private SparkMax _rightPivotMotor;
   private SparkMax _leftPivotMotor;
   private SparkMax _rollerMotor;
   private AbsoluteEncoder _pivotEncoder;
+  private SparkClosedLoopController _pidController;
 
   public RealIntakeIO() {
     configPivotMotors();
@@ -34,6 +38,7 @@ public class RealIntakeIO implements IntakeIO {
     // Configure right (leader) pivot motor
     _rightPivotMotor =
         new SparkMax(HardwareConstants.CanIds.RIGHT_PIVOT_MOTOR_ID, MotorType.kBrushless);
+    _pidController = _rightPivotMotor.getClosedLoopController();
 
     SparkMaxConfig rightConfig = new SparkMaxConfig();
     rightConfig
@@ -202,11 +207,11 @@ public class RealIntakeIO implements IntakeIO {
 
   // |============================== PIVOT MOTOR METHODS ============================== |
   public void setPivotTargetPosition(Rotation2d angle) {
-    Logger.recordOutput("Intake/pivot-target-angle", angle.getDegrees());
     // Add zero offset to convert from mechanism angle to encoder angle
+
     double targetRad = angle.plus(IntakeConstants.PIVOT_ZERO_ROTATION).getRadians();
-    Logger.recordOutput("Intake/pivot-target-angle-encoder-space", Math.toDegrees(targetRad));
-    // _rightPivotMotor.getClosedLoopController().setReference(targetRad, ControlType.kPosition);
+    double feedforward = angle.getCos() * IntakeConstants.INTAKE_PIVOT_FEEDFORWARD;
+    _pidController.setReference(targetRad, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforward, ArbFFUnits.kVoltage);
   }
 
   public void setIntakePivotDutyCucleOutput(double output) {

@@ -1,5 +1,7 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -12,7 +14,12 @@ public class IntakeConstants {
    ************************/
 
   // Absolute encoder zero position (intake fully stowed position)
-  public static final Rotation2d PIVOT_ZERO_ROTATION = new Rotation2d(0);
+  public static final Rotation2d PIVOT_ZERO_ROTATION = new Rotation2d(Degrees.of(-140));
+
+  // Volts of feedforward to apply to the pivot PID controller
+  // this will be multiplied by the cos of the desired pivot angle so that
+  // when the set point is vertical there is extra feedforward to compensate gravity
+  public static final double INTAKE_PIVOT_FEEDFORWARD = 0;
 
   /************************
    *
@@ -25,7 +32,7 @@ public class IntakeConstants {
   public static final LoggedNetworkNumber PIVOT_PID_KI =
       new LoggedNetworkNumber("Intake/Pivot/PID/kI", 0.000000);
   public static final LoggedNetworkNumber PIVOT_PID_KD =
-      new LoggedNetworkNumber("Intake/Pivot/PID/kD", 0.001);
+      new LoggedNetworkNumber("Intake/Pivot/PID/kD", 0.000);
 
   /***********************
    *
@@ -36,7 +43,7 @@ public class IntakeConstants {
    *
    **********************/
   public static final LoggedNetworkNumber POSITION_PICKUP =
-      new LoggedNetworkNumber("Intake/Position/Pickup", 90);
+      new LoggedNetworkNumber("Intake/Position/Pickup", 88);
 
   public static final LoggedNetworkNumber POSITION_STOW =
       new LoggedNetworkNumber("Intake/Position/Stow", 0);
