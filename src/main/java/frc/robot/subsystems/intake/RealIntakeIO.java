@@ -19,6 +19,8 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.HardwareConstants;
 
@@ -207,10 +209,10 @@ public class RealIntakeIO implements IntakeIO {
 
   // |============================== PIVOT MOTOR METHODS ============================== |
   public void setPivotTargetPosition(Rotation2d angle) {
-    // Add zero offset to convert from mechanism angle to encoder angle
-
-    double targetRad = angle.plus(IntakeConstants.PIVOT_ZERO_ROTATION).getRadians();
-    double feedforward = angle.getCos() * IntakeConstants.INTAKE_PIVOT_FEEDFORWARD;
+      double feedforward = angle.getCos() * IntakeConstants.INTAKE_PIVOT_FEEDFORWARD;
+      
+      // Add zero offset to convert from mechanism angle to encoder angle
+    double targetRad =  MathUtil.inputModulus(angle.plus(IntakeConstants.PIVOT_ZERO_ROTATION).getRadians(), 0, Math.PI * 2);
     _pidController.setReference(targetRad, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforward, ArbFFUnits.kVoltage);
   }
 
