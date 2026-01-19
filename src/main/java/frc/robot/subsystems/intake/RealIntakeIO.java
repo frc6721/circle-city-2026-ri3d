@@ -8,21 +8,14 @@ import static frc.robot.util.SparkUtil.ifOk;
 import static frc.robot.util.SparkUtil.tryUntilOk;
 
 import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.measure.Voltage;
 import frc.robot.HardwareConstants;
 
 public class RealIntakeIO implements IntakeIO {
@@ -185,10 +178,9 @@ public class RealIntakeIO implements IntakeIO {
   }
 
   // |============================== PIVOT MOTOR METHODS ============================== |
-  public void setPivotMotorVoltage(Voltage volts) {
+  public void setPivotMotorVoltage(double volts) {
     _rightPivotMotor.setVoltage(volts);
   }
-
 
   public void setIntakePivotDutyCucleOutput(double output) {
     _rightPivotMotor.set(output);

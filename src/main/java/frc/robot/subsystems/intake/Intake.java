@@ -1,5 +1,6 @@
 package frc.robot.subsystems.intake;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
@@ -10,6 +11,7 @@ public class Intake extends SubsystemBase {
   private final IntakeIO _intakeIO;
   private final IntakeIOInputsAutoLogged _intakeInputs = new IntakeIOInputsAutoLogged();
   private IntakePosition _intakePosition;
+  private PIDController _pivotPIDController;
 
   public enum IntakePosition {
     STOW(IntakeConstants.POSITION_STOW),
@@ -43,6 +45,11 @@ public class Intake extends SubsystemBase {
 
     // assume that the intake is all the way up when first turned on
     _intakePosition = IntakePosition.STOW;
+    _pivotPIDController =
+        new PIDController(
+            IntakeConstants.PIVOT_PID_KP.get(),
+            IntakeConstants.PIVOT_PID_KI.get(),
+            IntakeConstants.PIVOT_PID_KD.get());
   }
 
   @Override
@@ -60,11 +67,17 @@ public class Intake extends SubsystemBase {
     Logger.recordOutput(
         "Intake/raw-pivot-position-desired",
         _intakePosition.getAngle().plus(IntakeConstants.PIVOT_ZERO_ROTATION));
+    _pivotPIDController.setSetpoint(_intakePosition.getAngle().getDegrees());
+    double pivotVoltage =
+        _pivotPIDController.calculate(_intakeInputs._intakeRightPivotMotorPosition.getDegrees());
+    _intakeIO.setPivotMotorVoltage(
+        pivotVoltage
+            + IntakeConstants.INTAKE_PIVOT_FEEDFORWARD
+                * Math.cos(Math.toRadians(_intakePosition.getAngle().getDegrees())));
   }
 
   public void setIntakePosition(IntakePosition position) {
     _intakePosition = position;
-    _intakeIO.setPivotTargetPosition(position.getAngle());
   }
 
   public void setIntakePivotDutyCucleOutput(double output) {
