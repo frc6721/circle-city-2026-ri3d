@@ -41,6 +41,7 @@ import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.feeder.RealFeederIO;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.Intake.IntakePosition;
 import frc.robot.subsystems.intake.RealIntakeIO;
 import frc.robot.subsystems.shooter.RealShooterIO;
 import frc.robot.subsystems.shooter.Shooter;
@@ -182,20 +183,18 @@ public class RobotContainer {
     //         () -> new Rotation2d()));
 
     // A button: Move intake to PICKUP position (down)
-    // controller.a().whileTrue(IntakeCommands.setIntakeGoalPosition(intake,
-    // IntakePosition.PICKUP));
-    controller
-        .a()
-        .whileTrue(IntakeCommands.setIntakPivotDutyCycle(intake, 0.4))
-        .onFalse(IntakeCommands.setIntakPivotDutyCycle(intake, 0));
+    controller.a().whileTrue(IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.PICKUP));
+    // controller
+    //     .a()
+    //     .whileTrue(IntakeCommands.setIntakPivotDutyCycle(intake, 0.4))
+    //     .onFalse(IntakeCommands.setIntakPivotDutyCycle(intake, 0));
 
     // B button: Move intake to STOW position (up)
-    // controller.b().whileTrue(IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.STOW));
-
-    controller
-        .b()
-        .whileTrue(IntakeCommands.setIntakPivotDutyCycle(intake, -0.35))
-        .onFalse(IntakeCommands.setIntakPivotDutyCycle(intake, 0));
+    controller.b().whileTrue(IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.STOW));
+    // controller
+    //     .b()
+    //     .whileTrue(IntakeCommands.setIntakPivotDutyCycle(intake, -0.35))
+    //     .onFalse(IntakeCommands.setIntakPivotDutyCycle(intake, 0));
 
     // Switch to X pattern when X button is pressed
     // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));

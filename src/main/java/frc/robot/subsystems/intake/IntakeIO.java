@@ -38,7 +38,7 @@ public interface IntakeIO {
   public default void updateInputs(IntakeIOInputs inputs) {}
 
   // |============================== PIVOT MOTOR METHODS ============================== |
-  public void setPivotTargetPosition(Rotation2d angle);
+  public default void setPivotMotorVoltage(Voltage volts) {}
 
   public default void setIntakePivotDutyCucleOutput(double output) {}
 

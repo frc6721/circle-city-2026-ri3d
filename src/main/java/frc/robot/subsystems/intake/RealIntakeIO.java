@@ -20,6 +20,7 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.HardwareConstants;
 
 public class RealIntakeIO implements IntakeIO {
@@ -55,30 +56,6 @@ public class RealIntakeIO implements IntakeIO {
         .positionConversionFactor(IntakeConstants.PIVOT_ENCODER_POSITION_FACTOR)
         .velocityConversionFactor(IntakeConstants.PIVOT_ENCODER_VELOCITY_FACTOR)
         .averageDepth(2);
-
-    // Configure closed loop to use absolute encoder
-    rightConfig
-        .closedLoop
-        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        .positionWrappingEnabled(false)
-        .pidf(
-            IntakeConstants.PIVOT_PID_KP.get(),
-            IntakeConstants.PIVOT_PID_KI.get(),
-            IntakeConstants.PIVOT_PID_KD.get(),
-            0);
-
-    // Soft limits based on absolute position (accounting for zero offset)
-    // double minLimitRad =
-    //     Degree.of(IntakeConstants.MIN_INTAKE_ANGLE).in(Radians)
-    //         + IntakeConstants.PIVOT_ZERO_ROTATION.getRadians();
-    // double maxLimitRad =
-    //     Degree.of(IntakeConstants.MAX_INTAKE_ANGLE).in(Radians)
-    //         + IntakeConstants.PIVOT_ZERO_ROTATION.getRadians();
-
-    // rightConfig.softLimit.forwardSoftLimitEnabled(true);
-    // rightConfig.softLimit.forwardSoftLimit(maxLimitRad);
-    // rightConfig.softLimit.reverseSoftLimitEnabled(true);
-    // rightConfig.softLimit.reverseSoftLimit(minLimitRad);
 
     tryUntilOk(
         _rightPivotMotor,
@@ -206,13 +183,10 @@ public class RealIntakeIO implements IntakeIO {
   }
 
   // |============================== PIVOT MOTOR METHODS ============================== |
-  public void setPivotTargetPosition(Rotation2d angle) {
-    // Add zero offset to convert from mechanism angle to encoder angle
-
-    double targetRad = angle.plus(IntakeConstants.PIVOT_ZERO_ROTATION).getRadians();
-    double feedforward = angle.getCos() * IntakeConstants.INTAKE_PIVOT_FEEDFORWARD;
-    _pidController.setReference(targetRad, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforward, ArbFFUnits.kVoltage);
+  public void setPivotMotorVoltage(Voltage volts) {
+    _rightPivotMotor.setVoltage(volts);
   }
+
 
   public void setIntakePivotDutyCucleOutput(double output) {
     _rightPivotMotor.set(output);
