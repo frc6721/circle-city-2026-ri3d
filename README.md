@@ -4,7 +4,7 @@ Robot in 3 Days (RI3D) code for Circle City Robots
 
 ## Overview
 
-Our codebase is built upon the **Spark Swerve Template** from team 6328 and makes use of their AdvantageKit logging framework. We intend to release a simplified version of the code without the logging framework for teams who are new to FRC or have less programming resources.
+Our codebase is built upon the **Spark Swerve Template** from team 6328 and makes use of their AdvantageKit logging framework.
 
 > **Note**: Both versions of the code use the `Spark Swerve Template` from 6328 as it is our recommended starting point for teams using an all-REV swerve drivetrain.
 

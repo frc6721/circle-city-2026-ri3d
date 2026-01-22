@@ -50,6 +50,29 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+/**
+ * The Drive subsystem controls the robot's swerve drivetrain.
+ *
+ * <p><b>Hardware Overview:</b>
+ * <ul>
+ *   <li>Uses MK4i swerve modules with an inverted belly pan for electronics</li>
+ *   <li>Four independent swerve modules (Front-Left, Front-Right, Back-Left, Back-Right)</li>
+ *   <li>Each module has a drive motor and a turn motor controlled by REV Spark motor controllers</li>
+ *   <li>Gyroscope (Pigeon 2) for measuring robot rotation</li>
+ * </ul>
+ *
+ * <p><b>Software Features:</b>
+ * <ul>
+ *   <li>Field-centric driving - robot moves relative to the field, not its own orientation</li>
+ *   <li>Odometry - tracks robot position on the field using wheel encoders and gyro</li>
+ *   <li>Vision integration - can accept camera measurements to improve position accuracy</li>
+ *   <li>PathPlanner integration - supports autonomous path following</li>
+ *   <li>Distance calculation to game elements (like the Hub for shooting)</li>
+ * </ul>
+ *
+ * <p>This subsystem uses the AdvantageKit IO layer pattern to separate hardware-specific code
+ * from the main subsystem logic, making it easier to test and simulate.
+ */
 public class Drive extends SubsystemBase {
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
@@ -71,6 +94,19 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
+  /**
+   * Creates a new Drive subsystem.
+   *
+   * <p>This constructor sets up the swerve drivetrain by initializing the gyroscope and all four
+   * swerve modules. It also configures PathPlanner for autonomous driving and sets up
+   * the system identification (SysId) routine for characterization.
+   *
+   * @param gyroIO The gyroscope hardware interface (NavX, Pigeon2, or simulation)
+   * @param flModuleIO Front-left swerve module hardware interface
+   * @param frModuleIO Front-right swerve module hardware interface
+   * @param blModuleIO Back-left swerve module hardware interface
+   * @param brModuleIO Back-right swerve module hardware interface
+   */
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
@@ -123,6 +159,28 @@ public class Drive extends SubsystemBase {
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
   }
 
+  /**
+   * Periodic method called every 20 milliseconds (50 times per second).
+   *
+   * <p>This method handles:
+   * <ul>
+   *   <li>Reading sensor data from the gyro and all swerve modules</li>
+   *   <li>Logging all sensor data to AdvantageKit</li>
+   *   <li>Stopping the robot when disabled for safety</li>
+   *   <li>Updating odometry - calculating the robot's position on the field</li>
+   * </ul>
+   *
+   * <p><b>Odometry Update Process:</b>
+   * <ol>
+   *   <li>Read wheel positions from each module (distance traveled and angle)</li>
+   *   <li>Calculate how far each wheel moved since last update (delta)</li>
+   *   <li>Read gyro angle to know robot's rotation</li>
+   *   <li>Combine wheel deltas and gyro angle to calculate robot's new position</li>
+   * </ol>
+   *
+   * <p>The odometry runs at a higher frequency than 50Hz by processing multiple samples
+   * per loop, improving accuracy especially during fast movements.
+   */
   @Override
   public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
@@ -185,7 +243,24 @@ public class Drive extends SubsystemBase {
   /**
    * Runs the drive at the desired velocity.
    *
-   * @param speeds Speeds in meters/sec
+   * <p>This is the main method for controlling the robot's movement. It takes desired speeds
+   * for the robot (forward, sideways, and rotation) and converts them into individual
+   * commands for each swerve module.
+   *
+   * <p><b>How it works:</b>
+   * <ol>
+   *   <li>Takes the desired ChassisSpeeds (overall robot velocity)</li>
+   *   <li>Discretizes the speeds to prevent skewing during fast rotation</li>
+   *   <li>Uses kinematics to calculate what each module needs to do</li>
+   *   <li>Desaturates wheel speeds if any exceed the maximum (scales all down proportionally)</li>
+   *   <li>Sends optimized setpoints to each module</li>
+   * </ol>
+   *
+   * <p><b>Note:</b> Module states are automatically optimized (shortest rotation path)
+   * by each module's runSetpoint method.
+   *
+   * @param speeds Desired robot speeds (x, y velocities in m/s and rotation in rad/s).
+   *               Positive x is forward, positive y is left, positive rotation is counterclockwise.
    */
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
@@ -206,21 +281,56 @@ public class Drive extends SubsystemBase {
     Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
   }
 
-  /** Runs the drive in a straight line with the specified drive output. */
+  /**
+   * Runs the drive in a straight line with the specified drive output.
+   *
+   * <p>This method is used for characterization (measuring how the drivetrain responds
+   * to different voltages). During characterization, all modules point forward and
+   * receive the same voltage output.
+   *
+   * <p><b>When is this used?</b> This is called by SysId routines to measure the
+   * drivetrain's physical properties (like friction and motor characteristics) for
+   * better feedforward control.
+   *
+   * @param output The drive output voltage (-12 to +12 volts) to apply to all modules
+   */
   public void runCharacterization(double output) {
     for (int i = 0; i < 4; i++) {
       modules[i].runCharacterization(output);
     }
   }
 
-  /** Stops the drive. */
+  /**
+   * Stops the drive by commanding zero velocity.
+   *
+   * <p>This sets all module velocities to zero but doesn't change their angles.
+   * The modules will stay pointing in their current directions.
+   */
   public void stop() {
     runVelocity(new ChassisSpeeds());
   }
 
   /**
-   * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
-   * return to their normal orientations the next time a nonzero velocity is requested.
+   * Stops the drive and turns the modules to an X arrangement to resist movement.
+   *
+   * <p>The modules form an X pattern:
+   * <pre>
+   *   \  /
+   *    \/
+   *    /\
+   *   /  \
+   * </pre>
+   *
+   * <p>This X configuration makes it very difficult for other robots to push you because
+   * the wheels are braced against each other. This is useful for:
+   * <ul>
+   *   <li>Defense - resisting being pushed by other robots</li>
+   *   <li>Stability - maintaining position on an incline or when hit</li>
+   *   <li>End of auto - preventing drift after autonomous ends</li>
+   * </ul>
+   *
+   * <p>The modules will return to their normal orientations the next time a nonzero
+   * velocity is requested.
    */
   public void stopWithX() {
     Rotation2d[] headings = new Rotation2d[4];
@@ -231,19 +341,68 @@ public class Drive extends SubsystemBase {
     stop();
   }
 
-  /** Returns a command to run a quasistatic test in the specified direction. */
+  /**
+   * Returns a command to run a quasistatic test in the specified direction.
+   *
+   * <p><b>What is a quasistatic test?</b> This slowly increases the voltage applied to
+   * the drivetrain and measures how fast it moves. 
+   *
+   * <p>This helps measure:
+   * <ul>
+   *   <li>Static friction (kS) - voltage needed to overcome friction and start moving</li>
+   *   <li>Velocity constant (kV) - how voltage relates to velocity</li>
+   * </ul>
+   *
+   * <p><b>Usage:</b> Bind this to a button during characterization. Make sure the robot
+   * has plenty of space to drive!
+   *
+   * @param direction The direction to run the test (forward or backward)
+   * @return A command that runs the quasistatic characterization routine
+   */
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return run(() -> runCharacterization(0.0))
         .withTimeout(1.0)
         .andThen(sysId.quasistatic(direction));
   }
 
-  /** Returns a command to run a dynamic test in the specified direction. */
+  /**
+   * Returns a command to run a dynamic test in the specified direction.
+   *
+   * <p><b>What is a dynamic test?</b> This applies a large voltage step to the drivetrain
+   * and measures how quickly it accelerates. This happens fast - the robot will jerk forward!
+   *
+   * <p>This helps measure:
+   * <ul>
+   *   <li>Acceleration constant (kA) - how voltage relates to acceleration</li>
+   * </ul>
+   *
+   * <p>Combined with quasistatic test data, this gives us a complete feedforward model
+   * for accurate velocity control during autonomous.
+   *
+   * <p><b>Warning:</b> The robot will move quickly and suddenly. Make sure you have
+   * plenty of space!
+   *
+   * @param direction The direction to run the test (forward or backward)
+   * @return A command that runs the dynamic characterization routine
+   */
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
   }
 
-  /** Returns the module states (turn angles and drive velocities) for all of the modules. */
+  /**
+   * Returns the module states (turn angles and drive velocities) for all of the modules.
+   *
+   * <p>A SwerveModuleState contains:
+   * <ul>
+   *   <li>Speed - how fast the wheel is spinning (meters per second)</li>
+   *   <li>Angle - which direction the wheel is pointing (Rotation2d)</li>
+   * </ul>
+   *
+   * <p>This method is automatically logged to AdvantageKit as "SwerveStates/Measured"
+   * so you can visualize the actual module states in AdvantageScope.
+   *
+   * @return Array of 4 module states [Front-Left, Front-Right, Back-Left, Back-Right]
+   */
   @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
@@ -253,7 +412,19 @@ public class Drive extends SubsystemBase {
     return states;
   }
 
-  /** Returns the module positions (turn angles and drive positions) for all of the modules. */
+  /**
+   * Returns the module positions (turn angles and drive positions) for all of the modules.
+   *
+   * <p>Similar to module states, but instead of velocity, this returns:
+   * <ul>
+   *   <li>Distance - total distance the wheel has traveled (meters)</li>
+   *   <li>Angle - which direction the wheel is pointing (Rotation2d)</li>
+   * </ul>
+   *
+   * <p>This is used for odometry calculations to track the robot's position on the field.
+   *
+   * @return Array of 4 module positions [Front-Left, Front-Right, Back-Left, Back-Right]
+   */
   private SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] states = new SwerveModulePosition[4];
     for (int i = 0; i < 4; i++) {
@@ -262,13 +433,34 @@ public class Drive extends SubsystemBase {
     return states;
   }
 
-  /** Returns the measured chassis speeds of the robot. */
+  /**
+   * Returns the measured chassis speeds of the robot.
+   *
+   * <p>This converts the individual module states back into overall robot movement:
+   * <ul>
+   *   <li>vx - velocity forward/backward (meters per second)</li>
+   *   <li>vy - velocity left/right (meters per second)</li>
+   *   <li>omega - rotation speed (radians per second)</li>
+   * </ul>
+   *
+   * <p>This is automatically logged as "SwerveChassisSpeeds/Measured" so you can see
+   * the actual robot velocity in AdvantageScope.
+   *
+   * @return The current chassis speeds based on measured module states
+   */
   @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
   private ChassisSpeeds getChassisSpeeds() {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
 
-  /** Returns the position of each module in radians. */
+  /**
+   * Returns the position of each module in radians.
+   *
+   * <p>This is used during wheel radius characterization to determine the effective
+   * wheel radius. The robot spins in place and we measure how far each wheel travels.
+   *
+   * @return Array of 4 wheel positions in radians [FL, FR, BL, BR]
+   */
   public double[] getWheelRadiusCharacterizationPositions() {
     double[] values = new double[4];
     for (int i = 0; i < 4; i++) {
@@ -277,7 +469,15 @@ public class Drive extends SubsystemBase {
     return values;
   }
 
-  /** Returns the average velocity of the modules in rad/sec. */
+  /**
+   * Returns the average velocity of the modules in radians per second.
+   *
+   * <p>This is used during feedforward characterization to measure how the drivetrain
+   * responds to different voltages. The velocity is measured in radians per second
+   * (wheel rotation speed), not meters per second.
+   *
+   * @return Average module velocity in rad/sec
+   */
   public double getFFCharacterizationVelocity() {
     double output = 0.0;
     for (int i = 0; i < 4; i++) {
@@ -286,23 +486,84 @@ public class Drive extends SubsystemBase {
     return output;
   }
 
-  /** Returns the current odometry pose. */
+  /**
+   * Returns the current odometry pose (position and rotation on the field).
+   *
+   * <p>The Pose2d contains:
+   * <ul>
+   *   <li>X position - distance along the field length (meters)</li>
+   *   <li>Y position - distance along the field width (meters)</li>
+   *   <li>Rotation - which direction the robot is facing (Rotation2d)</li>
+   * </ul>
+   *
+   * <p>The origin (0, 0) is typically at the blue corner of the field, with positive X
+   * extending toward the opposite corner and positive Y extending to the left.
+   *
+   * <p>This is automatically logged as "Odometry/Robot" and can be visualized on
+   * a field diagram in AdvantageScope.
+   *
+   * @return The robot's current pose on the field
+   */
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
   }
 
-  /** Returns the current odometry rotation. */
+  /**
+   * Returns the current odometry rotation (which direction the robot is facing).
+   *
+   * <p>This is just the rotation component of the pose. Useful when you only need
+   * to know the robot's heading, not its position.
+   *
+   * @return The robot's current rotation on the field
+   */
   public Rotation2d getRotation() {
     return getPose().getRotation();
   }
 
-  /** Resets the current odometry pose. */
+  /**
+   * Resets the current odometry pose to a new position.
+   *
+   * <p>This tells the robot "you are now at this position on the field."
+   * Use this to:
+   * <ul>
+   *   <li>Set the robot's starting position at the beginning of autonomous</li>
+   *   <li>Correct position estimates when you know the robot's true location</li>
+   *   <li>Reset to (0, 0) for testing</li>
+   * </ul>
+   *
+   * <p><b>Important:</b> Make sure the pose rotation matches the robot's actual
+   * heading, or odometry will be inaccurate!
+   *
+   * @param pose The new pose to reset to (position and rotation on the field)
+   */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
   }
 
-  /** Adds a new timestamped vision measurement. */
+  /**
+   * Adds a new timestamped vision measurement to improve odometry accuracy.
+   *
+   * <p>Vision systems (like Limelight or PhotonVision) can detect AprilTags on the field
+   * and calculate the robot's position. This position can be added to the pose estimator
+   * to correct for odometry drift.
+   *
+   * <p><b>How it works:</b>
+   * <ol>
+   *   <li>Vision system detects AprilTag and calculates robot pose</li>
+   *   <li>This method adds that measurement with a timestamp (when it was captured)</li>
+   *   <li>Pose estimator combines vision data with wheel odometry</li>
+   *   <li>Less reliable measurements (far away, ambiguous) get lower weight via standard deviations</li>
+   * </ol>
+   *
+   * <p><b>Standard Deviations:</b> These tell the pose estimator how much to trust
+   * the measurement. Smaller values = more trust, larger values = less trust.
+   * Typically: close/clear tags = small stddev, far/unclear tags = large stddev.
+   *
+   * @param visionRobotPoseMeters The robot pose measured by the vision system
+   * @param timestampSeconds When the measurement was captured (from Logger.getRealTimestamp())
+   * @param visionMeasurementStdDevs Standard deviations for x, y, and rotation (3x1 matrix)
+   */
   public void addVisionMeasurement(
       Pose2d visionRobotPoseMeters,
       double timestampSeconds,
@@ -311,12 +572,38 @@ public class Drive extends SubsystemBase {
         visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
 
-  /** Returns the maximum linear speed in meters per sec. */
+  /**
+   * Returns the maximum linear speed in meters per second.
+   *
+   * <p>This is the fastest the robot can drive in a straight line, determined by:
+   * <ul>
+   *   <li>Motor free speed</li>
+   *   <li>Gear reduction</li>
+   *   <li>Wheel diameter</li>
+   * </ul>
+   *
+   * <p>Used by PathPlanner and other code that needs to know the robot's speed limits.
+   *
+   * @return Maximum speed in meters per second
+   */
   public double getMaxLinearSpeedMetersPerSec() {
     return maxSpeedMetersPerSec;
   }
 
-  /** Returns the maximum angular speed in radians per sec. */
+  /**
+   * Returns the maximum angular speed in radians per second.
+   *
+   * <p>This is how fast the robot can spin in place. It's calculated from the
+   * maximum linear speed and the drive base radius (distance from center to wheels).
+   *
+   * <p>The formula: max angular speed = max linear speed / drive base radius
+   * <br>Think of it like: the farther the wheels are from the center, the slower
+   * the robot spins for the same wheel speed.
+   *
+   * <p>Used by PathPlanner and other code that needs to know rotation speed limits.
+   *
+   * @return Maximum rotation speed in radians per second
+   */
   public double getMaxAngularSpeedRadPerSec() {
     return maxSpeedMetersPerSec / driveBaseRadius;
   }

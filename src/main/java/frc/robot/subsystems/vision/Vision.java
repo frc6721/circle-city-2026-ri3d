@@ -24,12 +24,86 @@ import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
+/**
+ * The Vision subsystem manages camera-based positioning using AprilTags.
+ *
+ * <p><b>What is Vision Positioning?</b>
+ * AprilTags are special markers placed at known locations on the field. Cameras on the
+ * robot detect these tags and calculate the robot's position. This helps correct odometry
+ * drift caused by wheel slippage.
+ *
+ * <p><b>Hardware Overview:</b>
+ * <ul>
+ *   <li>Tested with Limelight vision processor</li>
+ *   <li>Can support multiple cameras simultaneously</li>
+ *   <li>Each camera independently processes AprilTags and provides pose estimates</li>
+ * </ul>
+ *
+ * <p><b>How It Works:</b>
+ * <ol>
+ *   <li>Camera(s) capture images and detect AprilTags</li>
+ *   <li>Vision processor calculates robot position based on tag locations</li>
+ *   <li>Vision subsystem receives pose estimates with timestamps</li>
+ *   <li>Subsystem validates estimates (checks for realistic values)</li>
+ *   <li>Accepted estimates are sent to Drive subsystem's pose estimator</li>
+ *   <li>Pose estimator fuses vision data with wheel odometry</li>
+ * </ol>
+ *
+ * <p><b>Pose Validation:</b>
+ * Not all vision measurements are trustworthy. This subsystem rejects poses that:
+ * <ul>
+ *   <li>Have no detected tags (tagCount == 0)</li>
+ *   <li>Have only one tag with high ambiguity (uncertain detection)</li>
+ *   <li>Report unrealistic Z coordinates (height off the ground)</li>
+ *   <li>Fall outside the field boundaries</li>
+ * </ul>
+ *
+ * <p><b>Standard Deviation Calculation:</b>
+ * Each vision measurement includes standard deviations that tell the pose estimator
+ * how much to trust it:
+ * <ul>
+ *   <li><b>Closer tags = smaller stddev = more trust:</b> Tags nearby are easier to measure accurately</li>
+ *   <li><b>More tags = smaller stddev = more trust:</b> Multiple tags provide redundancy</li>
+ *   <li><b>MegaTag2 = smaller stddev = more trust:</b> Advanced algorithm for better accuracy</li>
+ *   <li><b>Per-camera factors:</b> Some cameras may be more/less reliable</li>
+ * </ul>
+ *
+ * <p><b>Status for RI3D:</b>
+ * Vision was tested with Limelight but NOT fully implemented in the competition robot.
+ * The infrastructure is here and working, but the camera and offsets where not fully tuned.
+ *
+ * <p>This subsystem uses the AdvantageKit IO layer pattern and supports multiple cameras.
+ */
 public class Vision extends SubsystemBase {
   private final VisionConsumer consumer;
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
 
+  /**
+   * Creates a new Vision subsystem.
+   *
+   * <p>This constructor sets up vision processing with support for multiple cameras.
+   * Each camera independently provides pose estimates that are validated and sent
+   * to the consumer (typically the Drive subsystem's pose estimator).
+   *
+   * <p><b>VisionConsumer:</b> This is a callback function that receives validated
+   * vision measurements. When you create the Vision subsystem in RobotContainer,
+   * you pass a reference to the Drive subsystem's addVisionMeasurement() method:
+   * <pre>
+   * Vision vision = new Vision(
+   *   drive::addVisionMeasurement,  // Consumer receives measurements
+   *   new VisionIOLimelight()         // One or more camera IOs
+   * );
+   * </pre>
+   *
+   * <p><b>Multiple Cameras:</b> You can pass multiple VisionIO objects to use
+   * multiple cameras.
+   *
+   * @param consumer Callback function to receive validated vision measurements
+   *                 (typically drive::addVisionMeasurement)
+   * @param io One or more VisionIO implementations, one per camera
+   */
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
     this.io = io;
@@ -50,14 +124,75 @@ public class Vision extends SubsystemBase {
   }
 
   /**
-   * Returns the X angle to the best target, which can be used for simple servoing with vision.
+   * Returns the X angle to the best target for simple vision servoing.
    *
-   * @param cameraIndex The index of the camera to use.
+   * <p>This provides a simpler alternative to full pose estimation. Instead of
+   * calculating the robot's position on the field, this just tells you how far
+   * left or right the target appears in the camera view.
+   *
+   * <p><b>Use Cases:</b>
+   * <ul>
+   *   <li>Aligning to a target without full odometry</li>
+   *   <li>Simple "turn toward target" commands</li>
+   *   <li>Quick alignment during teleop</li>
+   * </ul>
+   *
+   * <p><b>How to use:</b>
+   * <pre>
+   * Rotation2d angle = vision.getTargetX(0);
+   * if (Math.abs(angle.getDegrees()) < 2.0) {
+   *   // Aligned! Ready to shoot
+   * } else {
+   *   // Turn toward target
+   *   drive.turnToAngle(angle);
+   * }
+   * </pre>
+   *
+   * <p><b>Note:</b> This is simpler than pose estimation but less accurate for
+   * autonomous navigation. Good for quick teleop alignment.
+   *
+   * @param cameraIndex The index of the camera to use (0 for first camera, 1 for second, etc.)
+   * @return The horizontal angle to the target (positive = target is to the right)
    */
   public Rotation2d getTargetX(int cameraIndex) {
     return inputs[cameraIndex].latestTargetObservation.tx();
   }
 
+  /**
+   * Periodic method called every 20 milliseconds (50 times per second).
+   *
+   * <p>This is the main vision processing loop. For each camera:
+   * <ol>
+   *   <li><b>Read sensor data:</b> Get pose observations from each camera</li>
+   *   <li><b>Update disconnection alerts:</b> Warn if cameras go offline</li>
+   *   <li><b>Validate poses:</b> Reject unrealistic or low-quality measurements</li>
+   *   <li><b>Calculate standard deviations:</b> Determine how much to trust each measurement</li>
+   *   <li><b>Send to consumer:</b> Pass validated measurements to Drive subsystem</li>
+   *   <li><b>Log everything:</b> Record all data for AdvantageScope visualization</li>
+   * </ol>
+   *
+   * <p><b>Validation Checks:</b>
+   * Poses are rejected if they:
+   * <ul>
+   *   <li>Have no detected tags</li>
+   *   <li>Have only one tag with high ambiguity (uncertain)</li>
+   *   <li>Report unrealistic Z coordinate (too high/low off ground)</li>
+   *   <li>Fall outside the field boundaries</li>
+   * </ul>
+   *
+   * <p><b>Standard Deviation Factors:</b>
+   * Trust decreases (stddev increases) with:
+   * <ul>
+   *   <li>Distance to tags (square of distance)</li>
+   *   <li>Fewer tags detected (dividing by tag count)</li>
+   *   <li>Standard pose estimation vs. MegaTag2</li>
+   *   <li>Per-camera reliability factors</li>
+   * </ul>
+   *
+   * <p><b>Logging:</b> All poses (accepted and rejected), tag positions, and metadata
+   * are logged for each camera and in summary views. You can visualize these in
+   * AdvantageScope on a 3D field view to see what the vision system "sees".
+   */
   @Override
   public void periodic() {
     for (int i = 0; i < io.length; i++) {
@@ -168,8 +303,42 @@ public class Vision extends SubsystemBase {
         "Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
   }
 
+  /**
+   * Functional interface for consuming vision measurements.
+   *
+   * <p>This defines the signature for a callback function that receives validated
+   * vision measurements. The Drive subsystem's addVisionMeasurement() method
+   * implements this interface.
+   *
+   * <p><b>Why use an interface?</b> This decouples the Vision subsystem from the
+   * Drive subsystem. Vision doesn't need to know about Drive - it just calls
+   * whatever function you give it. This makes testing easier and the code more flexible.
+   *
+   * <p><b>Functional Interface:</b> This annotation means the interface has exactly
+   * one method, allowing it to be used with lambda expressions or method references:
+   * <pre>
+   * // Method reference (clean!)
+   * new Vision(drive::addVisionMeasurement, visionIO);
+   *
+   * // Lambda (equivalent but more verbose)
+   * new Vision((pose, time, stdDevs) -> drive.addVisionMeasurement(pose, time, stdDevs), visionIO);
+   * </pre>
+   *
+   * <p>This is an advanced Java feature that makes the code cleaner while maintaining
+   * flexibility.
+   */
   @FunctionalInterface
   public static interface VisionConsumer {
+    /**
+     * Accepts a vision measurement for pose estimation.
+     *
+     * <p>This method signature matches Drive.addVisionMeasurement(), allowing it
+     * to be used as a method reference.
+     *
+     * @param visionRobotPoseMeters The robot pose calculated from vision (2D position + rotation)
+     * @param timestampSeconds When the measurement was captured (seconds since robot start)
+     * @param visionMeasurementStdDevs Standard deviations for x, y, and rotation (how much to trust this measurement)
+     */
     public void accept(
         Pose2d visionRobotPoseMeters,
         double timestampSeconds,

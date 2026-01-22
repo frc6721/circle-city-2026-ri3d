@@ -29,9 +29,6 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.FeederCommands;
 import frc.robot.commands.IntakeCommands;
 import frc.robot.commands.ShooterCommands;
-import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.ClimberIO;
-import frc.robot.subsystems.climber.RealClimberIO;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -58,7 +55,6 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Intake intake;
-  private final Climber climber;
   private final Feeder feeder;
   private final Shooter shooter;
 
@@ -82,7 +78,6 @@ public class RobotContainer {
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
         intake = new Intake(new RealIntakeIO());
-        climber = new Climber(new RealClimberIO());
         shooter = new Shooter(new RealShooterIO());
         feeder = new Feeder(new RealFeederIO());
         break;
@@ -98,7 +93,6 @@ public class RobotContainer {
                 new ModuleIOSim());
         // intake = new Intake(new IntakeIO() {});
         intake = new Intake(new RealIntakeIO());
-        climber = new Climber(new ClimberIO() {});
         shooter = new Shooter(new ShooterIO() {});
         feeder = new Feeder(new RealFeederIO());
         break;
@@ -114,7 +108,6 @@ public class RobotContainer {
                 new ModuleIO() {});
         // intake = new Intake(new IntakeIO() {});
         intake = new Intake(new RealIntakeIO());
-        climber = new Climber(new ClimberIO() {});
         shooter = new Shooter(new ShooterIO() {});
         feeder = new Feeder(new RealFeederIO());
         break;
@@ -225,13 +218,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-
-    // Right bumper + Left joystick Y: Control climber
-    // No climber is on the robot right now
-    //     controller
-    //         .rightBumper()
-    //         .whileTrue(ClimberCommands.joystickControl(climber, () -> -controller.getLeftY()))
-    //         .onFalse(ClimberCommands.stopClimber(climber));
   }
 
   /**
