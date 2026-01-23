@@ -96,7 +96,7 @@ public class Drive extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Drive", inputs);
   }
-  
+
   // Method for commands to use
   public void arcadeDrive(double forward, double rotation) {
     io.setVoltage(forward + rotation, forward - rotation);
@@ -112,24 +112,24 @@ public class Drive extends SubsystemBase {
 // In a subsystem - command factory method
 public class Intake extends SubsystemBase {
   // ... subsystem code ...
-  
+
   /** Command to run intake motors */
   public Command intakeCommand() {
     // runOnce executes once and finishes immediately
     return this.runOnce(() -> setIntakeSpeed(0.8));
   }
-  
+
   /** Command to stop intake */
   public Command stopCommand() {
     return this.runOnce(() -> setIntakeSpeed(0.0));
   }
-  
+
   /** Command to run intake continuously */
   public Command runIntakeCommand() {
     // run() executes repeatedly until interrupted
     return this.run(() -> setIntakeSpeed(0.8));
   }
-  
+
   private void setIntakeSpeed(double speed) {
     io.setSpeed(speed);
   }
@@ -139,15 +139,15 @@ public class Intake extends SubsystemBase {
 public class RobotContainer {
   private final Intake intake = new Intake(new IntakeIOSparkMax());
   private final CommandXboxController driver = new CommandXboxController(0);
-  
+
   public RobotContainer() {
     configureButtonBindings();
   }
-  
+
   private void configureButtonBindings() {
     // Run intake while button is held, stop when released
     driver.a().whileTrue(intake.runIntakeCommand());
-    
+
     // Toggle intake on/off with single button press
     driver.b().onTrue(intake.intakeCommand());
     driver.x().onTrue(intake.stopCommand());
@@ -246,7 +246,7 @@ execute() ← Called every 20ms
 isFinished()? ← Checked every 20ms
     ↓
    Yes → end(false) ← interrupted = false
-    
+
 Button Released or Another Command Scheduled
     ↓
 end(true) ← interrupted = true

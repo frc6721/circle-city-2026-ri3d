@@ -18,51 +18,57 @@ import org.littletonrobotics.junction.Logger;
  * The Shooter subsystem controls the robot's game piece launching mechanism.
  *
  * <p><b>Hardware Overview:</b>
+ *
  * <ul>
- *   <li>Based on the AndyMark "Launcher in a Box" design</li>
- *   <li>Modified to fit under 22" trench (top 3" removed)</li>
- *   <li>Single NEO motor driving the flywheel 1:1 (direct drive)</li>
- *   <li>4" Solid Urethane Wheel from ThriftyBot as the shooting wheel</li>
- *   <li>Custom ½" thick aluminum flywheel for momentum and consistency</li>
- *   <li>Supported by 1x1 (1/16" wall) aluminum tubing frame</li>
- *   <li>Polycarbonate backing to guide game pieces into the wheel</li>
+ *   <li>Based on the AndyMark "Launcher in a Box" design
+ *   <li>Modified to fit under 22" trench (top 3" removed)
+ *   <li>Single NEO motor driving the flywheel 1:1 (direct drive)
+ *   <li>4" Solid Urethane Wheel from ThriftyBot as the shooting wheel
+ *   <li>Custom ½" thick aluminum flywheel for momentum and consistency
+ *   <li>Supported by 1x1 (1/16" wall) aluminum tubing frame
+ *   <li>Polycarbonate backing to guide game pieces into the wheel
  * </ul>
  *
  * <p><b>How It Works:</b>
+ *
  * <ul>
- *   <li><b>Flywheel:</b> A heavy wheel that spins at high speed to store rotational energy</li>
- *   <li><b>Launch:</b> When a game piece contacts the spinning flywheel, it's launched at high speed</li>
- *   <li><b>Distance Control:</b> Different flywheel speeds = different launch distances</li>
- *   <li><b>Consistency:</b> The heavy flywheel maintains speed between shots for repeatable performance</li>
+ *   <li><b>Flywheel:</b> A heavy wheel that spins at high speed to store rotational energy
+ *   <li><b>Launch:</b> When a game piece contacts the spinning flywheel, it's launched at high
+ *       speed
+ *   <li><b>Distance Control:</b> Different flywheel speeds = different launch distances
+ *   <li><b>Consistency:</b> The heavy flywheel maintains speed between shots for repeatable
+ *       performance
  * </ul>
  *
  * <p><b>Software Features:</b>
+ *
  * <ul>
- *   <li>Closed-loop (PID) velocity control for precise flywheel speed</li>
- *   <li>Distance-based shooting using an interpolated lookup table</li>
- *   <li>TreeMap data structure stores (distance → RPM) data points</li>
- *   <li>Interpolation calculates speeds for distances between data points</li>
- *   <li>Integration with Drive subsystem to get distance to target</li>
- *   <li>Comprehensive logging of RPM, setpoints, currents, and calculated speeds</li>
+ *   <li>Closed-loop (PID) velocity control for precise flywheel speed
+ *   <li>Distance-based shooting using an interpolated lookup table
+ *   <li>TreeMap data structure stores (distance → RPM) data points
+ *   <li>Interpolation calculates speeds for distances between data points
+ *   <li>Integration with Drive subsystem to get distance to target
+ *   <li>Comprehensive logging of RPM, setpoints, currents, and calculated speeds
  * </ul>
  *
  * <p><b>Distance-Based Shooting Concept:</b>
+ *
  * <ol>
- *   <li>Robot calculates distance to target (e.g., the Hub) using odometry</li>
- *   <li>getSpeedForDistance() looks up required RPM from the lookup table</li>
- *   <li>If exact distance isn't in table, interpolates between nearest points</li>
- *   <li>Shooter spins up to calculated RPM</li>
- *   <li>Once at target speed, feeder automatically feeds the game piece</li>
+ *   <li>Robot calculates distance to target (e.g., the Hub) using odometry
+ *   <li>getSpeedForDistance() looks up required RPM from the lookup table
+ *   <li>If exact distance isn't in table, interpolates between nearest points
+ *   <li>Shooter spins up to calculated RPM
+ *   <li>Once at target speed, feeder automatically feeds the game piece
  * </ol>
  *
  * <p><b>Key Learnings from RI3D:</b>
- * <ul>
- *   <li>Flywheels are critical for shot consistency - the heavier the better (up to a point)</li>
- *   <li>Shape the polycarbonate backing carefully for consistent feed angle</li>
- *   <li>Start with simple designs and test extensively before adding complexity</li>
- *   <li>The lookup table approach works well but needs good characterization data</li>
- * </ul>
  *
+ * <ul>
+ *   <li>Flywheels are critical for shot consistency - the heavier the better (up to a point)
+ *   <li>Shape the polycarbonate backing carefully for consistent feed angle
+ *   <li>Start with simple designs and test extensively before adding complexity
+ *   <li>The lookup table approach works well but needs good characterization data
+ * </ul>
  */
 public class Shooter extends SubsystemBase {
   private final ShooterIO _shooterIO;
@@ -72,8 +78,8 @@ public class Shooter extends SubsystemBase {
   /**
    * Creates a new Shooter subsystem.
    *
-   * <p>Initializes the shooter with the provided hardware IO and stops the flywheel
-   * for safety. The flywheel will remain stopped until commanded to spin.
+   * <p>Initializes the shooter with the provided hardware IO and stops the flywheel for safety. The
+   * flywheel will remain stopped until commanded to spin.
    *
    * @param shooterIO The hardware interface for shooter control (motor and sensors)
    */
@@ -86,22 +92,24 @@ public class Shooter extends SubsystemBase {
    * Periodic method called every 20 milliseconds (50 times per second).
    *
    * <p>This method handles:
+   *
    * <ul>
-   *   <li>Reading sensor data from the shooter hardware (flywheel velocity, current, etc.)</li>
-   *   <li>Logging all sensor data and setpoints to AdvantageKit</li>
-   *   <li>Checking if the flywheel has reached its target speed</li>
+   *   <li>Reading sensor data from the shooter hardware (flywheel velocity, current, etc.)
+   *   <li>Logging all sensor data and setpoints to AdvantageKit
+   *   <li>Checking if the flywheel has reached its target speed
    * </ul>
    *
    * <p><b>What gets logged:</b>
+   *
    * <ul>
-   *   <li>Current flywheel speed (in rad/s and RPM)</li>
-   *   <li>Desired flywheel speed (in rad/s and RPM)</li>
-   *   <li>Whether the flywheel is at target speed (boolean)</li>
-   *   <li>Motor current and voltage (via IO layer)</li>
+   *   <li>Current flywheel speed (in rad/s and RPM)
+   *   <li>Desired flywheel speed (in rad/s and RPM)
+   *   <li>Whether the flywheel is at target speed (boolean)
+   *   <li>Motor current and voltage (via IO layer)
    * </ul>
    *
-   * <p>The actual velocity control happens in the hardware layer (RealShooterIO)
-   * using the motor controller's built-in PID.
+   * <p>The actual velocity control happens in the hardware layer (RealShooterIO) using the motor
+   * controller's built-in PID.
    */
   @Override
   public void periodic() {
@@ -127,18 +135,19 @@ public class Shooter extends SubsystemBase {
   /**
    * Stops the flywheel by setting target speed to zero.
    *
-   * <p>This commands the flywheel to stop spinning. Note that a heavy flywheel
-   * takes time to spin down due to its momentum - it won't stop instantly.
+   * <p>This commands the flywheel to stop spinning. Note that a heavy flywheel takes time to spin
+   * down due to its momentum - it won't stop instantly.
    *
    * <p><b>When to use:</b>
+   *
    * <ul>
-   *   <li>When disabled for safety</li>
-   *   <li>After completing shots</li>
-   *   <li>When the robot is idle</li>
+   *   <li>When disabled for safety
+   *   <li>After completing shots
+   *   <li>When the robot is idle
    * </ul>
    *
-   * <p><b>Safety Note:</b> Always wait for the flywheel to fully stop before
-   * performing maintenance or reaching near the shooter mechanism.
+   * <p><b>Safety Note:</b> Always wait for the flywheel to fully stop before performing maintenance
+   * or reaching near the shooter mechanism.
    */
   public void stopFlywheels() {
     _targetFlywheelSpeed = RadiansPerSecond.of(0);
@@ -148,10 +157,11 @@ public class Shooter extends SubsystemBase {
   /**
    * Sets the target flywheel speed.
    *
-   * <p>This commands the flywheel to spin at a specific speed. The motor controller's
-   * PID will automatically adjust voltage to reach and maintain this speed.
+   * <p>This commands the flywheel to spin at a specific speed. The motor controller's PID will
+   * automatically adjust voltage to reach and maintain this speed.
    *
    * <p><b>How to use:</b>
+   *
    * <pre>
    * // Set a specific RPM
    * shooter.setFlywheelSpeed(RPM.of(3000));
@@ -161,8 +171,8 @@ public class Shooter extends SubsystemBase {
    * shooter.setFlywheelSpeed(shooter.getSpeedForDistance(distanceToHub));
    * </pre>
    *
-   * <p>The flywheel will take time to spin up. Use areFlywheelsAtTargetSpeed()
-   * to check when it's ready to shoot.
+   * <p>The flywheel will take time to spin up. Use areFlywheelsAtTargetSpeed() to check when it's
+   * ready to shoot.
    *
    * @param speed The desired flywheel angular velocity (use RPM.of(), RadiansPerSecond.of(), etc.)
    */
@@ -174,18 +184,20 @@ public class Shooter extends SubsystemBase {
   /**
    * Calculates the required flywheel speed for a given distance to the target.
    *
-   * <p>This is the key method for distance-based shooting. It uses a lookup table
-   * (TreeMap) stored in ShooterConstants that maps distances to required RPMs.
+   * <p>This is the key method for distance-based shooting. It uses a lookup table (TreeMap) stored
+   * in ShooterConstants that maps distances to required RPMs.
    *
    * <p><b>How the lookup table works:</b>
+   *
    * <ul>
-   *   <li>You characterize your shooter by shooting from various distances</li>
-   *   <li>Record what RPM is needed for each distance to make the shot</li>
-   *   <li>Store these (distance, RPM) pairs in ShooterConstants.DISTANCE_TO_SPEED_TABLE</li>
-   *   <li>TreeMap automatically interpolates for distances between your data points</li>
+   *   <li>You characterize your shooter by shooting from various distances
+   *   <li>Record what RPM is needed for each distance to make the shot
+   *   <li>Store these (distance, RPM) pairs in ShooterConstants.DISTANCE_TO_SPEED_TABLE
+   *   <li>TreeMap automatically interpolates for distances between your data points
    * </ul>
    *
    * <p><b>Example lookup table:</b>
+   *
    * <pre>
    * Distance (m) | RPM
    * -------------|-----
@@ -193,15 +205,17 @@ public class Shooter extends SubsystemBase {
    * 2.0          | 2500
    * 3.0          | 3200
    * </pre>
+   *
    * If you ask for 1.5m, it interpolates: (2000 + 2500) / 2 = 2250 RPM
    *
    * <p><b>How to characterize your shooter:</b>
+   *
    * <ol>
-   *   <li>Place robot at known distance from target</li>
-   *   <li>Manually adjust RPM until shots consistently score</li>
-   *   <li>Record the distance and RPM</li>
-   *   <li>Repeat for 5-7 distances across your shooting range</li>
-   *   <li>Add data points to ShooterConstants</li>
+   *   <li>Place robot at known distance from target
+   *   <li>Manually adjust RPM until shots consistently score
+   *   <li>Record the distance and RPM
+   *   <li>Repeat for 5-7 distances across your shooting range
+   *   <li>Add data points to ShooterConstants
    * </ol>
    *
    * @param distance Distance to the target (use Meters.of() or similar)
@@ -225,25 +239,26 @@ public class Shooter extends SubsystemBase {
   /**
    * Checks if the flywheel has reached its target speed.
    *
-   * <p>This returns true when the flywheel speed is within an acceptable tolerance
-   * of the target speed. The tolerance is defined as a percentage in ShooterConstants.
+   * <p>This returns true when the flywheel speed is within an acceptable tolerance of the target
+   * speed. The tolerance is defined as a percentage in ShooterConstants.
    *
    * <p><b>How it works:</b>
+   *
    * <pre>
    * error = |target speed - actual speed|
    * tolerance = target speed × FLYWHEEL_PID_TOLERANCE
    * at target = error <= tolerance
    * </pre>
    *
-   * <p><b>Example:</b>
-   * If target is 3000 RPM and tolerance is 0.02 (2%):
+   * <p><b>Example:</b> If target is 3000 RPM and tolerance is 0.02 (2%):
+   *
    * <ul>
-   *   <li>Tolerance = 3000 × 0.02 = 60 RPM</li>
-   *   <li>At target when speed is between 2940-3060 RPM</li>
+   *   <li>Tolerance = 3000 × 0.02 = 60 RPM
+   *   <li>At target when speed is between 2940-3060 RPM
    * </ul>
    *
-   * <p><b>Usage:</b> Check this before feeding game pieces to the shooter.
-   * Feeding before the flywheel is up to speed will result in weak, inaccurate shots.
+   * <p><b>Usage:</b> Check this before feeding game pieces to the shooter. Feeding before the
+   * flywheel is up to speed will result in weak, inaccurate shots.
    *
    * @return true if flywheel is at target speed (within tolerance), false otherwise
    */
@@ -259,25 +274,27 @@ public class Shooter extends SubsystemBase {
   /**
    * Manually controls the flywheel with a duty cycle output.
    *
-   * <p><b>Warning:</b> This bypasses the PID velocity control and directly sets
-   * motor power. Use carefully - mainly for testing or manual override.
+   * <p><b>Warning:</b> This bypasses the PID velocity control and directly sets motor power. Use
+   * carefully - mainly for testing or manual override.
    *
    * <p>Duty cycle output ranges:
+   *
    * <ul>
-   *   <li>+1.0 = Full power forward</li>
-   *   <li>0.0 = Stopped</li>
-   *   <li>-1.0 = Full power reverse (not recommended for shooter!)</li>
+   *   <li>+1.0 = Full power forward
+   *   <li>0.0 = Stopped
+   *   <li>-1.0 = Full power reverse (not recommended for shooter!)
    * </ul>
    *
    * <p><b>When to use this:</b>
+   *
    * <ul>
-   *   <li>Testing motor direction during initial setup</li>
-   *   <li>Verifying motor controller wiring</li>
-   *   <li>Emergency manual control if PID fails</li>
+   *   <li>Testing motor direction during initial setup
+   *   <li>Verifying motor controller wiring
+   *   <li>Emergency manual control if PID fails
    * </ul>
    *
-   * <p>For normal operation, use setFlywheelSpeed() instead, which provides
-   * precise velocity control and consistency.
+   * <p>For normal operation, use setFlywheelSpeed() instead, which provides precise velocity
+   * control and consistency.
    *
    * @param output The duty cycle output (0.0 to +1.0 recommended) for the flywheel motor
    */
