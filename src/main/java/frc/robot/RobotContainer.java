@@ -14,6 +14,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -149,24 +150,24 @@ public class RobotContainer {
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
     // real controller
-    // drive.setDefaultCommand(
-    //     DriveCommands.joystickDrive(
-    //         drive,
-    //         () -> -controller.getLeftY(),
-    //         () -> -controller.getLeftX(),
-    //         () -> -controller.getRightX()));
-
-    // sim controller in MAC os
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> -(controller.getRightTriggerAxis())));
+            () -> -controller.getRightX()));
+
+    // sim controller in MAC os
+    // drive.setDefaultCommand(
+    //     DriveCommands.joystickDrive(
+    //         drive,
+    //         () -> -controller.getLeftY(),
+    //         () -> -controller.getLeftX(),
+    //         () -> -(controller.getRightTriggerAxis())));
 
     // Always run the flywheels a little bit during the match so they can spin up quicker when we
     // need them
-    shooter.setDefaultCommand(ShooterCommands.runFlywheelsAtIdle(shooter));
+    // shooter.setDefaultCommand(ShooterCommands.runFlywheelsAtIdle(shooter));
 
     controller
         .leftBumper()
@@ -199,7 +200,7 @@ public class RobotContainer {
     // Right bumper is for the real controller
     // y() button on xbox on mac os
     controller
-        .y()
+        .rightBumper()
         .onTrue(
             ShooterCommands.setFlywheelTargetSpeed(
                     shooter, RevolutionsPerSecond.of(4000 / 60.0)) // 4000 RPM
@@ -218,6 +219,16 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    controller
+        .x()
+        .onTrue(ShooterCommands.setFlywheelTargetSpeed(shooter, RotationsPerSecond.of(3500 / 60)))
+        .onFalse(ShooterCommands.setFlywheelTargetSpeed(shooter, RotationsPerSecond.of(0 / 60)));
+
+    // controller
+    //     .x()
+    //     .onTrue(Commands.run(() -> shooter.setFlyWheelDutyCycle(0.5), shooter))
+    //     .onFalse(Commands.run(() -> shooter.setFlyWheelDutyCycle(0.0), shooter));
   }
 
   /**

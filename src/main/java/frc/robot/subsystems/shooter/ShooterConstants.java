@@ -45,20 +45,20 @@ public class ShooterConstants {
       RevolutionsPerSecond.of(100 / 60.0); // 100 RPM
 
   public static final AngularVelocity MAX_FLYWHEEL_SPEED =
-      RevolutionsPerSecond.of(80000 / 60.0); // 10000 RPM
+      RevolutionsPerSecond.of(5600 / 60.0); // 5600 RPM
 
   // ==================== PID CONSTANTS (REAL ROBOT) ====================
 
   /** Real robot PID values - tuned for actual hardware (on motor controller) */
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KP_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kP", 0.0006);
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kP", 0.0000000);
 
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KI_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kI", 0.00000000);
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kI", 0.0);
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KD_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kD", 0.0005);
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kD", 0.0000);
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_FF_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kFF", 0.0000008);
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kFF", 0.0000500);
 
   // ==================== PID CONSTANTS (SIMULATION) ====================
 
