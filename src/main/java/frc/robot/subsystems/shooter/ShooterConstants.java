@@ -22,7 +22,7 @@ public class ShooterConstants {
   // ==================== MECHANICAL CONSTANTS ====================
 
   /** Gear ratio from motor to flywheel (motor rotations per flywheel rotation) */
-  public static final double FLYWHEEL_GEAR_RATIO = 2.0;
+  public static final double FLYWHEEL_GEAR_RATIO = 1.0;
 
   /** Flywheel diameter (4" urethane wheel) */
   public static final Distance FLYWHEEL_DIAMETER = Inches.of(4.0);
@@ -31,7 +31,7 @@ public class ShooterConstants {
    * Moment of inertia for the flywheel. Estimated for 4" urethane wheel + custom aluminum flywheel.
    * A typical 4" wheel + aluminum disc is approximately 0.003-0.005 kg⋅m²
    */
-  public static final MomentOfInertia FLYWHEEL_MOI = KilogramSquareMeters.of(0.004);
+  public static final MomentOfInertia FLYWHEEL_MOI = KilogramSquareMeters.of(0.0004);
 
   /** Motor type for the flywheel (1x NEO) */
   public static final DCMotor FLYWHEEL_MOTOR = DCMotor.getNEO(1);
@@ -45,7 +45,7 @@ public class ShooterConstants {
       RevolutionsPerSecond.of(100 / 60.0); // 100 RPM
 
   public static final AngularVelocity MAX_FLYWHEEL_SPEED =
-      RevolutionsPerSecond.of(10000 / 60.0); // 10000 RPM
+      RevolutionsPerSecond.of(80000 / 60.0); // 10000 RPM
 
   // ==================== PID CONSTANTS (REAL ROBOT) ====================
 
@@ -54,7 +54,7 @@ public class ShooterConstants {
       new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kP", 0.0006);
 
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KI_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kI", 0.00000006);
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kI", 0.00000000);
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KD_REAL =
       new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kD", 0.0005);
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_FF_REAL =
