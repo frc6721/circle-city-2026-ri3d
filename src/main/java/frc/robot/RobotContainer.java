@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -203,10 +202,8 @@ public class RobotContainer {
         .y()
         .onTrue(
             ShooterCommands.setFlywheelTargetSpeed(
-                    shooter, RevolutionsPerSecond.of(4000 / 60.0)) // 2500 RPM
-                .andThen(ShooterCommands.waitForFlywheelsToReachSpeed(shooter).withTimeout(3)))
-        .onTrue(
-            new WaitCommand(2.5)
+                    shooter, RevolutionsPerSecond.of(4000 / 60.0)) // 4000 RPM
+                .andThen(ShooterCommands.waitForFlywheelsToReachSpeed(shooter).withTimeout(2))
                 .andThen(FeederCommands.runFeederAtPercentOutput(feeder, 0.75).repeatedly()))
         .onFalse(
             FeederCommands.stopFeeder(feeder).andThen(ShooterCommands.runFlywheelsAtIdle(shooter)));
