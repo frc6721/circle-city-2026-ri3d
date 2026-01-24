@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.geometry.Pose3d;
@@ -55,7 +56,8 @@ public class ShooterVisualizer {
    */
   public ShooterVisualizer(String name) {
     this.name = name;
-    this.baseOffset = new Pose3d(ShooterConstants.VISUALIZATION_OFFSET, Rotation3d.kZero);
+    this.baseOffset =
+        new Pose3d(ShooterConstants.VISUALIZATION_OFFSET, ShooterConstants.VISUALIZATION_ROTATION);
 
     // Create the Mechanism2d canvas
     mechanism = new LoggedMechanism2d(WIDTH, HEIGHT, new Color8Bit(Color.kBlack));
@@ -146,12 +148,16 @@ public class ShooterVisualizer {
 
     // Publish to SmartDashboard for Glass/AdvantageScope Mechanism2d view
     SmartDashboard.putData(name + " Visualizer", mechanism);
+    Logger.recordOutput(name + "/Mechanism2d", mechanism);
 
     // Log the 3D pose for AdvantageScope 3D visualization
     // The rotation is around the X axis (roll) since the flywheel spins on its axis
     Pose3d pose3d =
         baseOffset.rotateBy(
-            new Rotation3d(Degrees.of(accumulatedAngle), Degrees.zero(), Degrees.zero()));
+            new Rotation3d(
+                Degrees.of(accumulatedAngle).plus(Radians.of(baseOffset.getRotation().getX())),
+                Radians.of(baseOffset.getRotation().getY()),
+                Radians.of(baseOffset.getRotation().getZ())));
 
     Logger.recordOutput(name + "/Pose3d", pose3d);
     Logger.recordOutput(name + "/CurrentVelocityRadPerSec", currentVelocity.in(RadiansPerSecond));

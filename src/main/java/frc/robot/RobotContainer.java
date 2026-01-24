@@ -149,12 +149,21 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
+    // real controller
+    // drive.setDefaultCommand(
+    //     DriveCommands.joystickDrive(
+    //         drive,
+    //         () -> -controller.getLeftY(),
+    //         () -> -controller.getLeftX(),
+    //         () -> -controller.getRightX()));
+
+    // sim controller in MAC os
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -(controller.getRightTriggerAxis())));
 
     // Always run the flywheels a little bit during the match so they can spin up quicker when we
     // need them
@@ -164,11 +173,6 @@ public class RobotContainer {
         .leftBumper()
         .whileTrue(IntakeCommands.runIntakeRollers(intake))
         .onFalse(IntakeCommands.stopIntakeRollers(intake));
-
-    controller
-        .y()
-        .onTrue(IntakeCommands.setIntakPivotDutyCycle(intake, 0.05))
-        .onFalse(IntakeCommands.setIntakPivotDutyCycle(intake, 0));
 
     // Lock to 0° when A button is held
     // controller
@@ -182,17 +186,9 @@ public class RobotContainer {
 
     // A button: Move intake to PICKUP position (down)
     controller.a().whileTrue(IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.PICKUP));
-    // controller
-    //     .a()
-    //     .whileTrue(IntakeCommands.setIntakPivotDutyCycle(intake, 0.4))
-    //     .onFalse(IntakeCommands.setIntakPivotDutyCycle(intake, 0));
 
     // B button: Move intake to STOW position (up)
     controller.b().whileTrue(IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.STOW));
-    // controller
-    //     .b()
-    //     .whileTrue(IntakeCommands.setIntakPivotDutyCycle(intake, -0.35))
-    //     .onFalse(IntakeCommands.setIntakPivotDutyCycle(intake, 0));
 
     // Switch to X pattern when X button is pressed
     // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -201,8 +197,10 @@ public class RobotContainer {
     //     .onTrue(FeederCommands.runFeederAtPercentOutput(feeder, .5))
     //     .onFalse(FeederCommands.stopFeeder(feeder));
 
+    // Right bumper is for the real controller
+    // y() button on xbox on mac os
     controller
-        .rightBumper()
+        .y()
         .onTrue(
             ShooterCommands.setFlywheelTargetSpeed(
                     shooter, RevolutionsPerSecond.of(4000 / 60.0)) // 2500 RPM

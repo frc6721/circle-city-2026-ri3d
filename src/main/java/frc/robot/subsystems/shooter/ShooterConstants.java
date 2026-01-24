@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -119,9 +120,14 @@ public class ShooterConstants {
 
   /**
    * 3D offset from robot origin to flywheel center. TODO: Update these values based on CAD or
-   * measurements. X = forward/back, Y = left/right, Z = up/down (meters)
+   * measurements. X = forward/back, Y = up/down, Z = left/right (meters)
    */
-  public static final Translation3d VISUALIZATION_OFFSET = new Translation3d(0.0, 0.0, 0.0);
+  public static final Translation3d VISUALIZATION_OFFSET =
+      new Translation3d(
+          Inches.of(26 / 2).in(Meters), Inches.of(20).in(Meters), Inches.of(6).in(Meters));
+
+  /** 3D rotation offset for visualization orientation */
+  public static final Rotation3d VISUALIZATION_ROTATION = new Rotation3d(0.0, 0.0, 0.0);
 
   /** Visualization flywheel radius in meters for Mechanism2d display */
   public static final double VISUALIZATION_FLYWHEEL_RADIUS = FLYWHEEL_DIAMETER.in(Meters) / 2.0;

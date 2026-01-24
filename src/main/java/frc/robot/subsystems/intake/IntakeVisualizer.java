@@ -32,8 +32,8 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 public class IntakeVisualizer {
 
   // Mechanism2d canvas dimensions
-  private static final double WIDTH = 3.0;
-  private static final double HEIGHT = 3.0;
+  private static final double WIDTH = 1.0;
+  private static final double HEIGHT = 1.0;
 
   // Visualization components
   private final LoggedMechanism2d mechanism;
@@ -56,13 +56,15 @@ public class IntakeVisualizer {
   public IntakeVisualizer(String name) {
     this.name = name;
     this.armLength = IntakeConstants.VISUALIZATION_ARM_LENGTH;
-    this.baseOffset = new Pose3d(IntakeConstants.VISUALIZATION_OFFSET, Rotation3d.kZero);
+    this.baseOffset =
+        new Pose3d(IntakeConstants.VISUALIZATION_OFFSET, IntakeConstants.VISUALIZATION_ROTATION);
 
     // Create the Mechanism2d canvas
     mechanism = new LoggedMechanism2d(WIDTH, HEIGHT, new Color8Bit(Color.kBlack));
 
     // Create the root at center of canvas
-    LoggedMechanismRoot2d root = mechanism.getRoot(name + "_Root", WIDTH / 2.0, HEIGHT / 2.0);
+    LoggedMechanismRoot2d root =
+        mechanism.getRoot(name + "_Root", baseOffset.getX(), baseOffset.getY());
 
     // Create min/max angle boundary indicators
     lowerBound =
@@ -158,12 +160,17 @@ public class IntakeVisualizer {
 
     // Publish to SmartDashboard for Glass/AdvantageScope Mechanism2d view
     SmartDashboard.putData(name + " Visualizer", mechanism);
+    Logger.recordOutput(name + "/Mechanism2d", mechanism);
 
     // Log the 3D pose for AdvantageScope 3D visualization
     // The rotation is around the Y axis (pitch) since the arm pivots up/down
     Pose3d pose3d =
         baseOffset.rotateBy(
-            new Rotation3d(Radians.zero(), Degrees.of(measuredAngle.getDegrees()), Radians.zero()));
+            new Rotation3d(
+                Radians.of(baseOffset.getRotation().getX()),
+                Radians.of(baseOffset.getRotation().getX())
+                    .plus(Degrees.of(measuredAngle.getDegrees())),
+                Radians.of(baseOffset.getRotation().getZ())));
 
     Logger.recordOutput(name + "/Pose3d", pose3d);
     Logger.recordOutput(name + "/MeasuredAngleDegrees", measuredAngle.getDegrees());
