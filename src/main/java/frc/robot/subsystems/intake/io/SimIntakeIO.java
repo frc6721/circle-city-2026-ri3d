@@ -162,8 +162,11 @@ public class SimIntakeIO implements IntakeIO {
     inputs._intakeRightPivotMotorTemperature = Celsius.of(40.0); // Simulated constant temp
     inputs._intakeRightPivotMotorVelocity = RadiansPerSecond.of(pivotArmSim.getVelocityRadPerSec());
 
-    // Get the simulated angle and apply the same offset as the real robot
-    Rotation2d simAngle = Rotation2d.fromRadians(pivotArmSim.getAngleRads());
+    // Transform from physics frame (0° = horizontal) to robot frame (0° = vertical)
+    // Robot frame: 0° = vertical (stowed), 90° = horizontal (deployed)
+    // Physics frame: 0° = horizontal, 90° = vertical
+    // Transformation: robot_angle = 90° - physics_angle
+    Rotation2d simAngle = Rotation2d.fromRadians(Math.PI / 2 - pivotArmSim.getAngleRads());
     inputs._intakeRightPivotMotorPosition = simAngle;
 
     inputs._intakeRightPivotMotorVoltage = Volts.of(pivotAppliedVoltage);
@@ -188,14 +191,14 @@ public class SimIntakeIO implements IntakeIO {
   @Override
   public void setPivotMotorVoltage(double volts) {
     // Clamp voltage to battery voltage
-    pivotAppliedVoltage = Math.max(-12.0, Math.min(12.0, volts));
+    pivotAppliedVoltage = -Math.max(-12.0, Math.min(12.0, volts));
     rightPivotMotor.setVoltage(pivotAppliedVoltage);
   }
 
   @Override
   public void setIntakePivotDutyCucleOutput(double output) {
     // Convert duty cycle to voltage
-    pivotAppliedVoltage = output * 12.0;
+    pivotAppliedVoltage = -output * 12.0;
     rightPivotMotor.set(output);
   }
 

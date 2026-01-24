@@ -94,15 +94,15 @@ public class IntakeConstants {
 
   /** Simulation PID values - tuned for physics simulation */
   public static final LoggedNetworkNumber PIVOT_PID_KP_SIM =
-      new LoggedNetworkNumber("Intake/Pivot/PID/Sim/kP", 0.15);
+      new LoggedNetworkNumber("Intake/Pivot/PID/Sim/kP", 0.2);
 
   public static final LoggedNetworkNumber PIVOT_PID_KI_SIM =
-      new LoggedNetworkNumber("Intake/Pivot/PID/Sim/kI", 0.0);
+      new LoggedNetworkNumber("Intake/Pivot/PID/Sim/kI", 0.0002);
   public static final LoggedNetworkNumber PIVOT_PID_KD_SIM =
-      new LoggedNetworkNumber("Intake/Pivot/PID/Sim/kD", 0.01);
+      new LoggedNetworkNumber("Intake/Pivot/PID/Sim/kD", 0.0015);
 
   /** Simulation feedforward for gravity compensation */
-  public static final double INTAKE_PIVOT_FEEDFORWARD_SIM = 1.5;
+  public static final double INTAKE_PIVOT_FEEDFORWARD_SIM = 2;
 
   // ==================== MODE-SELECTED CONSTANTS ====================
 

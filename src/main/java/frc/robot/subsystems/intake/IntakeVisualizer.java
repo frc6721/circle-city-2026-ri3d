@@ -67,11 +67,15 @@ public class IntakeVisualizer {
         mechanism.getRoot(name + "_Root", baseOffset.getX(), baseOffset.getY());
 
     // Create min/max angle boundary indicators
+    // Transform from robot frame to Mechanism2d frame
+    double minAngleMech2d = 90.0 - IntakeConstants.MAX_INTAKE_ANGLE_DEGREES; // Note: min robot = max visual
+    double maxAngleMech2d = 90.0 - IntakeConstants.MIN_INTAKE_ANGLE_DEGREES; // Note: max robot = min visual
+    
     lowerBound =
         new LoggedMechanismLigament2d(
             name + "_LowerBound",
             armLength,
-            IntakeConstants.MIN_INTAKE_ANGLE_DEGREES,
+            minAngleMech2d,
             2,
             new Color8Bit(Color.kWhite));
 
@@ -79,7 +83,7 @@ public class IntakeVisualizer {
         new LoggedMechanismLigament2d(
             name + "_UpperBound",
             armLength,
-            IntakeConstants.MAX_INTAKE_ANGLE_DEGREES,
+            maxAngleMech2d,
             2,
             new Color8Bit(Color.kWhite));
 
@@ -88,7 +92,7 @@ public class IntakeVisualizer {
         new LoggedMechanismLigament2d(
             name + "_Measured",
             armLength,
-            IntakeConstants.STARTING_ANGLE_DEGREES,
+            90.0 - IntakeConstants.STARTING_ANGLE_DEGREES, // Transform to Mechanism2d frame
             6,
             new Color8Bit(Color.kGreen));
 
@@ -97,7 +101,7 @@ public class IntakeVisualizer {
         new LoggedMechanismLigament2d(
             name + "_Setpoint",
             armLength * 0.9, // Slightly shorter to see both
-            IntakeConstants.STARTING_ANGLE_DEGREES,
+            90.0 - IntakeConstants.STARTING_ANGLE_DEGREES, // Transform to Mechanism2d frame
             4,
             new Color8Bit(Color.kYellow));
 
@@ -106,7 +110,7 @@ public class IntakeVisualizer {
         new LoggedMechanismLigament2d(
             name + "_Goal",
             armLength * 0.8, // Even shorter to see all three
-            IntakeConstants.STARTING_ANGLE_DEGREES,
+            90.0 - IntakeConstants.STARTING_ANGLE_DEGREES, // Transform to Mechanism2d frame
             3,
             new Color8Bit(Color.kRed));
 
@@ -121,7 +125,7 @@ public class IntakeVisualizer {
   /**
    * Updates the visualizer with the current state.
    *
-   * @param measuredAngle The current measured angle from the encoder
+   * @param measuredAngle The current measured angle from the encoder (in robot frame: 0° = vertical)
    * @param setpointAngle The current PID setpoint (optional - empty if not in position control)
    * @param goalAngle The goal position (optional - empty if not targeting a position)
    * @param atGoal Whether the mechanism is at the goal position
@@ -132,13 +136,18 @@ public class IntakeVisualizer {
       Optional<Rotation2d> goalAngle,
       boolean atGoal) {
 
+    // Transform from robot frame (0° = vertical) to Mechanism2d frame (0° = horizontal)
+    // Transformation: mechanism_angle = 90° - robot_angle
+    double measuredAngleMech2d = 90.0 - measuredAngle.getDegrees();
+    
     // Update measured arm angle
-    measuredArm.setAngle(measuredAngle.getDegrees());
+    measuredArm.setAngle(measuredAngleMech2d);
 
     // Update setpoint arm (hide if no setpoint)
     if (setpointAngle.isPresent()) {
       setpointArm.setLength(armLength * 0.9);
-      setpointArm.setAngle(setpointAngle.get().getDegrees());
+      double setpointAngleMech2d = 90.0 - setpointAngle.get().getDegrees();
+      setpointArm.setAngle(setpointAngleMech2d);
     } else {
       setpointArm.setLength(0); // Hide by setting length to 0
     }
@@ -146,7 +155,8 @@ public class IntakeVisualizer {
     // Update goal arm (hide if no goal)
     if (goalAngle.isPresent()) {
       goalArm.setLength(armLength * 0.8);
-      goalArm.setAngle(goalAngle.get().getDegrees());
+      double goalAngleMech2d = 90.0 - goalAngle.get().getDegrees();
+      goalArm.setAngle(goalAngleMech2d);
     } else {
       goalArm.setLength(0); // Hide by setting length to 0
     }
