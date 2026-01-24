@@ -44,8 +44,8 @@ public class ShooterCommands {
   /**
    * Creates a command to set the flywheel to a specific target speed.
    *
-   * <p>This command continuously commands the flywheel to spin at the specified speed. The motor
-   * controller's PID handles reaching and maintaining the speed.
+   * <p>This command sets the flywheel target speed once and finishes immediately. The motor
+   * controller's PID continues to maintain the speed after the command completes.
    *
    * <p><b>Use cases:</b>
    *
@@ -60,11 +60,11 @@ public class ShooterCommands {
    * <pre>
    * import static edu.wpi.first.units.Units.RPM;
    *
-   * // Set to 3000 RPM
+   * // Set to 3000 RPM once, then flywheel maintains that speed
    * Command shoot = ShooterCommands.setFlywheelTargetSpeed(shooter, RPM.of(3000));
    *
-   * // Bind to button
-   * driver.rightBumper().whileTrue(shoot);
+   * // Bind to button - sets speed on press, doesn't need to be held
+   * driver.rightBumper().onTrue(shoot);
    * </pre>
    *
    * <p><b>Remember:</b> Use waitForFlywheelsToReachSpeed() before feeding to ensure the flywheel is
@@ -72,10 +72,10 @@ public class ShooterCommands {
    *
    * @param shooter The shooter subsystem
    * @param speed The target flywheel speed (use RPM.of(), RadiansPerSecond.of(), etc.)
-   * @return A command that maintains the flywheel at the target speed
+   * @return A command that sets the flywheel target speed once and finishes immediately
    */
   public static Command setFlywheelTargetSpeed(Shooter shooter, AngularVelocity speed) {
-    return Commands.run(
+    return Commands.runOnce(
         () -> {
           shooter.setFlywheelSpeed(speed);
         },
@@ -85,8 +85,9 @@ public class ShooterCommands {
   /**
    * Creates a command to stop the flywheel.
    *
-   * <p>This commands the flywheel to stop spinning. Note that heavy flywheels take time to spin
-   * down due to momentum - they won't stop instantly.
+   * <p>This command stops the flywheel once and finishes immediately. Note that heavy flywheels
+   * take time to spin down due to momentum - they won't stop instantly, but the command completes
+   * right away after sending the stop signal.
    *
    * <p><b>Use cases:</b>
    *
@@ -100,10 +101,10 @@ public class ShooterCommands {
    * keeps the flywheel spinning slowly so the next shot spins up faster.
    *
    * @param shooter The shooter subsystem
-   * @return A command that stops the flywheel
+   * @return A command that stops the flywheel once and finishes immediately
    */
   public static Command stopFlywheels(Shooter shooter) {
-    return Commands.run(
+    return Commands.runOnce(
         () -> {
           shooter.stopFlywheels();
         },
@@ -113,8 +114,10 @@ public class ShooterCommands {
   /**
    * Creates a command to run the flywheel at a low idle speed.
    *
-   * <p>Instead of fully stopping the flywheel between shots, this keeps it spinning slowly. This
-   * reduces the time needed to spin up for the next shot.
+   * <p>This command sets the flywheel to idle speed once and finishes immediately. The flywheel
+   * continues spinning at idle speed after the command completes. Instead of fully stopping the
+   * flywheel between shots, this keeps it spinning slowly, which reduces the time needed to spin up
+   * for the next shot.
    *
    * <p><b>Trade-offs:</b>
    *
@@ -135,10 +138,10 @@ public class ShooterCommands {
    * based on your robot's needs.
    *
    * @param shooter The shooter subsystem
-   * @return A command that runs the flywheel at idle speed
+   * @return A command that sets the flywheel to idle speed once and finishes immediately
    */
   public static Command runFlywheelsAtIdle(Shooter shooter) {
-    return Commands.run(
+    return Commands.runOnce(
         () -> {
           shooter.setFlyWheelDutyCycle(ShooterConstants.SHOOTER_IDLE_DUTY_CYCLE_OUTPUT);
         },
@@ -149,7 +152,8 @@ public class ShooterCommands {
    * Creates a command to set flywheel speed based on distance to the target.
    *
    * <p>This is the core of distance-based shooting! It automatically calculates the required
-   * flywheel RPM using the lookup table in ShooterConstants.
+   * flywheel RPM using the lookup table in ShooterConstants. This command calculates the speed once
+   * and finishes immediately.
    *
    * <p><b>How it works:</b>
    *
@@ -158,7 +162,7 @@ public class ShooterCommands {
    *   <li>Calls shooter.getSpeedForDistance() to look up required RPM
    *   <li>Lookup table interpolates between known data points
    *   <li>Sets flywheel to calculated speed
-   *   <li>Repeats every 20ms to adjust if distance changes
+   *   <li>Command finishes - motor controller maintains the speed
    * </ol>
    *
    * <p><b>Usage with vision or odometry:</b>
@@ -167,22 +171,20 @@ public class ShooterCommands {
    * // Get distance from Drive subsystem's odometry
    * Distance distanceToHub = drive.getDistanceToHub();
    *
-   * // Create command
+   * // Create command - sets speed once based on current distance
    * Command spinUp = ShooterCommands.setFlywheelSpeedForDistance(shooter, distanceToHub);
    * </pre>
    *
-   * <p><b>Dynamic vs. Static distance:</b>
-   *
-   * <ul>
-   *   <li><b>Static:</b> Pass distance once, RPM stays constant even if robot moves
-   *   <li><b>Dynamic:</b> Call drive.getDistanceToHub() repeatedly to update as robot moves
-   * </ul>
+   * <p><b>Important:</b> This command calculates speed based on the distance at the moment the
+   * command runs. If the robot moves after the command finishes, the speed won't update. For
+   * continuously updating speed as the robot moves, wrap this in a Commands.run() or call it
+   * repeatedly.
    *
    * <p><b>Complete shooting sequence:</b>
    *
    * <pre>
    * Command shoot = Commands.sequence(
-   *   // 1. Calculate and spin to correct speed
+   *   // 1. Calculate and set speed for current distance
    *   this.setFlywheelSpeedForDistance(shooter, drive.getDistanceToHub()),
    *
    *   // 2. Wait until at speed
@@ -195,10 +197,10 @@ public class ShooterCommands {
    *
    * @param shooter The shooter subsystem
    * @param distance Distance to the target (from odometry or vision)
-   * @return A command that continuously calculates and sets the correct flywheel speed
+   * @return A command that calculates and sets the correct flywheel speed once, then finishes
    */
   public static Command setFlywheelSpeedForDistance(Shooter shooter, Distance distance) {
-    return Commands.run(
+    return Commands.runOnce(
         () -> {
           AngularVelocity targetSpeed = shooter.getSpeedForDistance(distance);
           shooter.setFlywheelSpeed(targetSpeed);
