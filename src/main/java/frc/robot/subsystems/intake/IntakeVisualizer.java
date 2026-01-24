@@ -68,24 +68,18 @@ public class IntakeVisualizer {
 
     // Create min/max angle boundary indicators
     // Transform from robot frame to Mechanism2d frame
-    double minAngleMech2d = 90.0 - IntakeConstants.MAX_INTAKE_ANGLE_DEGREES; // Note: min robot = max visual
-    double maxAngleMech2d = 90.0 - IntakeConstants.MIN_INTAKE_ANGLE_DEGREES; // Note: max robot = min visual
-    
+    double minAngleMech2d =
+        90.0 - IntakeConstants.MAX_INTAKE_ANGLE_DEGREES; // Note: min robot = max visual
+    double maxAngleMech2d =
+        90.0 - IntakeConstants.MIN_INTAKE_ANGLE_DEGREES; // Note: max robot = min visual
+
     lowerBound =
         new LoggedMechanismLigament2d(
-            name + "_LowerBound",
-            armLength,
-            minAngleMech2d,
-            2,
-            new Color8Bit(Color.kWhite));
+            name + "_LowerBound", armLength, minAngleMech2d, 2, new Color8Bit(Color.kWhite));
 
     upperBound =
         new LoggedMechanismLigament2d(
-            name + "_UpperBound",
-            armLength,
-            maxAngleMech2d,
-            2,
-            new Color8Bit(Color.kWhite));
+            name + "_UpperBound", armLength, maxAngleMech2d, 2, new Color8Bit(Color.kWhite));
 
     // Create the measured position arm (what the encoder reads)
     measuredArm =
@@ -125,7 +119,8 @@ public class IntakeVisualizer {
   /**
    * Updates the visualizer with the current state.
    *
-   * @param measuredAngle The current measured angle from the encoder (in robot frame: 0° = vertical)
+   * @param measuredAngle The current measured angle from the encoder (in robot frame: 0° =
+   *     vertical)
    * @param setpointAngle The current PID setpoint (optional - empty if not in position control)
    * @param goalAngle The goal position (optional - empty if not targeting a position)
    * @param atGoal Whether the mechanism is at the goal position
@@ -139,7 +134,7 @@ public class IntakeVisualizer {
     // Transform from robot frame (0° = vertical) to Mechanism2d frame (0° = horizontal)
     // Transformation: mechanism_angle = 90° - robot_angle
     double measuredAngleMech2d = 90.0 - measuredAngle.getDegrees();
-    
+
     // Update measured arm angle
     measuredArm.setAngle(measuredAngleMech2d);
 
