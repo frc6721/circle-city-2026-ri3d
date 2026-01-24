@@ -47,11 +47,17 @@ public class ShooterConstants {
   public static final AngularVelocity MAX_FLYWHEEL_SPEED =
       RevolutionsPerSecond.of(5600 / 60.0); // 5600 RPM
 
+
+  // ==================== ACCELERATION LIMITS ====================
+
+  public static final AngularAcceleration MAX_FLYWHEEL_ACCEL =
+      RevolutionsPerSecond.of(100 / 60.0); // 100 RPM/s
+
   // ==================== PID CONSTANTS (REAL ROBOT) ====================
 
   /** Real robot PID values - tuned for actual hardware (on motor controller) */
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KP_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kP", 0.0000000);
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kP", 0.0000500);
 
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KI_REAL =
       new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kI", 0.0);
