@@ -29,4 +29,6 @@ public interface ShooterIO {
   public default void setFlyWheelDutyCycle(double output) {}
 
   public default void stopFlywheel() {}
+
+  public default void setFlywheelVoltage(Voltage volts) {}
 }

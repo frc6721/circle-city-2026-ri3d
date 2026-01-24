@@ -8,10 +8,14 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.shooter.io.ShooterIO;
 import frc.robot.subsystems.shooter.io.ShooterIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
@@ -77,6 +81,7 @@ public class Shooter extends SubsystemBase {
   private final ShooterIOInputsAutoLogged _shooterInputs = new ShooterIOInputsAutoLogged();
   private AngularVelocity _targetFlywheelSpeed;
   private final ShooterVisualizer _visualizer;
+  private final SysIdRoutine sysId;
 
   /**
    * Creates a new Shooter subsystem.
@@ -92,6 +97,16 @@ public class Shooter extends SubsystemBase {
 
     // Initialize the visualizer for Mechanism2d and 3D pose output
     _visualizer = new ShooterVisualizer("Shooter");
+
+    // Configure SysId
+    sysId =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+            new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage), null, this));
   }
 
   /**
@@ -311,5 +326,33 @@ public class Shooter extends SubsystemBase {
    */
   public void setFlyWheelDutyCycle(double output) {
     this._shooterIO.setFlyWheelDutyCycle(output);
+  }
+
+  public void runCharacterization(Voltage volts) {
+    this._shooterIO.setFlywheelVoltage(volts);
+  }
+
+  /**
+   * Returns the current flywheel velocity used for feedforward characterization.
+   *
+   * <p>This returns the measured angular velocity in radians per second. The characterization
+   * routine uses this value to correlate applied voltage to achieved velocity.
+   *
+   * @return current flywheel angular velocity (rad/s)
+   */
+  public double getFFCharacterizationVelocity() {
+    return _shooterInputs._flywheelMotorVelocity.in(RadiansPerSecond);
+  }
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return run(() -> runCharacterization(Volts.of(0.0)))
+        .withTimeout(1.0)
+        .andThen(sysId.quasistatic(direction));
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return run(() -> runCharacterization(Volts.of(0.0)))
+        .withTimeout(1.0)
+        .andThen(sysId.dynamic(direction));
   }
 }

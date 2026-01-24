@@ -1,11 +1,18 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Factory class for creating shooter-related commands.
@@ -40,6 +47,10 @@ import frc.robot.subsystems.shooter.ShooterConstants;
  * </pre>
  */
 public class ShooterCommands {
+
+  // Feedforward characterization tuning constants
+  private static final double FF_START_DELAY = 2.0; // seconds to wait for idle before ramp
+  private static final double FF_RAMP_RATE = 0.1; // Volts per second
 
   /**
    * Creates a command to set the flywheel to a specific target speed.
@@ -252,5 +263,74 @@ public class ShooterCommands {
    */
   public static Command waitForFlywheelsToReachSpeed(Shooter shooter) {
     return Commands.waitUntil(() -> shooter.areFlywheelsAtTargetSpeed());
+  }
+
+  /**
+   * Simple feedforward characterization for the shooter flywheel.
+   *
+   * <p>Ramps voltage up linearly while sampling the resulting angular velocity. When the command is
+   * canceled, performs a least-squares fit to compute kS and kV (volts and volts per RPM
+   * respectively) and prints the results.
+   *
+   * <p>Use this in voltage-control mode only. Example: hold the X button to run the
+   * characterization, release to finish and print results.
+   *
+   * <p><b>Units:</b> kS is in Volts, kV is in Volts per RPM
+   */
+  public static Command feedforwardCharacterization(Shooter shooter) {
+    List<Double> velocitySamples = new LinkedList<>();
+    List<Double> voltageSamples = new LinkedList<>();
+    Timer timer = new Timer();
+
+    return Commands.sequence(
+        // Reset data
+        Commands.runOnce(
+            () -> {
+              velocitySamples.clear();
+              voltageSamples.clear();
+            }),
+
+        // Ensure idle for a moment so things settle
+        Commands.run(() -> shooter.runCharacterization(Volts.of(0.0)), shooter)
+            .withTimeout(FF_START_DELAY),
+
+        // Start timer
+        Commands.runOnce(timer::restart),
+
+        // Ramp voltage and sample
+        Commands.run(
+                () -> {
+                  double voltage = timer.get() * FF_RAMP_RATE;
+                  shooter.runCharacterization(Volts.of(voltage));
+                  // Sample velocity in rad/s, convert to RPM for regression
+                  double velocityRadPerSec = shooter.getFFCharacterizationVelocity();
+                  double velocityRPM = velocityRadPerSec * 60.0 / (2.0 * Math.PI);
+                  velocitySamples.add(velocityRPM);
+                  voltageSamples.add(voltage);
+                },
+                shooter)
+
+            // When cancelled, calculate and print results
+            .finallyDo(
+                () -> {
+                  int n = velocitySamples.size();
+                  double sumX = 0.0;
+                  double sumY = 0.0;
+                  double sumXY = 0.0;
+                  double sumX2 = 0.0;
+                  for (int i = 0; i < n; i++) {
+                    sumX += velocitySamples.get(i);
+                    sumY += voltageSamples.get(i);
+                    sumXY += velocitySamples.get(i) * voltageSamples.get(i);
+                    sumX2 += velocitySamples.get(i) * velocitySamples.get(i);
+                  }
+                  double kS = (sumY * sumX2 - sumX * sumXY) / (n * sumX2 - sumX * sumX);
+                  double kV = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+
+                  NumberFormat formatter = new DecimalFormat("#0.00000");
+                  System.out.println("********** Shooter FF Characterization Results **********");
+                  System.out.println("\tkS (Volts): " + formatter.format(kS));
+                  System.out.println("\tkV (Volts per RPM): " + formatter.format(kV));
+                }));
   }
 }

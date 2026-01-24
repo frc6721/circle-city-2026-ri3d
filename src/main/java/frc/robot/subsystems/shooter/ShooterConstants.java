@@ -4,10 +4,12 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
+import static edu.wpi.first.units.Units.Second;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
@@ -47,24 +49,23 @@ public class ShooterConstants {
   public static final AngularVelocity MAX_FLYWHEEL_SPEED =
       RevolutionsPerSecond.of(5600 / 60.0); // 5600 RPM
 
-
   // ==================== ACCELERATION LIMITS ====================
 
   public static final AngularAcceleration MAX_FLYWHEEL_ACCEL =
-      RevolutionsPerSecond.of(100 / 60.0); // 100 RPM/s
+      RevolutionsPerSecond.per(Second).of(5600 / 60.0); // 5600 RPM
 
   // ==================== PID CONSTANTS (REAL ROBOT) ====================
 
   /** Real robot PID values - tuned for actual hardware (on motor controller) */
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KP_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kP", 0.0000500);
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kP", 0.000500);
 
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KI_REAL =
       new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kI", 0.0);
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KD_REAL =
       new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kD", 0.0000);
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_FF_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kFF", 0.0000500);
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kFF", 0.000100);
 
   // ==================== PID CONSTANTS (SIMULATION) ====================
 

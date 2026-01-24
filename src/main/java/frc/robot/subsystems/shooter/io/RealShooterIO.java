@@ -3,6 +3,7 @@ package frc.robot.subsystems.shooter.io;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.util.SparkUtil.tryUntilOk;
 
@@ -14,6 +15,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.HardwareConstants;
 import frc.robot.subsystems.shooter.ShooterConstants;
 
@@ -40,6 +42,9 @@ public class RealShooterIO implements ShooterIO {
         ShooterConstants.getFlywheelKD(),
         ShooterConstants.getFlywheelFF());
 
+    config.closedLoop.maxMotion.maxAcceleration(
+        ShooterConstants.MAX_FLYWHEEL_ACCEL.in(RotationsPerSecond.per(Second)) * 60.0);
+
     tryUntilOk(
         _flywheelMotor,
         5,
@@ -64,7 +69,7 @@ public class RealShooterIO implements ShooterIO {
   public void setFlywheelSpeed(AngularVelocity speed) {
     _flywheelMotor
         .getClosedLoopController()
-        .setReference(speed.in(RotationsPerSecond) * 60.0, ControlType.kVelocity);
+        .setReference(speed.in(RotationsPerSecond) * 60.0, ControlType.kMAXMotionVelocityControl);
   }
 
   public void setFlyWheelDutyCycle(double output) {
@@ -75,5 +80,9 @@ public class RealShooterIO implements ShooterIO {
     // reset the integral accumulator to prevent integral windup
     _flywheelMotor.getClosedLoopController().setIAccum(0);
     _flywheelMotor.stopMotor();
+  }
+
+  public void setFlywheelVoltage(Voltage volts) {
+    _flywheelMotor.setVoltage(volts.magnitude());
   }
 }

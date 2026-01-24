@@ -14,7 +14,6 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -220,15 +219,28 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller
-        .x()
-        .onTrue(ShooterCommands.setFlywheelTargetSpeed(shooter, RotationsPerSecond.of(3500 / 60)))
-        .onFalse(ShooterCommands.setFlywheelTargetSpeed(shooter, RotationsPerSecond.of(0 / 60)));
+    // controller
+    // .x()
+    // .onTrue(ShooterCommands.setFlywheelTargetSpeed(shooter, RotationsPerSecond.of(3500 / 60)))
+    // .onFalse(ShooterCommands.setFlywheelTargetSpeed(shooter, RotationsPerSecond.of(0 / 60)));
 
+    // Original X binding replaced with shooter characterization bindings
     // controller
     //     .x()
-    //     .onTrue(Commands.run(() -> shooter.setFlyWheelDutyCycle(0.5), shooter))
+    //     .onTrue(Commands.run(() -> shooter.setFlyWheelDutyCycle(0.015), shooter))
     //     .onFalse(Commands.run(() -> shooter.setFlyWheelDutyCycle(0.0), shooter));
+
+    // X button: run feedforward characterization (hold to run, release to finish)
+    controller
+        .x()
+        .whileTrue(ShooterCommands.feedforwardCharacterization(shooter))
+        .onFalse(Commands.runOnce(() -> shooter.stopFlywheels(), shooter));
+
+    // Y button: run shooter quasistatic SysId (forward). Hold to run, release to stop.
+    controller
+        .y()
+        .whileTrue(shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward))
+        .onFalse(Commands.runOnce(() -> shooter.stopFlywheels(), shooter));
   }
 
   /**
