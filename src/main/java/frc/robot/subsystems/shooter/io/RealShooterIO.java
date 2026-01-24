@@ -36,11 +36,10 @@ public class RealShooterIO implements ShooterIO {
         .smartCurrentLimit(ShooterConstants.SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT)
         .secondaryCurrentLimit(ShooterConstants.SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT)
         .voltageCompensation(12.0);
-    config.closedLoop.pidf(
+    config.closedLoop.pid(
         ShooterConstants.getFlywheelKP(),
         ShooterConstants.getFlywheelKI(),
-        ShooterConstants.getFlywheelKD(),
-        ShooterConstants.getFlywheelFF());
+        ShooterConstants.getFlywheelKD());
 
     config.closedLoop.maxMotion.maxAcceleration(
         ShooterConstants.MAX_FLYWHEEL_ACCEL.in(RotationsPerSecond.per(Second)) * 60.0);
@@ -67,9 +66,21 @@ public class RealShooterIO implements ShooterIO {
 
   // |============================== FLYWHEEL MOTOR METHODS ============================== |
   public void setFlywheelSpeed(AngularVelocity speed) {
+    double targetRPM = speed.in(RotationsPerSecond) * 60.0;
+
+    // Manually calculate feedforward voltage: V = kS * sign(velocity) + kV * velocity
+    double kS = ShooterConstants.getFlywheelKS();
+    double kV = ShooterConstants.getFlywheelKV();
+    double ffVolts = kS * Math.signum(targetRPM) + kV * targetRPM;
+
     _flywheelMotor
         .getClosedLoopController()
-        .setReference(speed.in(RotationsPerSecond) * 60.0, ControlType.kMAXMotionVelocityControl);
+        .setReference(
+            targetRPM,
+            ControlType.kMAXMotionVelocityControl,
+            com.revrobotics.spark.ClosedLoopSlot.kSlot0,
+            ffVolts,
+            com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits.kVoltage);
   }
 
   public void setFlyWheelDutyCycle(double output) {

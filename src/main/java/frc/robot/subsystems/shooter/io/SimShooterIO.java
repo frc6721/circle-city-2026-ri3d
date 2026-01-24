@@ -103,15 +103,17 @@ public class SimShooterIO implements ShooterIO {
     // --- Calculate applied voltage ---
 
     if (velocityControlActive) {
-      // Simulate PID control - simple feedforward + proportional control
+      // Manually calculate feedforward: V = kS * sign(velocity) + kV * velocity
+      double kS = ShooterConstants.getFlywheelKS();
+      double kV = ShooterConstants.getFlywheelKV();
+      double ffVolts = kS * Math.signum(targetVelocityRPM) + kV * targetVelocityRPM;
+
+      // Add proportional feedback for error correction
       double currentRPM = flywheelPhysicsSim.getAngularVelocityRPM();
       double error = targetVelocityRPM - currentRPM;
+      double pVolts = error * ShooterConstants.getFlywheelKP() * 100.0;
 
-      // Simple simulated PID (feedforward dominant for flywheels)
-      double ff = targetVelocityRPM * ShooterConstants.getFlywheelFF() * 1000.0;
-      double p = error * ShooterConstants.getFlywheelKP() * 100.0;
-
-      appliedVoltage = Math.max(-12.0, Math.min(12.0, ff + p));
+      appliedVoltage = Math.max(-12.0, Math.min(12.0, ffVolts + pVolts));
     }
 
     // --- Update the flywheel physics simulation ---
@@ -162,5 +164,11 @@ public class SimShooterIO implements ShooterIO {
     targetVelocityRPM = 0.0;
     appliedVoltage = 0.0;
     flywheelMotor.stopMotor();
+  }
+
+  @Override
+  public void setFlywheelVoltage(edu.wpi.first.units.measure.Voltage volts) {
+    velocityControlActive = false;
+    appliedVoltage = volts.magnitude();
   }
 }

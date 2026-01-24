@@ -67,6 +67,26 @@ public class ShooterConstants {
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_FF_REAL =
       new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kFF", 0.000100);
 
+  // ==================== FEEDFORWARD CONSTANTS (REAL ROBOT) ====================
+
+  /** Static friction voltage (voltage to overcome friction) */
+  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_KS_REAL =
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Real/kS", 0.18554);
+
+  /** Velocity feedforward constant (Volts per RPM) */
+  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_KV_REAL =
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Real/kV", 0.002);
+
+  // ==================== FEEDFORWARD CONSTANTS (SIMULATION) ====================
+
+  /** Static friction voltage (voltage to overcome friction) */
+  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_KS_SIM =
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Sim/kS", 0.0);
+
+  /** Velocity feedforward constant (Volts per RPM) */
+  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_KV_SIM =
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Sim/kV", 0.0018);
+
   // ==================== PID CONSTANTS (SIMULATION) ====================
 
   /** Simulation PID values - tuned for physics simulation */
@@ -108,6 +128,20 @@ public class ShooterConstants {
     return Constants.currentMode == Constants.Mode.SIM
         ? SHOOTER_FLYWHEEL_PID_FF_SIM.get()
         : SHOOTER_FLYWHEEL_PID_FF_REAL.get();
+  }
+
+  /** Returns the appropriate feedforward kS based on current mode */
+  public static double getFlywheelKS() {
+    return Constants.currentMode == Constants.Mode.SIM
+        ? SHOOTER_FLYWHEEL_KS_SIM.get()
+        : SHOOTER_FLYWHEEL_KS_REAL.get();
+  }
+
+  /** Returns the appropriate feedforward kV based on current mode */
+  public static double getFlywheelKV() {
+    return Constants.currentMode == Constants.Mode.SIM
+        ? SHOOTER_FLYWHEEL_KV_SIM.get()
+        : SHOOTER_FLYWHEEL_KV_REAL.get();
   }
 
   // ==================== CURRENT LIMITS ====================
