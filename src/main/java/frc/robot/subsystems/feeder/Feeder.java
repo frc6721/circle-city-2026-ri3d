@@ -1,6 +1,8 @@
 package frc.robot.subsystems.feeder;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.feeder.io.FeederIO;
+import frc.robot.subsystems.feeder.io.FeederIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
 /**

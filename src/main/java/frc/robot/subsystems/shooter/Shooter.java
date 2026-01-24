@@ -12,6 +12,8 @@ import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.shooter.io.ShooterIO;
+import frc.robot.subsystems.shooter.io.ShooterIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -74,6 +76,7 @@ public class Shooter extends SubsystemBase {
   private final ShooterIO _shooterIO;
   private final ShooterIOInputsAutoLogged _shooterInputs = new ShooterIOInputsAutoLogged();
   private AngularVelocity _targetFlywheelSpeed;
+  private final ShooterVisualizer _visualizer;
 
   /**
    * Creates a new Shooter subsystem.
@@ -86,6 +89,9 @@ public class Shooter extends SubsystemBase {
   public Shooter(ShooterIO shooterIO) {
     this._shooterIO = shooterIO;
     this.stopFlywheels();
+
+    // Initialize the visualizer for Mechanism2d and 3D pose output
+    _visualizer = new ShooterVisualizer("Shooter");
   }
 
   /**
@@ -97,6 +103,7 @@ public class Shooter extends SubsystemBase {
    *   <li>Reading sensor data from the shooter hardware (flywheel velocity, current, etc.)
    *   <li>Logging all sensor data and setpoints to AdvantageKit
    *   <li>Checking if the flywheel has reached its target speed
+   *   <li>Updating the visualization
    * </ul>
    *
    * <p><b>What gets logged:</b>
@@ -130,6 +137,10 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput(
         "Shooter/Desired-Flywheel-Speed-RPM", _targetFlywheelSpeed.in(RevolutionsPerSecond) * 60);
     Logger.recordOutput("Shooter/areFlyWheelsAtTarget", this.areFlywheelsAtTargetSpeed());
+
+    // Update visualization with current state
+    _visualizer.update(
+        _shooterInputs._flywheelMotorVelocity, _targetFlywheelSpeed, areFlywheelsAtTargetSpeed());
   }
 
   /**

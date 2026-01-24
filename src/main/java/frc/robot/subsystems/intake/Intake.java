@@ -3,6 +3,8 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.intake.io.IntakeIO;
+import frc.robot.subsystems.intake.io.IntakeIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -37,6 +39,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
  *   <li>Feedforward compensation for gravity (cosine of angle)
  *   <li>Predefined positions (STOW and PICKUP) for easy control
  *   <li>Comprehensive logging of position, setpoints, voltages, and PID gains
+ *   <li>Mechanism2d visualization for AdvantageScope
  * </ul>
  *
  * <p><b>Key Learnings from RI3D:</b>
@@ -56,6 +59,7 @@ public class Intake extends SubsystemBase {
   private final IntakeIOInputsAutoLogged _intakeInputs = new IntakeIOInputsAutoLogged();
   private IntakePosition _intakePosition;
   private PIDController _pivotPIDController;
+  private final IntakeVisualizer _visualizer;
 
   /**
    * Enum representing predefined positions for the intake pivot.
@@ -78,7 +82,6 @@ public class Intake extends SubsystemBase {
     PICKUP(IntakeConstants.POSITION_PICKUP);
 
     private final LoggedNetworkNumber _angle;
-
     /**
      * Private constructor for the IntakePosition enum.
      *
@@ -118,7 +121,8 @@ public class Intake extends SubsystemBase {
    * <ul>
    *   <li>Stores the hardware IO interface
    *   <li>Initializes the intake position to STOW (assumes intake starts up)
-   *   <li>Creates the PID controller with gains from IntakeConstants
+   *   <li>Creates the PID controller with gains from IntakeConstants (mode-selected for sim/real)
+   *   <li>Creates the visualizer for Mechanism2d and Pose3d output
    * </ul>
    *
    * <p><b>About the PID Controller:</b> The PID controller automatically adjusts motor voltage to
@@ -137,11 +141,16 @@ public class Intake extends SubsystemBase {
 
     // assume that the intake is all the way up when first turned on
     _intakePosition = IntakePosition.STOW;
+
+    // Use mode-selected PID constants (different values for sim vs real)
     _pivotPIDController =
         new PIDController(
-            IntakeConstants.PIVOT_PID_KP.get(),
-            IntakeConstants.PIVOT_PID_KI.get(),
-            IntakeConstants.PIVOT_PID_KD.get());
+            IntakeConstants.getPivotKP(),
+            IntakeConstants.getPivotKI(),
+            IntakeConstants.getPivotKD());
+
+    // Initialize the visualizer for Mechanism2d and 3D pose output
+    _visualizer = new IntakeVisualizer("Intake");
   }
 
   /**
@@ -154,6 +163,7 @@ public class Intake extends SubsystemBase {
    *   <li>Logging all sensor data and setpoints to AdvantageKit
    *   <li>Running the PID control loop to maintain the pivot position
    *   <li>Applying feedforward compensation for gravity
+   *   <li>Updating the visualization
    * </ul>
    *
    * <p><b>PID + Feedforward Control:</b>
@@ -188,13 +198,28 @@ public class Intake extends SubsystemBase {
     Logger.recordOutput(
         "Intake/raw-pivot-position-desired",
         _intakePosition.getAngle().plus(IntakeConstants.PIVOT_ZERO_ROTATION));
+
+    // Run PID control
     _pivotPIDController.setSetpoint(_intakePosition.getAngle().getDegrees());
     double pivotVoltage =
         _pivotPIDController.calculate(_intakeInputs._intakeRightPivotMotorPosition.getDegrees());
-    _intakeIO.setPivotMotorVoltage(
-        pivotVoltage
-            + IntakeConstants.INTAKE_PIVOT_FEEDFORWARD
-                * Math.cos(Math.toRadians(_intakePosition.getAngle().getDegrees())));
+
+    // Apply feedforward for gravity compensation (uses mode-selected constant)
+    double feedforward =
+        IntakeConstants.getPivotFeedforward()
+            * Math.cos(Math.toRadians(_intakePosition.getAngle().getDegrees()));
+
+    _intakeIO.setPivotMotorVoltage(pivotVoltage + feedforward);
+
+    // Update visualization with current state
+    boolean atGoal =
+        Math.abs(
+                _intakeInputs._intakeRightPivotMotorPosition.getDegrees()
+                    - _intakePosition.getAngle().getDegrees())
+            < IntakeConstants.INTAKE_PIVOT_DEADBAND;
+
+    _visualizer.update(
+        _intakeInputs._intakeRightPivotMotorPosition, _intakePosition.getAngle(), atGoal);
   }
 
   /**

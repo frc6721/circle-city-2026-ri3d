@@ -36,13 +36,18 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.feeder.Feeder;
-import frc.robot.subsystems.feeder.RealFeederIO;
+import frc.robot.subsystems.feeder.io.FeederIO;
+import frc.robot.subsystems.feeder.io.RealFeederIO;
+import frc.robot.subsystems.feeder.io.SimFeederIO;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
-import frc.robot.subsystems.intake.RealIntakeIO;
-import frc.robot.subsystems.shooter.RealShooterIO;
+import frc.robot.subsystems.intake.io.IntakeIO;
+import frc.robot.subsystems.intake.io.RealIntakeIO;
+import frc.robot.subsystems.intake.io.SimIntakeIO;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.io.RealShooterIO;
+import frc.robot.subsystems.shooter.io.ShooterIO;
+import frc.robot.subsystems.shooter.io.SimShooterIO;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -91,10 +96,10 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim());
-        // intake = new Intake(new IntakeIO() {});
-        intake = new Intake(new RealIntakeIO());
-        shooter = new Shooter(new ShooterIO() {});
-        feeder = new Feeder(new RealFeederIO());
+        // Use simulation IO implementations with physics simulation
+        intake = new Intake(new SimIntakeIO());
+        shooter = new Shooter(new SimShooterIO());
+        feeder = new Feeder(new SimFeederIO());
         break;
 
       default:
@@ -106,10 +111,10 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        // intake = new Intake(new IntakeIO() {});
-        intake = new Intake(new RealIntakeIO());
+        // For replay, use empty IO implementations
+        intake = new Intake(new IntakeIO() {});
         shooter = new Shooter(new ShooterIO() {});
-        feeder = new Feeder(new RealFeederIO());
+        feeder = new Feeder(new FeederIO() {});
         break;
     }
 

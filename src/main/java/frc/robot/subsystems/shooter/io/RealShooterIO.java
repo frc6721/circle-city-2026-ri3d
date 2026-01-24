@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.shooter.io;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Celsius;
@@ -15,6 +15,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.HardwareConstants;
+import frc.robot.subsystems.shooter.ShooterConstants;
 
 public class RealShooterIO implements ShooterIO {
   private SparkMax _flywheelMotor;
@@ -34,10 +35,10 @@ public class RealShooterIO implements ShooterIO {
         .secondaryCurrentLimit(ShooterConstants.SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT)
         .voltageCompensation(12.0);
     config.closedLoop.pidf(
-        ShooterConstants.SHOOTER_FLYWHEEL_PID_KP.get(),
-        ShooterConstants.SHOOTER_FLYWHEEL_PID_KI.get(),
-        ShooterConstants.SHOOTER_FLYWHEEL_PID_KD.get(),
-        ShooterConstants.SHOOTER_FLYWHEEL_PID_FF.get());
+        ShooterConstants.getFlywheelKP(),
+        ShooterConstants.getFlywheelKI(),
+        ShooterConstants.getFlywheelKD(),
+        ShooterConstants.getFlywheelFF());
 
     tryUntilOk(
         _flywheelMotor,

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.feeder;
+package frc.robot.subsystems.feeder.io;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Celsius;
@@ -12,6 +12,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.HardwareConstants;
+import frc.robot.subsystems.feeder.FeederConstants;
 
 public class RealFeederIO implements FeederIO {
   private SparkMax _feederMotor;

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.feeder;
+package frc.robot.subsystems.feeder.io;
 
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
