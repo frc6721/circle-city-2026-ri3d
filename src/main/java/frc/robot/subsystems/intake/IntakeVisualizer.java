@@ -169,11 +169,13 @@ public class IntakeVisualizer {
 
     // Log the 3D pose for AdvantageScope 3D visualization
     // The rotation is around the Y axis (pitch) since the arm pivots up/down
+    // Keep the base position fixed, only change the rotation
     Pose3d pose3d =
-        baseOffset.rotateBy(
+        new Pose3d(
+            baseOffset.getTranslation(),
             new Rotation3d(
                 Radians.of(baseOffset.getRotation().getX()),
-                Radians.of(baseOffset.getRotation().getX())
+                Radians.of(baseOffset.getRotation().getY())
                     .plus(Degrees.of(measuredAngle.getDegrees())),
                 Radians.of(baseOffset.getRotation().getZ())));
 

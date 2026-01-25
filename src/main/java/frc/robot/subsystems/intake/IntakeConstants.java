@@ -162,7 +162,7 @@ public class IntakeConstants {
    * measurements. X = forward/back, Y = up/down, Z = left/right (meters)
    */
   public static final Translation3d VISUALIZATION_OFFSET =
-      new Translation3d(Inches.of(5).in(Meters), Inches.of(0).in(Meters), Inches.of(8).in(Meters));
+      new Translation3d(Inches.of(-8.5).in(Meters), Inches.of(0).in(Meters), Inches.of(10).in(Meters));
 
   public static final Rotation3d VISUALIZATION_ROTATION = new Rotation3d(0, -Math.PI/2, Math.PI);
 
