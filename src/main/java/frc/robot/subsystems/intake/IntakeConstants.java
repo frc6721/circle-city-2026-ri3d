@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -161,9 +162,9 @@ public class IntakeConstants {
    * measurements. X = forward/back, Y = up/down, Z = left/right (meters)
    */
   public static final Translation3d VISUALIZATION_OFFSET =
-      new Translation3d(Inches.of(8).in(Meters), Inches.of(8).in(Meters), Inches.of(0).in(Meters));
+      new Translation3d(Inches.of(5).in(Meters), Inches.of(0).in(Meters), Inches.of(8).in(Meters));
 
-  public static final Rotation3d VISUALIZATION_ROTATION = new Rotation3d(0.0, 0.0, Math.PI);
+  public static final Rotation3d VISUALIZATION_ROTATION = new Rotation3d(0, -Math.PI/2, Math.PI);
 
   /** Visualization arm length in meters for Mechanism2d display */
   public static final double VISUALIZATION_ARM_LENGTH = ARM_LENGTH.in(Meters);
@@ -188,5 +189,6 @@ public class IntakeConstants {
     Logger.recordOutput(
         "Constants/Intake/INTAKE_ROLLER_SECONDARY_CURRENT_LIMIT",
         INTAKE_ROLLER_SECONDARY_CURRENT_LIMIT);
+    Logger.recordOutput("Constants/Intake/ZeroedPose3d", Pose3d.kZero);
   }
 }
