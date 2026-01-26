@@ -13,18 +13,21 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.*;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.lib.VirtualHopper;
+import frc.lib.feulSim.FuelSim;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.FeederCommands;
 import frc.robot.commands.IntakeCommands;
@@ -41,6 +44,7 @@ import frc.robot.subsystems.feeder.io.RealFeederIO;
 import frc.robot.subsystems.feeder.io.SimFeederIO;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakePosition;
+import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.intake.io.IntakeIO;
 import frc.robot.subsystems.intake.io.RealIntakeIO;
 import frc.robot.subsystems.intake.io.SimIntakeIO;
@@ -83,7 +87,8 @@ public class RobotContainer {
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
         intake = new Intake(new RealIntakeIO());
-        shooter = new Shooter(new RealShooterIO());
+        // Pass pose and field speed suppliers for FuelSim integration
+        shooter = new Shooter(new RealShooterIO(), drive::getPose, drive::getFieldRelativeSpeeds);
         feeder = new Feeder(new RealFeederIO());
         break;
 
@@ -98,7 +103,8 @@ public class RobotContainer {
                 new ModuleIOSim());
         // Use simulation IO implementations with physics simulation
         intake = new Intake(new SimIntakeIO());
-        shooter = new Shooter(new SimShooterIO());
+        // Pass pose and field speed suppliers for FuelSim integration
+        shooter = new Shooter(new SimShooterIO(), drive::getPose, drive::getFieldRelativeSpeeds);
         feeder = new Feeder(new SimFeederIO());
         break;
 
@@ -113,7 +119,8 @@ public class RobotContainer {
                 new ModuleIO() {});
         // For replay, use empty IO implementations
         intake = new Intake(new IntakeIO() {});
-        shooter = new Shooter(new ShooterIO() {});
+        // For replay, provide no-op suppliers (no live robot state)
+        shooter = new Shooter(new ShooterIO() {}, () -> new Pose2d(), () -> new ChassisSpeeds());
         feeder = new Feeder(new FeederIO() {});
         break;
     }
@@ -144,6 +151,82 @@ public class RobotContainer {
         "Stow Intake", IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.STOW));
     SmartDashboard.putData(
         "Deploy Intake", IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.PICKUP));
+
+    // Configure FuelSim for game piece visualization
+    configureFuelSim();
+  }
+
+  /**
+   * Configures the FuelSim system for game piece simulation and visualization.
+   *
+   * <p>FuelSim allows us to visualize:
+   *
+   * <ul>
+   *   <li>Game pieces (fuel) on the field
+   *   <li>Intake collecting fuel when driven over
+   *   <li>Shooter trajectory prediction
+   *   <li>Launched fuel following realistic physics
+   * </ul>
+   *
+   * <p>This method:
+   *
+   * <ol>
+   *   <li>Spawns starting fuel on the field
+   *   <li>Registers robot dimensions for collision detection
+   *   <li>Registers intake bounding box for fuel collection
+   *   <li>Adds a dashboard button to reset fuel positions
+   *   <li>Starts the simulation
+   * </ol>
+   */
+  private void configureFuelSim() {
+    try {
+      FuelSim fuelSim = FuelSim.getInstance();
+
+      // Spawn initial fuel on the field (neutral zone and depots)
+      fuelSim.spawnStartingFuel();
+
+      // Register robot with FuelSim for collision detection
+      // Robot pushes fuel out of the way when driving
+      fuelSim.registerRobot(
+          Dimensions.ROBOT_WIDTH.in(Meters),
+          Dimensions.ROBOT_LENGTH.in(Meters),
+          Dimensions.BUMPER_HEIGHT.in(Meters),
+          drive::getPose,
+          drive::getFieldRelativeSpeeds);
+
+      // Register intake with FuelSim
+      // Fuel inside the bounding box will be "collected" when canIntakeFuel() returns true
+      fuelSim.registerIntake(
+          IntakeConstants.INTAKE_BOUNDING_BOX_MIN_X.in(Meters),
+          IntakeConstants.INTAKE_BOUNDING_BOX_MAX_X.in(Meters),
+          IntakeConstants.INTAKE_BOUNDING_BOX_MIN_Y.in(Meters),
+          IntakeConstants.INTAKE_BOUNDING_BOX_MAX_Y.in(Meters),
+          intake::canIntakeFuel, // BooleanSupplier - checks if intake can collect
+          intake::simIntakeFuel); // Runnable - called when fuel is collected
+
+      // Start the simulation (updateSim must still be called each loop)
+      fuelSim.start();
+
+      // Add dashboard button to reset fuel and hopper
+      SmartDashboard.putData(
+          "Reset Fuel",
+          Commands.runOnce(
+                  () -> {
+                    // Clear all fuel from the field
+                    FuelSim.getInstance().clearFuel();
+                    // Respawn fuel in starting positions
+                    FuelSim.getInstance().spawnStartingFuel();
+                    // Reset virtual hopper to empty
+                    VirtualHopper.getInstance().reset();
+                  })
+              .withName("Reset Fuel")
+              .ignoringDisable(true));
+
+    } catch (Exception e) {
+      // Log error but don't crash - FuelSim is for visualization only
+      System.err.println("FuelSim initialization failed: " + e.getMessage());
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -155,20 +238,20 @@ public class RobotContainer {
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
     // real controller
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
-
-    // sim controller in MAC os
     // drive.setDefaultCommand(
     //     DriveCommands.joystickDrive(
     //         drive,
     //         () -> -controller.getLeftY(),
     //         () -> -controller.getLeftX(),
-    //         () -> -(controller.getRightTriggerAxis())));
+    //         () -> -controller.getRightX()));
+
+    // sim controller in MAC os
+    drive.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> -(controller.getRightTriggerAxis())));
 
     // Always run the flywheels a little bit during the match so they can spin up quicker when we
     // need them
@@ -178,16 +261,6 @@ public class RobotContainer {
         .leftBumper()
         .whileTrue(IntakeCommands.runIntakeRollers(intake))
         .onFalse(IntakeCommands.stopIntakeRollers(intake));
-
-    // Lock to 0° when A button is held
-    // controller
-    // .x()
-    // .whileTrue(
-    //     DriveCommands.joystickDriveAtAngle(
-    //         drive,
-    //         () -> -controller.getLeftY(),
-    //         () -> -controller.getLeftX(),
-    //         () -> new Rotation2d()));
 
     // A button: Move intake to PICKUP position (down)
     controller.a().whileTrue(IntakeCommands.setIntakeGoalPosition(intake, IntakePosition.PICKUP));
@@ -205,7 +278,7 @@ public class RobotContainer {
     // Right bumper is for the real controller
     // y() button on xbox on mac os
     controller
-        .rightBumper()
+        .y()
         .onTrue(
             ShooterCommands.setFlywheelTargetSpeed(
                     shooter, RevolutionsPerSecond.of(4000 / 60.0)) // 4000 RPM
@@ -225,30 +298,20 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller
-        .x()
-        .onTrue(
-            ShooterCommands.setFlywheelTargetSpeed(shooter, RevolutionsPerSecond.of(3500 / 60.0)))
-        .onFalse(
-            ShooterCommands.setFlywheelTargetSpeed(shooter, RevolutionsPerSecond.of(0 / 60.0)));
+    // controller
+    //     .x()
+    //     .onTrue(
+    //         ShooterCommands.setFlywheelTargetSpeed(shooter, RevolutionsPerSecond.of(3500 /
+    // 60.0)))
+    //     .onFalse(
+    //         ShooterCommands.setFlywheelTargetSpeed(shooter, RevolutionsPerSecond.of(0 / 60.0)));
 
+    // Used for shooter characterization routines. Not for normal use.
     // Original X binding replaced with shooter characterization bindings
     // controller
     //     .x()
     //     .onTrue(Commands.run(() -> shooter.setFlyWheelDutyCycle(0.015), shooter))
     //     .onFalse(Commands.run(() -> shooter.setFlyWheelDutyCycle(0.0), shooter));
-
-    // X button: run feedforward characterization (hold to run, release to finish)
-    //     controller
-    //         .x()
-    //         .whileTrue(ShooterCommands.feedforwardCharacterization(shooter))
-    //         .onFalse(Commands.runOnce(() -> shooter.stopFlywheels(), shooter));
-
-    //     // Y button: run shooter quasistatic SysId (forward). Hold to run, release to stop.
-    //     controller
-    //         .y()
-    //         .whileTrue(shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward))
-    //         .onFalse(Commands.runOnce(() -> shooter.stopFlywheels(), shooter));
   }
 
   /**

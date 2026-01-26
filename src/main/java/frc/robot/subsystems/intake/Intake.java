@@ -3,8 +3,10 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.VirtualHopper;
 import frc.robot.subsystems.intake.io.IntakeIO;
 import frc.robot.subsystems.intake.io.IntakeIOInputsAutoLogged;
+import frc.robot.subsystems.shooter.ShooterConstants;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -295,5 +297,85 @@ public class Intake extends SubsystemBase {
    */
   public void stopRollers() {
     _intakeIO.setRollerMotorOutput(0.0);
+  }
+
+  // ==================== FUEL SIM INTEGRATION ====================
+
+  /**
+   * Called by FuelSim when the intake collects a virtual fuel piece.
+   *
+   * <p>This method is passed as a callback to FuelSim's registerIntake(). When the simulation
+   * detects a fuel inside the intake bounding box and the intake is ready to collect, this method
+   * is called to add the fuel to the virtual hopper.
+   *
+   * <p><b>Capacity Check:</b> This method checks if the hopper has room before adding. If the
+   * hopper is full (at MAX_HOPPER_CAPACITY), the fuel is not added.
+   */
+  public void simIntakeFuel() {
+    // Check if we have room in the hopper
+    if (VirtualHopper.getInstance().getFuelCount() < ShooterConstants.MAX_HOPPER_CAPACITY) {
+      VirtualHopper.getInstance().addFuel();
+      Logger.recordOutput("Intake/FuelSim/IntakedFuel", true);
+    }
+  }
+
+  /**
+   * Returns true if the intake is deployed (in PICKUP position).
+   *
+   * <p>Used by FuelSim to determine if the intake is ready to collect fuel. The intake can only
+   * collect game pieces when it's down in the pickup position.
+   *
+   * @return true if intake is in PICKUP position, false if STOW
+   */
+  public boolean isDeployed() {
+    return _intakePosition == IntakePosition.PICKUP;
+  }
+
+  /**
+   * Returns true if the intake pivot is at its target position.
+   *
+   * <p>The intake is considered "at target" when the difference between the current angle and
+   * target angle is less than the deadband (INTAKE_PIVOT_DEADBAND degrees).
+   *
+   * <p>This prevents the intake from collecting fuel while still moving to position.
+   *
+   * @return true if the intake pivot is within deadband of target position
+   */
+  public boolean isAtTarget() {
+    double currentAngle = _intakeInputs._intakeRightPivotMotorPosition.getDegrees();
+    double targetAngle = _intakePosition.getAngle().getDegrees();
+    double error = Math.abs(currentAngle - targetAngle);
+    return error < IntakeConstants.INTAKE_PIVOT_DEADBAND;
+  }
+
+  /**
+   * Returns true if the intake can currently collect fuel.
+   *
+   * <p>All three conditions must be met:
+   *
+   * <ul>
+   *   <li>Intake is deployed (in PICKUP position)
+   *   <li>Intake pivot has reached its target position (within deadband)
+   *   <li>Virtual hopper has room for more fuel (below MAX_HOPPER_CAPACITY)
+   * </ul>
+   *
+   * <p>This is used as the BooleanSupplier for FuelSim's registerIntake() to determine when to
+   * allow fuel collection.
+   *
+   * @return true if all conditions for fuel intake are met
+   */
+  public boolean canIntakeFuel() {
+    boolean deployed = isDeployed();
+    boolean atTarget = isAtTarget();
+    boolean hasCapacity =
+        VirtualHopper.getInstance().getFuelCount() < ShooterConstants.MAX_HOPPER_CAPACITY;
+
+    // Log for debugging
+    Logger.recordOutput("Intake/FuelSim/IsDeployed", deployed);
+    Logger.recordOutput("Intake/FuelSim/IsAtTarget", atTarget);
+    Logger.recordOutput("Intake/FuelSim/HasCapacity", hasCapacity);
+    Logger.recordOutput("Intake/FuelSim/CanIntake", deployed && atTarget && hasCapacity);
+
+    return deployed && atTarget && hasCapacity;
   }
 }

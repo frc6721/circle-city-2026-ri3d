@@ -10,14 +10,19 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.VirtualHopper;
 import frc.robot.subsystems.shooter.io.ShooterIO;
 import frc.robot.subsystems.shooter.io.ShooterIOInputsAutoLogged;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -83,20 +88,39 @@ public class Shooter extends SubsystemBase {
   private final ShooterVisualizer _visualizer;
   private final SysIdRoutine sysId;
 
+  // FuelSim integration - suppliers for robot state
+  private final Supplier<Pose2d> _poseSupplier;
+  private final Supplier<ChassisSpeeds> _fieldSpeedsSupplier;
+  private final FuelSimVisualizer _fuelSimVisualizer;
+
   /**
    * Creates a new Shooter subsystem.
    *
    * <p>Initializes the shooter with the provided hardware IO and stops the flywheel for safety. The
    * flywheel will remain stopped until commanded to spin.
    *
+   * <p><b>Dependency Injection:</b> The pose and speed suppliers allow this subsystem to access
+   * robot state without directly depending on the Drive subsystem. This pattern makes the code more
+   * testable and simulation-friendly.
+   *
    * @param shooterIO The hardware interface for shooter control (motor and sensors)
+   * @param poseSupplier Supplier for current robot pose (position and heading on field)
+   * @param fieldSpeedsSupplier Supplier for field-relative chassis speeds
    */
-  public Shooter(ShooterIO shooterIO) {
+  public Shooter(
+      ShooterIO shooterIO,
+      Supplier<Pose2d> poseSupplier,
+      Supplier<ChassisSpeeds> fieldSpeedsSupplier) {
     this._shooterIO = shooterIO;
+    this._poseSupplier = poseSupplier;
+    this._fieldSpeedsSupplier = fieldSpeedsSupplier;
     this.stopFlywheels();
 
     // Initialize the visualizer for Mechanism2d and 3D pose output
     _visualizer = new ShooterVisualizer("Shooter");
+
+    // Initialize FuelSim visualizer for trajectory and launch simulation
+    _fuelSimVisualizer = new FuelSimVisualizer(poseSupplier, fieldSpeedsSupplier);
 
     // Configure SysId
     sysId =
@@ -156,6 +180,73 @@ public class Shooter extends SubsystemBase {
     // Update visualization with current state
     _visualizer.update(
         _shooterInputs._flywheelMotorVelocity, _targetFlywheelSpeed, areFlywheelsAtTargetSpeed());
+
+    // ==================== FUEL SIM INTEGRATION ====================
+    // Update trajectory visualization every loop so driver sees real-time prediction
+    LinearVelocity linearSpeed =
+        _fuelSimVisualizer.convertToLinearVelocity(_shooterInputs._flywheelMotorVelocity);
+    _fuelSimVisualizer.updateTrajectory(linearSpeed, ShooterConstants.SHOOTER_HOOD_ANGLE);
+
+    // Check if we should launch fuel (for visualization)
+    Logger.recordOutput("Shooter/FuelSim/ShouldVisualizeLaunch", shouldVisualizeLaunch());
+
+    // Actually launch fuel if conditions are met
+    visualizeFuelLaunch();
+  }
+
+  // ==================== FUEL SIM METHODS ====================
+
+  /**
+   * Determines if fuel should be visualized as launching.
+   *
+   * <p>This is for VISUALIZATION only and does NOT affect actual robot shooting. The driver still
+   * controls shooting with existing buttons.
+   *
+   * <p>All conditions must be true:
+   *
+   * <ul>
+   *   <li>Flywheels are at target speed (within tolerance)
+   *   <li>Target speed is above the launch threshold (prevents false triggers)
+   *   <li>Virtual hopper has fuel available
+   *   <li>Enough time has passed since last launch (rate limiting)
+   * </ul>
+   *
+   * @return true if fuel should be visualized as launching
+   */
+  private boolean shouldVisualizeLaunch() {
+    // Check flywheel is at target speed
+    boolean atTargetSpeed = areFlywheelsAtTargetSpeed();
+
+    // Check target speed is above threshold (compare using same units)
+    double targetRPM = _targetFlywheelSpeed.in(RevolutionsPerSecond) * 60;
+    boolean aboveThreshold = targetRPM > ShooterConstants.SHOOTER_RPM_THRESHOLD_FOR_LAUNCH.in(RPM);
+
+    // Check hopper has fuel
+    boolean hasFuel = VirtualHopper.getInstance().hasFuel();
+
+    // Check rate limit
+    boolean canLaunch = _fuelSimVisualizer.canLaunch();
+
+    return atTargetSpeed && aboveThreshold && hasFuel && canLaunch;
+  }
+
+  /**
+   * Launches virtual fuel if all conditions are met.
+   *
+   * <p>This uses the MEASURED flywheel speed (not target) for realistic physics. The measured speed
+   * reflects actual motor performance, giving more accurate trajectory prediction.
+   */
+  private void visualizeFuelLaunch() {
+    if (!shouldVisualizeLaunch()) {
+      return;
+    }
+
+    // Use MEASURED speed for realistic physics
+    LinearVelocity linearSpeed =
+        _fuelSimVisualizer.convertToLinearVelocity(_shooterInputs._flywheelMotorVelocity);
+
+    // Launch with hood angle from constants
+    _fuelSimVisualizer.launchFuel(linearSpeed, ShooterConstants.SHOOTER_HOOD_ANGLE);
   }
 
   /**

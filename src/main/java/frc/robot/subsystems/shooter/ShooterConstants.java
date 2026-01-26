@@ -1,18 +1,23 @@
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.Time;
 import frc.robot.Constants;
 import java.util.Map;
 import java.util.TreeMap;
@@ -256,6 +261,62 @@ public class ShooterConstants {
     }
   }
 
+  // ==================== FUEL SIM CONSTANTS ====================
+
+  /**
+   * FuelSim constants for shooter trajectory visualization.
+   *
+   * <p>These constants define the shooter's physical position on the robot and launch parameters.
+   * They are used by the FuelSimVisualizer to calculate realistic projectile trajectories.
+   *
+   * <p><b>Coordinate System:</b> Robot-relative coordinates with origin at robot center.
+   *
+   * <ul>
+   *   <li>X-axis: forward (positive ahead of robot)
+   *   <li>Y-axis: left/right (positive to left)
+   *   <li>Z-axis: up (positive above ground)
+   * </ul>
+   */
+
+  /** Height of the shooter exit point above the ground. 18" = 0.457 m */
+  public static final Distance SHOOTER_HEIGHT_FROM_GROUND = Inches.of(18.0);
+
+  /** Forward offset of shooter from robot center. 8" ahead of center. */
+  public static final Distance SHOOTER_FORWARD_OFFSET = Inches.of(8.0);
+
+  /** Side offset of shooter from robot center. Centered left/right = 0.0. */
+  public static final Distance SHOOTER_SIDE_OFFSET = Inches.of(0.0);
+
+  /** Fixed hood angle from horizontal. 30° launch angle for the fuel trajectory. */
+  public static final Angle SHOOTER_HOOD_ANGLE = Degrees.of(30.0);
+
+  /**
+   * Minimum flywheel RPM threshold to trigger fuel launch visualization. Below this speed, no fuel
+   * will be visualized as launching.
+   */
+  public static final AngularVelocity SHOOTER_RPM_THRESHOLD_FOR_LAUNCH = RPM.of(1000.0);
+
+  /**
+   * Time between consecutive fuel launches. Limits visualization rate to one fuel every 0.5
+   * seconds.
+   */
+  public static final Time SHOOTER_LAUNCH_INTERVAL = Seconds.of(0.5);
+
+  /**
+   * Diameter of the shooter wheel for velocity conversion. Uses the same 4" wheel as
+   * FLYWHEEL_DIAMETER.
+   */
+  public static final Distance SHOOTER_WHEEL_DIAMETER = FLYWHEEL_DIAMETER;
+
+  /** Maximum number of fuel pieces the robot can hold. */
+  public static final int MAX_HOPPER_CAPACITY = 8;
+
+  /** Number of fuel pieces robot starts with when enabled. */
+  public static final int STARTING_FUEL_COUNT = 8;
+
+  /** Number of points used to render the trajectory visualization. */
+  public static final int TRAJECTORY_VISUALIZATION_POINTS = 25;
+
   // ==================== LOGGING ====================
 
   static {
@@ -269,5 +330,23 @@ public class ShooterConstants {
         "Constants/Shooter/SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT",
         SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT);
     Logger.recordOutput("Constants/Shooter/SHOOTER_FLYWHEEL_INVERTED", SHOOTER_FLYWHEEL_INVERTED);
+
+    // Log FuelSim constants
+    Logger.recordOutput(
+        "Constants/Shooter/FuelSim/HeightFromGround_m", SHOOTER_HEIGHT_FROM_GROUND.in(Meters));
+    Logger.recordOutput(
+        "Constants/Shooter/FuelSim/ForwardOffset_m", SHOOTER_FORWARD_OFFSET.in(Meters));
+    Logger.recordOutput("Constants/Shooter/FuelSim/SideOffset_m", SHOOTER_SIDE_OFFSET.in(Meters));
+    Logger.recordOutput("Constants/Shooter/FuelSim/HoodAngle_deg", SHOOTER_HOOD_ANGLE.in(Degrees));
+    Logger.recordOutput(
+        "Constants/Shooter/FuelSim/RPMThreshold", SHOOTER_RPM_THRESHOLD_FOR_LAUNCH.in(RPM));
+    Logger.recordOutput(
+        "Constants/Shooter/FuelSim/LaunchInterval_s", SHOOTER_LAUNCH_INTERVAL.in(Seconds));
+    Logger.recordOutput(
+        "Constants/Shooter/FuelSim/WheelDiameter_m", SHOOTER_WHEEL_DIAMETER.in(Meters));
+    Logger.recordOutput("Constants/Shooter/FuelSim/MaxHopperCapacity", MAX_HOPPER_CAPACITY);
+    Logger.recordOutput("Constants/Shooter/FuelSim/StartingFuelCount", STARTING_FUEL_COUNT);
+    Logger.recordOutput(
+        "Constants/Shooter/FuelSim/TrajectoryPoints", TRAJECTORY_VISUALIZATION_POINTS);
   }
 }

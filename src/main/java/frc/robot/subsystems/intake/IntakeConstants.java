@@ -162,12 +162,44 @@ public class IntakeConstants {
    * measurements. X = forward/back, Y = up/down, Z = left/right (meters)
    */
   public static final Translation3d VISUALIZATION_OFFSET =
-      new Translation3d(Inches.of(-8.5).in(Meters), Inches.of(0).in(Meters), Inches.of(10).in(Meters));
+      new Translation3d(
+          Inches.of(-8.5).in(Meters), Inches.of(0).in(Meters), Inches.of(10).in(Meters));
 
-  public static final Rotation3d VISUALIZATION_ROTATION = new Rotation3d(0, -Math.PI/2, Math.PI);
+  public static final Rotation3d VISUALIZATION_ROTATION = new Rotation3d(0, -Math.PI / 2, Math.PI);
 
   /** Visualization arm length in meters for Mechanism2d display */
   public static final double VISUALIZATION_ARM_LENGTH = ARM_LENGTH.in(Meters);
+
+  // ==================== FUEL SIM CONSTANTS ====================
+
+  /**
+   * Intake bounding box in robot-relative coordinates. The intake is 5" deep and 20" wide, sitting
+   * just outside the bumpers.
+   *
+   * <p>Coordinate system: Origin at robot center - X axis: forward (positive ahead of robot) - Y
+   * axis: left/right (positive to left) - Robot frame: 26" × 26" - Bumpers: 4" thick on all sides
+   *
+   * <p>X-axis calculation: - Robot center to bumper edge: 26"/2 + 4" bumper = 17" - Intake starts
+   * at bumper edge (MIN_X = 17") - Intake extends 5" forward: 17" + 5" = 22" (MAX_X = 22")
+   *
+   * <p>Y-axis calculation: - Intake width: 20" (10" on each side of center) - Left edge: -10"
+   * (MIN_Y = -10") - Right edge: +10" (MAX_Y = +10")
+   *
+   * <p>Note: Intake height matches bumper height (6" off ground). FuelSim automatically checks fuel
+   * height against bumper height, so no Z-axis bounding needed.
+   */
+
+  /** Minimum X coordinate of intake bounding box (bumper edge). 17" = robot half-width + bumpers */
+  public static final Distance INTAKE_BOUNDING_BOX_MIN_X = Inches.of(17.0);
+
+  /** Maximum X coordinate of intake bounding box (5" forward from bumper). 17" + 5" = 22" */
+  public static final Distance INTAKE_BOUNDING_BOX_MAX_X = Inches.of(22.0);
+
+  /** Minimum Y coordinate of intake bounding box (left edge). -10" (half of 20" intake width) */
+  public static final Distance INTAKE_BOUNDING_BOX_MIN_Y = Inches.of(-10.0);
+
+  /** Maximum Y coordinate of intake bounding box (right edge). +10" (half of 20" intake width) */
+  public static final Distance INTAKE_BOUNDING_BOX_MAX_Y = Inches.of(10.0);
 
   // ==================== LOGGING ====================
 
@@ -190,5 +222,15 @@ public class IntakeConstants {
         "Constants/Intake/INTAKE_ROLLER_SECONDARY_CURRENT_LIMIT",
         INTAKE_ROLLER_SECONDARY_CURRENT_LIMIT);
     Logger.recordOutput("Constants/Intake/ZeroedPose3d", Pose3d.kZero);
+
+    // Log FuelSim constants
+    Logger.recordOutput(
+        "Constants/Intake/FuelSim/BoundingBoxMinX_m", INTAKE_BOUNDING_BOX_MIN_X.in(Meters));
+    Logger.recordOutput(
+        "Constants/Intake/FuelSim/BoundingBoxMaxX_m", INTAKE_BOUNDING_BOX_MAX_X.in(Meters));
+    Logger.recordOutput(
+        "Constants/Intake/FuelSim/BoundingBoxMinY_m", INTAKE_BOUNDING_BOX_MIN_Y.in(Meters));
+    Logger.recordOutput(
+        "Constants/Intake/FuelSim/BoundingBoxMaxY_m", INTAKE_BOUNDING_BOX_MAX_Y.in(Meters));
   }
 }

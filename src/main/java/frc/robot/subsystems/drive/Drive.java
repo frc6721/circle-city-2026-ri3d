@@ -465,6 +465,44 @@ public class Drive extends SubsystemBase {
   }
 
   /**
+   * Returns the robot's velocity in field-relative coordinates.
+   *
+   * <p>This transforms the robot-relative chassis speeds into field coordinates, accounting for the
+   * robot's heading. This is used by FuelSim to calculate projectile trajectories that account for
+   * robot motion.
+   *
+   * <p><b>Coordinate Transformation:</b>
+   *
+   * <p>Robot-relative speeds are measured from the robot's perspective:
+   *
+   * <ul>
+   *   <li>vx = forward/backward relative to robot
+   *   <li>vy = left/right relative to robot
+   * </ul>
+   *
+   * <p>Field-relative speeds are measured from the field's perspective:
+   *
+   * <ul>
+   *   <li>vx = velocity toward the opposite end of the field
+   *   <li>vy = velocity toward the left side of the field
+   * </ul>
+   *
+   * <p>The transformation uses the robot's heading to rotate the velocity vector. For example, if
+   * the robot is facing sideways (90°) and moving "forward" at 1 m/s, the field-relative velocity
+   * would be 1 m/s to the left.
+   *
+   * @return Field-relative chassis speeds (vx, vy in field coordinates, omega unchanged)
+   */
+  public ChassisSpeeds getFieldRelativeSpeeds() {
+    Pose2d pose = getPose();
+    ChassisSpeeds robotRelative = getChassisSpeeds();
+
+    // Transform from robot-relative to field-relative
+    // ChassisSpeeds.fromRobotRelativeSpeeds rotates the vx/vy by the robot's heading
+    return ChassisSpeeds.fromRobotRelativeSpeeds(robotRelative, pose.getRotation());
+  }
+
+  /**
    * Returns the position of each module in radians.
    *
    * <p>This is used during wheel radius characterization to determine the effective wheel radius.
