@@ -153,7 +153,7 @@ public class IntakeConstants {
   // ==================== SOFTWARE SETTINGS ====================
 
   /** Deadband for considering pivot "at position" in degrees */
-  public static final double INTAKE_PIVOT_DEADBAND = 2.0;
+  public static final double INTAKE_PIVOT_DEADBAND = 4.0;
 
   // ==================== VISUALIZATION CONSTANTS ====================
 
