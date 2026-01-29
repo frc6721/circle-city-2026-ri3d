@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 
@@ -197,10 +198,10 @@ public class RobotContainer {
       // Register intake with FuelSim
       // Fuel inside the bounding box will be "collected" when canIntakeFuel() returns true
       fuelSim.registerIntake(
-          IntakeConstants.INTAKE_BOUNDING_BOX_MIN_X.in(Meters),
-          IntakeConstants.INTAKE_BOUNDING_BOX_MAX_X.in(Meters),
-          IntakeConstants.INTAKE_BOUNDING_BOX_MIN_Y.in(Meters),
-          IntakeConstants.INTAKE_BOUNDING_BOX_MAX_Y.in(Meters),
+          -IntakeConstants.INTAKE_LENGTH.div(2).in(Meters),
+          IntakeConstants.INTAKE_LENGTH.div(2).plus(Inches.of(10)).in(Meters),
+          -IntakeConstants.INTAKE_WIDTH.div(2).in(Meters),
+          IntakeConstants.INTAKE_WIDTH.div(2).in(Meters),
           intake::canIntakeFuel, // BooleanSupplier - checks if intake can collect
           intake::simIntakeFuel); // Runnable - called when fuel is collected
 

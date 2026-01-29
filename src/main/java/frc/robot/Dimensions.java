@@ -39,18 +39,8 @@ public final class Dimensions {
    */
   public static final Distance ROBOT_WIDTH = Inches.of(34.0);
 
-  /**
-   * Full robot length including bumpers (front to back, along X-axis).
-   *
-   * <p>Calculation is same as width since the robot has a square frame.
-   *
-   * <ul>
-   *   <li>Robot frame: 26"
-   *   <li>Bumpers front and back: 4" × 2 = 8"
-   *   <li>Total: 26" + 8" = 34" = 0.8636 m
-   * </ul>
-   */
-  public static final Distance ROBOT_LENGTH = Inches.of(34.0);
+  /** Full robot length including bumpers (front to back, along X-axis). */
+  public static final Distance ROBOT_LENGTH = Inches.of(26.0 + 3.75);
 
   /**
    * Height from ground to top of bumpers.
@@ -59,7 +49,7 @@ public final class Dimensions {
    * is used by FuelSim to determine if game pieces can be pushed by the robot (pieces above bumper
    * height won't collide with the robot body).
    */
-  public static final Distance BUMPER_HEIGHT = Inches.of(6.0);
+  public static final Distance BUMPER_HEIGHT = Inches.of(4.0);
 
   // Log dimensions at class load
   static {

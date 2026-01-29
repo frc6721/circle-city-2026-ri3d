@@ -315,7 +315,7 @@ public class ShooterConstants {
   public static final int STARTING_FUEL_COUNT = 8;
 
   /** Number of points used to render the trajectory visualization. */
-  public static final int TRAJECTORY_VISUALIZATION_POINTS = 25;
+  public static final int TRAJECTORY_VISUALIZATION_POINTS = 50;
 
   // ==================== LOGGING ====================
 
