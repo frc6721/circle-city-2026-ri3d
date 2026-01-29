@@ -44,6 +44,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import frc.robot.RobotState;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -236,8 +237,15 @@ public class Drive extends SubsystemBase {
         rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
       }
 
-      // Apply update
+      // Apply update to local pose estimator
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+
+      // Also update the centralized RobotState
+      // This allows other subsystems (like Shooter) to access robot state without
+      // a direct reference to Drive
+      RobotState.getInstance()
+          .addOdometryObservation(
+              sampleTimestamps[i], rawGyroRotation, modulePositions, getModuleStates());
     }
 
     // Update gyro alert

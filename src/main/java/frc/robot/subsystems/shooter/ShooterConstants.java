@@ -82,27 +82,21 @@ public class ShooterConstants {
       new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Real/kV", 0.002);
 
   // ==================== FEEDFORWARD CONSTANTS (SIMULATION) ====================
-
-  /** Static friction voltage (voltage to overcome friction) */
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_KS_SIM =
       new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Sim/kS", 0.0);
-
-  /** Velocity feedforward constant (Volts per RPM) */
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_KV_SIM =
       new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Sim/kV", 0.0018);
 
   // ==================== PID CONSTANTS (SIMULATION) ====================
 
-  /** Simulation PID values - tuned for physics simulation */
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KP_SIM =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kP", 0.001);
-
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kP", 0.0001);
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KI_SIM =
       new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kI", 0.0);
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KD_SIM =
       new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kD", 0.0);
   public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_FF_SIM =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kFF", 0.00018);
+      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kV", 0.0);
 
   // ==================== MODE-SELECTED CONSTANTS ====================
 
@@ -199,8 +193,8 @@ public class ShooterConstants {
 
   static {
     // Add characterization data points using the units library for clarity
-    DISTANCE_TO_SPEED_MAP.put(Meters.of(1.0).in(Meters), RPM.of(1500.0).in(RPM));
-    DISTANCE_TO_SPEED_MAP.put(Meters.of(3.0).in(Meters), RPM.of(3000.0).in(RPM));
+    DISTANCE_TO_SPEED_MAP.put(Meters.of(1.0).in(Meters), RPM.of(1000.0).in(RPM));
+    DISTANCE_TO_SPEED_MAP.put(Meters.of(3.0).in(Meters), RPM.of(1500.0).in(RPM));
     // Add more data points as you characterize:
     // DISTANCE_TO_SPEED_MAP.put(Meters.of(5.0).in(Meters), RPM.of(4500.0).in(RPM));
   }
@@ -231,14 +225,14 @@ public class ShooterConstants {
   /** Side offset of shooter from robot center. Centered left/right = 0.0. */
   public static final Distance SHOOTER_SIDE_OFFSET = Inches.of(0.0);
 
-  /** Fixed hood angle from horizontal. 30° launch angle for the fuel trajectory. */
-  public static final Angle SHOOTER_HOOD_ANGLE = Degrees.of(20.0);
+  /** Fixed hood angle from horizontal. 70° launch angle for the fuel trajectory. */
+  public static final Angle SHOOTER_HOOD_ANGLE = Degrees.of(70.0);
 
   /**
    * Minimum flywheel RPM threshold to trigger fuel launch visualization. Below this speed, no fuel
    * will be visualized as launching.
    */
-  public static final AngularVelocity SHOOTER_RPM_THRESHOLD_FOR_LAUNCH = RPM.of(1000.0);
+  public static final AngularVelocity SHOOTER_RPM_THRESHOLD_FOR_LAUNCH = RPM.of(200.0);
 
   /**
    * Time between consecutive fuel launches. Limits visualization rate to one fuel every 0.5

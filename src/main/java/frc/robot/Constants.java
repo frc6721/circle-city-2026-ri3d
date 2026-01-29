@@ -40,5 +40,4 @@ public final class Constants {
   public static void disableHAL() {
     disableHAL = true;
   }
-
 }

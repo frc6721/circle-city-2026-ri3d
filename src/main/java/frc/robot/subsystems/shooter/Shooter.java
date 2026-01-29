@@ -10,8 +10,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -22,7 +21,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.VirtualHopper;
 import frc.robot.subsystems.shooter.io.ShooterIO;
 import frc.robot.subsystems.shooter.io.ShooterIOInputsAutoLogged;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -89,9 +87,6 @@ public class Shooter extends SubsystemBase {
   private final ShooterVisualizer _visualizer;
   private final SysIdRoutine sysId;
 
-  // FuelSim integration - suppliers for robot state
-  private final Supplier<Pose2d> _poseSupplier;
-  private final Supplier<ChassisSpeeds> _fieldSpeedsSupplier;
   private final FuelVisualizer _fuelSimVisualizer;
 
   /**
@@ -100,28 +95,21 @@ public class Shooter extends SubsystemBase {
    * <p>Initializes the shooter with the provided hardware IO and stops the flywheel for safety. The
    * flywheel will remain stopped until commanded to spin.
    *
-   * <p><b>Dependency Injection:</b> The pose and speed suppliers allow this subsystem to access
-   * robot state without directly depending on the Drive subsystem. This pattern makes the code more
-   * testable and simulation-friendly.
+   * <p><b>RobotState Integration:</b> This subsystem uses the centralized RobotState singleton to
+   * access robot pose and velocity. This decouples the Shooter from the Drive subsystem and
+   * simplifies the constructor.
    *
    * @param shooterIO The hardware interface for shooter control (motor and sensors)
-   * @param poseSupplier Supplier for current robot pose (position and heading on field)
-   * @param fieldSpeedsSupplier Supplier for field-relative chassis speeds
    */
-  public Shooter(
-      ShooterIO shooterIO,
-      Supplier<Pose2d> poseSupplier,
-      Supplier<ChassisSpeeds> fieldSpeedsSupplier) {
+  public Shooter(ShooterIO shooterIO) {
     this._shooterIO = shooterIO;
-    this._poseSupplier = poseSupplier;
-    this._fieldSpeedsSupplier = fieldSpeedsSupplier;
     this.stopFlywheels();
 
     // Initialize the visualizer for Mechanism2d and 3D pose output
     _visualizer = new ShooterVisualizer("Shooter");
 
     // Initialize FuelSim visualizer for trajectory and launch simulation
-    _fuelSimVisualizer = new FuelVisualizer(poseSupplier, fieldSpeedsSupplier);
+    _fuelSimVisualizer = new FuelVisualizer();
 
     // Configure SysId
     sysId =
@@ -453,5 +441,51 @@ public class Shooter extends SubsystemBase {
     return run(() -> runCharacterization(Volts.of(0.0)))
         .withTimeout(1.0)
         .andThen(sysId.dynamic(direction));
+  }
+
+  /**
+   * Updates the flywheel speed to shoot at the alliance hub.
+   *
+   * <p>This method calculates the required flywheel speed based on the current distance to the
+   * alliance hub and sets the flywheel to that speed. Call this method continuously (e.g., from a
+   * command's execute()) to adjust speed as the robot moves.
+   *
+   * <p>The alliance hub target is automatically flipped based on alliance color.
+   *
+   * <p><b>Usage in a command:</b>
+   *
+   * <pre>
+   * // Continuously update speed while driving
+   * Commands.run(() -> shooter.updateSpeedForHub(), shooter)
+   * </pre>
+   */
+  public void updateSpeedForHub() {
+    AngularVelocity targetSpeed = ShotCalculator.getInstance().getFlywheelSpeedForAllianceHub();
+    setFlywheelSpeed(targetSpeed);
+  }
+
+  /**
+   * Updates the flywheel speed to shoot at a specific point on the field.
+   *
+   * <p>This method calculates the required flywheel speed based on the current distance to the
+   * target point and sets the flywheel to that speed. Call this method continuously to adjust speed
+   * as the robot moves.
+   *
+   * @param target The target point to shoot at (Translation3d in field coordinates)
+   */
+  public void updateSpeedForTarget(Translation3d target) {
+    AngularVelocity targetSpeed = ShotCalculator.getInstance().getFlywheelSpeedForTarget(target);
+    setFlywheelSpeed(targetSpeed);
+  }
+
+  /**
+   * Checks if the robot is within effective shooting range of the alliance hub.
+   *
+   * <p>This can be used by commands to decide whether to attempt a shot or provide driver feedback.
+   *
+   * @return true if the robot is within the characterized shooting range
+   */
+  public boolean isInShootingRange() {
+    return ShotCalculator.getInstance().isInShootingRange();
   }
 }

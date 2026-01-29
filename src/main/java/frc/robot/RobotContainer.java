@@ -14,12 +14,10 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -87,8 +85,7 @@ public class RobotContainer {
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
         intake = new Intake(new RealIntakeIO());
-        // Pass pose and field speed suppliers for FuelSim integration
-        shooter = new Shooter(new RealShooterIO(), drive::getPose, drive::getFieldRelativeSpeeds);
+        shooter = new Shooter(new RealShooterIO());
         feeder = new Feeder(new RealFeederIO());
         break;
 
@@ -103,8 +100,7 @@ public class RobotContainer {
                 new ModuleIOSim());
         // Use simulation IO implementations with physics simulation
         intake = new Intake(new SimIntakeIO());
-        // Pass pose and field speed suppliers for FuelSim integration
-        shooter = new Shooter(new SimShooterIO(), drive::getPose, drive::getFieldRelativeSpeeds);
+        shooter = new Shooter(new SimShooterIO());
         feeder = new Feeder(new SimFeederIO());
         break;
 
@@ -119,8 +115,7 @@ public class RobotContainer {
                 new ModuleIO() {});
         // For replay, use empty IO implementations
         intake = new Intake(new IntakeIO() {});
-        // For replay, provide no-op suppliers (no live robot state)
-        shooter = new Shooter(new ShooterIO() {}, () -> new Pose2d(), () -> new ChassisSpeeds());
+        shooter = new Shooter(new ShooterIO() {});
         feeder = new Feeder(new FeederIO() {});
         break;
     }
@@ -281,13 +276,10 @@ public class RobotContainer {
 
     // Right bumper is for the real controller
     // y() button on xbox on mac os
+    // Dynamic shooting: continuously adjusts flywheel speed based on distance to alliance hub
     controller
         .y()
-        .onTrue(
-            ShooterCommands.setFlywheelTargetSpeed(
-                    shooter, RevolutionsPerSecond.of(4000 / 60.0)) // 4000 RPM
-                .andThen(ShooterCommands.waitForFlywheelsToReachSpeed(shooter).withTimeout(2))
-                .andThen(FeederCommands.runFeederAtPercentOutput(feeder, 0.75).repeatedly()))
+        .whileTrue(ShooterCommands.shootToHubSequence(shooter, feeder))
         .onFalse(
             FeederCommands.stopFeeder(feeder).andThen(ShooterCommands.runFlywheelsAtIdle(shooter)));
 

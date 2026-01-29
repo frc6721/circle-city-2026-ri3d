@@ -2,6 +2,7 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -15,7 +16,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.lib.VirtualHopper;
 import frc.lib.feulSim.FuelSim;
-import java.util.function.Supplier;
+import frc.robot.RobotState;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -53,6 +54,11 @@ import org.littletonrobotics.junction.Logger;
  *   <li>Rotate by robot heading to convert to field coordinates
  *   <li>Add robot's field velocity (robot is moving while shooting)
  * </ol>
+ *
+ * <p><b>RobotState Integration:</b>
+ *
+ * <p>This class uses the centralized RobotState singleton to get robot pose and velocity, removing
+ * the need for pose/speed suppliers to be passed in.
  */
 public class FuelVisualizer {
 
@@ -63,10 +69,6 @@ public class FuelVisualizer {
   // 50 points × 0.02s = 1 second of trajectory
   private static final double TRAJECTORY_TIME_STEP = 0.02;
 
-  // Suppliers for robot state (dependency injection for testability)
-  private final Supplier<Pose2d> poseSupplier;
-  private final Supplier<ChassisSpeeds> fieldSpeedsSupplier;
-
   // Trajectory visualization array
   private final Translation3d[] trajectory;
 
@@ -74,20 +76,12 @@ public class FuelVisualizer {
   private double lastLaunchTime = 0.0;
 
   /**
-   * Creates a new FuelSimVisualizer.
+   * Creates a new FuelVisualizer.
    *
-   * <p>The suppliers allow this class to get robot state without depending directly on the Drive
-   * subsystem - this is the "dependency injection" pattern that makes testing and simulation
-   * easier.
-   *
-   * @param poseSupplier Supplies the current robot pose (position and rotation on field)
-   * @param fieldSpeedsSupplier Supplies field-relative chassis speeds
+   * <p>This class now uses RobotState.getInstance() to get robot pose and velocity, so no suppliers
+   * need to be passed in.
    */
-  public FuelVisualizer(
-      Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> fieldSpeedsSupplier) {
-    this.poseSupplier = poseSupplier;
-    this.fieldSpeedsSupplier = fieldSpeedsSupplier;
-
+  public FuelVisualizer() {
     // Initialize trajectory array with size from constants
     this.trajectory = new Translation3d[ShooterConstants.TRAJECTORY_VISUALIZATION_POINTS];
     for (int i = 0; i < trajectory.length; i++) {
@@ -164,9 +158,9 @@ public class FuelVisualizer {
    * @return Field-relative 3D velocity vector
    */
   public Translation3d calculateLaunchVelocity(LinearVelocity linearVel, Angle angle) {
-    // Get current robot state
-    Pose2d robotPose = poseSupplier.get();
-    ChassisSpeeds fieldSpeeds = fieldSpeedsSupplier.get();
+    // Get current robot state from centralized RobotState
+    Pose2d robotPose = RobotState.getInstance().getEstimatedPose();
+    ChassisSpeeds fieldSpeeds = RobotState.getInstance().getFieldRelativeVelocity();
 
     // Convert units
     double speedMps = linearVel.in(MetersPerSecond);
@@ -201,7 +195,7 @@ public class FuelVisualizer {
    * @return The shooter's position in field coordinates (x, y, z in meters)
    */
   private Translation3d getShooterPosition() {
-    Pose2d robotPose = poseSupplier.get();
+    Pose2d robotPose = RobotState.getInstance().getEstimatedPose();
 
     // Get shooter offset from constants (robot-relative) - convert Distance to meters
     double forwardOffset = ShooterConstants.SHOOTER_FORWARD_OFFSET.in(Meters);
@@ -285,12 +279,37 @@ public class FuelVisualizer {
    * @param angle The hood angle
    */
   public void updateTrajectory(LinearVelocity linearVel, Angle angle) {
+    // Convert to RPM to check against threshold
+    double linearVelMps = linearVel.in(MetersPerSecond);
+    double radiusMeters = ShooterConstants.SHOOTER_WHEEL_DIAMETER.in(Meters) / 2.0;
+    double angularVelRadPerSec = linearVelMps / radiusMeters;
+    double rpm = (angularVelRadPerSec * 60.0) / (2.0 * Math.PI);
+
+    // If flywheel speed is below threshold, clear trajectory and return
+    if (rpm < ShooterConstants.SHOOTER_RPM_THRESHOLD_FOR_LAUNCH.in(RPM)) {
+      // Clear all trajectory points
+      for (int i = 0; i < trajectory.length; i++) {
+        trajectory[i] = new Translation3d();
+      }
+      Logger.recordOutput("Shooter/Trajectory", trajectory);
+      return;
+    }
+
     // Get initial position and velocity
     Translation3d initialPos = getShooterPosition();
     Translation3d velocity = calculateLaunchVelocity(linearVel, angle);
 
     // Calculate trajectory points
+    boolean hitGround = false;
+    Translation3d groundContactPoint = null;
+
     for (int i = 0; i < trajectory.length; i++) {
+      // If we've already hit the ground, use the ground contact point for remaining points
+      if (hitGround) {
+        trajectory[i] = groundContactPoint;
+        continue;
+      }
+
       // Time for this point
       double t = i * TRAJECTORY_TIME_STEP;
 
@@ -305,8 +324,12 @@ public class FuelVisualizer {
       // The ½gt² comes from integrating constant acceleration twice
       double z = initialPos.getZ() + velocity.getZ() * t - 0.5 * GRAVITY * t * t;
 
-      // Clamp z to ground level (fuel doesn't go underground)
-      z = Math.max(0, z);
+      // Check if we hit the ground
+      if (z <= 0) {
+        hitGround = true;
+        z = 0; // Set exactly to ground level for this final point
+        groundContactPoint = new Translation3d(x, y, z);
+      }
 
       trajectory[i] = new Translation3d(x, y, z);
     }

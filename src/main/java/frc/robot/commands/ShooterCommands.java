@@ -333,4 +333,113 @@ public class ShooterCommands {
                   System.out.println("\tkV (Volts per RPM): " + formatter.format(kV));
                 }));
   }
+
+  // ==================== DYNAMIC SHOOTING COMMANDS ====================
+
+  /**
+   * Creates a command to continuously update flywheel speed based on distance to the alliance hub.
+   *
+   * <p>This command runs continuously and updates the flywheel speed every loop (20ms) based on the
+   * robot's current distance to the alliance hub. This allows the robot to adjust its shot while
+   * moving.
+   *
+   * <p><b>How it works:</b>
+   *
+   * <ol>
+   *   <li>Every 20ms, gets robot position from RobotState
+   *   <li>Calculates distance to the alliance hub (auto-flips for red alliance)
+   *   <li>Looks up required RPM from the interpolation table
+   *   <li>Updates flywheel target speed
+   * </ol>
+   *
+   * <p><b>Usage:</b>
+   *
+   * <pre>
+   * // Hold button to spin up, flywheel adjusts as you move
+   * driver.rightBumper().whileTrue(
+   *   ShooterCommands.shootToHub(shooter)
+   * );
+   *
+   * // Complete shooting sequence
+   * driver.rightBumper().whileTrue(
+   *   ShooterCommands.shootToHub(shooter)
+   *     .alongWith(
+   *       Commands.waitUntil(() -> shooter.areFlywheelsAtTargetSpeed())
+   *         .andThen(FeederCommands.runFeeder(feeder))
+   *     )
+   * );
+   * </pre>
+   *
+   * <p><b>Note:</b> This command does NOT finish on its own - it runs until interrupted. Typically
+   * used with whileTrue() button binding so it stops when the button is released.
+   *
+   * @param shooter The shooter subsystem
+   * @return A command that continuously updates flywheel speed for the alliance hub
+   */
+  public static Command shootToHub(Shooter shooter) {
+    return Commands.run(
+            () -> {
+              shooter.updateSpeedForHub();
+            },
+            shooter)
+        .withName("ShootToHub");
+  }
+
+  /**
+   * Creates a command to continuously update flywheel speed based on distance to a specific target.
+   *
+   * <p>Similar to shootToHub(), but allows shooting at any point on the field. Useful for shooting
+   * at specific targets or testing different positions.
+   *
+   * @param shooter The shooter subsystem
+   * @param target The target point to shoot at (Translation3d in field coordinates)
+   * @return A command that continuously updates flywheel speed for the target
+   */
+  public static Command shootToPoint(
+      Shooter shooter, edu.wpi.first.math.geometry.Translation3d target) {
+    return Commands.run(
+            () -> {
+              shooter.updateSpeedForTarget(target);
+            },
+            shooter)
+        .withName("ShootToPoint");
+  }
+
+  /**
+   * Creates a complete shooting sequence command for the alliance hub.
+   *
+   * <p>This command:
+   *
+   * <ol>
+   *   <li>Continuously updates flywheel speed based on distance to hub
+   *   <li>Waits for the flywheel to reach target speed (with timeout)
+   *   <li>Runs the feeder to shoot the game piece
+   *   <li>Stops the flywheel when the command ends
+   * </ol>
+   *
+   * <p><b>Usage:</b>
+   *
+   * <pre>
+   * driver.rightBumper().whileTrue(
+   *   ShooterCommands.shootToHubSequence(shooter, feeder)
+   * );
+   * </pre>
+   *
+   * @param shooter The shooter subsystem
+   * @param feeder The feeder subsystem (passed to create the feeding command)
+   * @return A complete shooting sequence command
+   */
+  public static Command shootToHubSequence(
+      Shooter shooter, frc.robot.subsystems.feeder.Feeder feeder) {
+    return shootToHub(shooter)
+        .alongWith(
+            Commands.waitUntil(() -> shooter.areFlywheelsAtTargetSpeed())
+                .withTimeout(2.0)
+                .andThen(FeederCommands.runFeederAtPercentOutput(feeder, 0.75).repeatedly()))
+        .finallyDo(
+            () -> {
+              shooter.stopFlywheels();
+            })
+        .withName("ShootToHubSequence");
+  }
 }
