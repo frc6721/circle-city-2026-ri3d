@@ -89,7 +89,7 @@ public class VirtualHopper {
    * @param count The new fuel count (should be >= 0)
    */
   public void setFuelCount(int count) {
-    fuelCount = Math.max(0, count); // Ensure non-negative
+    fuelCount = Math.max(0, count); 
     logFuelCount();
   }
 

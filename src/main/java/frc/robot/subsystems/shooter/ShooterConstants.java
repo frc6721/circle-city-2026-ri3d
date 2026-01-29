@@ -309,7 +309,7 @@ public class ShooterConstants {
   public static final Distance SHOOTER_WHEEL_DIAMETER = FLYWHEEL_DIAMETER;
 
   /** Maximum number of fuel pieces the robot can hold. */
-  public static final int MAX_HOPPER_CAPACITY = 8;
+  public static final int MAX_HOPPER_CAPACITY = 30;
 
   /** Number of fuel pieces robot starts with when enabled. */
   public static final int STARTING_FUEL_COUNT = 8;
