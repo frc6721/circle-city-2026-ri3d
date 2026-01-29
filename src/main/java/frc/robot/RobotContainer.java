@@ -198,8 +198,8 @@ public class RobotContainer {
       // Register intake with FuelSim
       // Fuel inside the bounding box will be "collected" when canIntakeFuel() returns true
       fuelSim.registerIntake(
-          -IntakeConstants.INTAKE_LENGTH.div(2).in(Meters),
-          IntakeConstants.INTAKE_LENGTH.div(2).plus(Inches.of(10)).in(Meters),
+          -IntakeConstants.INTAKE_LENGTH.div(2).minus(Inches.of(10)).in(Meters),
+          IntakeConstants.INTAKE_LENGTH.div(2).in(Meters),
           -IntakeConstants.INTAKE_WIDTH.div(2).in(Meters),
           IntakeConstants.INTAKE_WIDTH.div(2).in(Meters),
           intake::canIntakeFuel, // BooleanSupplier - checks if intake can collect
