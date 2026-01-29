@@ -54,7 +54,7 @@ import org.littletonrobotics.junction.Logger;
  *   <li>Add robot's field velocity (robot is moving while shooting)
  * </ol>
  */
-public class FuelSimVisualizer {
+public class FuelVisualizer {
 
   // Gravitational acceleration (m/s²)
   private static final double GRAVITY = 9.81;
@@ -83,7 +83,7 @@ public class FuelSimVisualizer {
    * @param poseSupplier Supplies the current robot pose (position and rotation on field)
    * @param fieldSpeedsSupplier Supplies field-relative chassis speeds
    */
-  public FuelSimVisualizer(
+  public FuelVisualizer(
       Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> fieldSpeedsSupplier) {
     this.poseSupplier = poseSupplier;
     this.fieldSpeedsSupplier = fieldSpeedsSupplier;

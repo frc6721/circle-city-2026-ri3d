@@ -55,9 +55,9 @@ import org.littletonrobotics.junction.Logger;
  *
  * <ul>
  *   <li>Closed-loop (PID) velocity control for precise flywheel speed
- *   <li>Distance-based shooting using an interpolated lookup table
- *   <li>TreeMap data structure stores (distance → RPM) data points
- *   <li>Interpolation calculates speeds for distances between data points
+ *   <li>Distance-based shooting using WPILib's InterpolatingDoubleTreeMap
+ *   <li>InterpolatingDoubleTreeMap stores (distance → RPM) data points in ShooterConstants
+ *   <li>Automatic linear interpolation for distances between data points
  *   <li>Integration with Drive subsystem to get distance to target
  *   <li>Comprehensive logging of RPM, setpoints, currents, and calculated speeds
  * </ul>
@@ -66,8 +66,8 @@ import org.littletonrobotics.junction.Logger;
  *
  * <ol>
  *   <li>Robot calculates distance to target (e.g., the Hub) using odometry
- *   <li>getSpeedForDistance() looks up required RPM from the lookup table
- *   <li>If exact distance isn't in table, interpolates between nearest points
+ *   <li>getSpeedForDistance() looks up required RPM from the InterpolatingDoubleTreeMap
+ *   <li>Map automatically interpolates between your characterization data points
  *   <li>Shooter spins up to calculated RPM
  *   <li>Once at target speed, feeder automatically feeds the game piece
  * </ol>
@@ -78,7 +78,8 @@ import org.littletonrobotics.junction.Logger;
  *   <li>Flywheels are critical for shot consistency - the heavier the better (up to a point)
  *   <li>Shape the polycarbonate backing carefully for consistent feed angle
  *   <li>Start with simple designs and test extensively before adding complexity
- *   <li>The lookup table approach works well but needs good characterization data
+ *   <li>InterpolatingDoubleTreeMap makes distance-based shooting simple and reliable
+ *   <li>Use the units library when adding data points for clarity and to prevent unit errors
  * </ul>
  */
 public class Shooter extends SubsystemBase {
@@ -91,7 +92,7 @@ public class Shooter extends SubsystemBase {
   // FuelSim integration - suppliers for robot state
   private final Supplier<Pose2d> _poseSupplier;
   private final Supplier<ChassisSpeeds> _fieldSpeedsSupplier;
-  private final FuelSimVisualizer _fuelSimVisualizer;
+  private final FuelVisualizer _fuelSimVisualizer;
 
   /**
    * Creates a new Shooter subsystem.
@@ -120,7 +121,7 @@ public class Shooter extends SubsystemBase {
     _visualizer = new ShooterVisualizer("Shooter");
 
     // Initialize FuelSim visualizer for trajectory and launch simulation
-    _fuelSimVisualizer = new FuelSimVisualizer(poseSupplier, fieldSpeedsSupplier);
+    _fuelSimVisualizer = new FuelVisualizer(poseSupplier, fieldSpeedsSupplier);
 
     // Configure SysId
     sysId =
@@ -301,16 +302,18 @@ public class Shooter extends SubsystemBase {
   /**
    * Calculates the required flywheel speed for a given distance to the target.
    *
-   * <p>This is the key method for distance-based shooting. It uses a lookup table (TreeMap) stored
-   * in ShooterConstants that maps distances to required RPMs.
+   * <p>This is the key method for distance-based shooting. It uses WPILib's
+   * InterpolatingDoubleTreeMap which automatically performs linear interpolation between data
+   * points.
    *
    * <p><b>How the lookup table works:</b>
    *
    * <ul>
    *   <li>You characterize your shooter by shooting from various distances
    *   <li>Record what RPM is needed for each distance to make the shot
-   *   <li>Store these (distance, RPM) pairs in ShooterConstants.DISTANCE_TO_SPEED_TABLE
-   *   <li>TreeMap automatically interpolates for distances between your data points
+   *   <li>Store these (distance, RPM) pairs in ShooterConstants.DISTANCE_TO_SPEED_MAP
+   *   <li>InterpolatingDoubleTreeMap automatically interpolates for distances between your data
+   *       points
    * </ul>
    *
    * <p><b>Example lookup table:</b>
@@ -323,7 +326,7 @@ public class Shooter extends SubsystemBase {
    * 3.0          | 3200
    * </pre>
    *
-   * If you ask for 1.5m, it interpolates: (2000 + 2500) / 2 = 2250 RPM
+   * If you ask for 1.5m, InterpolatingDoubleTreeMap calculates: (2000 + 2500) / 2 = 2250 RPM
    *
    * <p><b>How to characterize your shooter:</b>
    *
@@ -332,7 +335,7 @@ public class Shooter extends SubsystemBase {
    *   <li>Manually adjust RPM until shots consistently score
    *   <li>Record the distance and RPM
    *   <li>Repeat for 5-7 distances across your shooting range
-   *   <li>Add data points to ShooterConstants
+   *   <li>Add data points to ShooterConstants.DISTANCE_TO_SPEED_MAP using the units library
    * </ol>
    *
    * @param distance Distance to the target (use Meters.of() or similar)
@@ -343,7 +346,12 @@ public class Shooter extends SubsystemBase {
     double distanceMeters = distance.in(Meters);
 
     // Get interpolated speed from lookup table (returns RPM)
-    double speedRPM = ShooterConstants.getSpeedForDistance(distanceMeters);
+    double speedRPM = ShooterConstants.DISTANCE_TO_SPEED_MAP.get(distanceMeters);
+
+    // Clamp to min/max speeds for safety
+    double minRPM = ShooterConstants.MIN_FLYWHEEL_SPEED.in(RevolutionsPerSecond) * 60.0;
+    double maxRPM = ShooterConstants.MAX_FLYWHEEL_SPEED.in(RevolutionsPerSecond) * 60.0;
+    speedRPM = Math.max(minRPM, Math.min(maxRPM, speedRPM));
 
     // Log the calculation for debugging
     Logger.recordOutput("Shooter/CalculatedDistance_meters", distanceMeters);

@@ -13,12 +13,9 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Minute;
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 
-import com.fasterxml.jackson.databind.util.RootNameLookup;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -200,8 +197,12 @@ public class RobotContainer {
       // Register intake with FuelSim
       // Fuel inside the bounding box will be "collected" when canIntakeFuel() returns true
       fuelSim.registerIntake(
-          RobotDimensions.ROBOT_WIDTH.div(2).unaryMinus().minus(IntakeConstants.INTAKE_WIDTH.div(2)).in(Meters),
-        -RobotDimensions.ROBOT_WIDTH.div(2).in(Meters), // Offset intake box to back of robot 
+          RobotDimensions.ROBOT_WIDTH
+              .div(2)
+              .unaryMinus()
+              .minus(IntakeConstants.INTAKE_WIDTH.div(2))
+              .in(Meters),
+          -RobotDimensions.ROBOT_WIDTH.div(2).in(Meters), // Offset intake box to back of robot
           -IntakeConstants.INTAKE_LENGTH.div(2).in(Meters),
           IntakeConstants.INTAKE_LENGTH.div(2).in(Meters),
           intake::canIntakeFuel, // BooleanSupplier - checks if intake can collect
@@ -241,20 +242,20 @@ public class RobotContainer {
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
     // real controller
-    // drive.setDefaultCommand(
-    //     DriveCommands.joystickDrive(
-    //         drive,
-    //         () -> -controller.getLeftY(),
-    //         () -> -controller.getLeftX(),
-    //         () -> -controller.getRightX()));
-
-    // sim controller in MAC os
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> -(controller.getRightTriggerAxis())));
+            () -> -controller.getRightX()));
+
+    // sim controller in MAC os
+    // drive.setDefaultCommand(
+    //     DriveCommands.joystickDrive(
+    //         drive,
+    //         () -> -controller.getLeftY(),
+    //         () -> -controller.getLeftX(),
+    //         () -> -(controller.getRightTriggerAxis())));
 
     // Always run the flywheels a little bit during the match so they can spin up quicker when we
     // need them

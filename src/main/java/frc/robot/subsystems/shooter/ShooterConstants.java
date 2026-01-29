@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -19,8 +20,6 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import frc.robot.Constants;
-import java.util.Map;
-import java.util.TreeMap;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -180,85 +179,30 @@ public class ShooterConstants {
 
   // ==================== DISTANCE TO SPEED LOOKUP TABLE ====================
 
-  /** Data point 1 - Distance units: meters, Speed units: RPM */
-  public static final LoggedNetworkNumber LOOKUP_DISTANCE_1 =
-      new LoggedNetworkNumber("Shooter/Lookup/Distance1_meters", 1.0);
-
-  public static final LoggedNetworkNumber LOOKUP_SPEED_1 =
-      new LoggedNetworkNumber("Shooter/Lookup/Speed1_RPM", 1500.0);
-
-  /** Data point 2 */
-  public static final LoggedNetworkNumber LOOKUP_DISTANCE_2 =
-      new LoggedNetworkNumber("Shooter/Lookup/Distance2_meters", 3.0);
-
-  public static final LoggedNetworkNumber LOOKUP_SPEED_2 =
-      new LoggedNetworkNumber("Shooter/Lookup/Speed2_RPM", 3000.0);
-
-  // Add more data points here as needed:
-  // public static final LoggedNetworkNumber LOOKUP_DISTANCE_3 =
-  //     new LoggedNetworkNumber("Shooter/Lookup/Distance3_meters", 5.0);
-  // public static final LoggedNetworkNumber LOOKUP_SPEED_3 =
-  //     new LoggedNetworkNumber("Shooter/Lookup/Speed3_RPM", 4500.0);
-
   /**
-   * Builds the distance-to-speed lookup table from LoggedNetworkNumbers. TreeMap automatically
-   * sorts by distance for interpolation.
+   * Distance-based shooting lookup table.
    *
-   * @return TreeMap with distance (meters) as key and speed (RPM) as value
-   */
-  public static TreeMap<Double, Double> buildLookupTable() {
-    TreeMap<Double, Double> table = new TreeMap<>();
-    table.put(LOOKUP_DISTANCE_1.get(), LOOKUP_SPEED_1.get());
-    table.put(LOOKUP_DISTANCE_2.get(), LOOKUP_SPEED_2.get());
-    // Add more data points here:
-    // table.put(LOOKUP_DISTANCE_3.get(), LOOKUP_SPEED_3.get());
-    return table;
-  }
-
-  /**
-   * Interpolates shooter speed based on distance using the lookup table. Clamps to min/max speeds
-   * if distance is outside the table range.
+   * <p>Maps distance to target (meters) → required shooter speed (RPM)
    *
-   * @param distanceMeters Distance to target in meters
-   * @return Shooter speed in RPM
+   * <p>Characterize your shooter by:
+   *
+   * <ol>
+   *   <li>Shooting from various known distances
+   *   <li>Recording the RPM needed for successful shots
+   *   <li>Adding those data points here using Meters.of() and RPM.of()
+   * </ol>
+   *
+   * <p>InterpolatingDoubleTreeMap automatically interpolates between points for any distance.
    */
-  public static double getSpeedForDistance(double distanceMeters) {
-    TreeMap<Double, Double> table = buildLookupTable();
+  public static final InterpolatingDoubleTreeMap DISTANCE_TO_SPEED_MAP =
+      new InterpolatingDoubleTreeMap();
 
-    // Find surrounding data points
-    Map.Entry<Double, Double> lowerEntry = table.floorEntry(distanceMeters);
-    Map.Entry<Double, Double> upperEntry = table.ceilingEntry(distanceMeters);
-
-    // Handle edge cases
-    if (lowerEntry == null) {
-      return table.firstEntry().getValue();
-    }
-    if (upperEntry == null) {
-      return table.lastEntry().getValue();
-    }
-
-    // If exact match, return it
-    if (lowerEntry.getKey().equals(distanceMeters)) {
-      return lowerEntry.getValue();
-    }
-
-    double x1 = lowerEntry.getKey();
-    double y1 = lowerEntry.getValue();
-    double x2 = upperEntry.getKey();
-    double y2 = upperEntry.getValue();
-    double x = distanceMeters;
-
-    // LINEAR INTERPOLATION
-    double speed = y1 + (y2 - y1) * (x - x1) / (x2 - x1);
-
-    // Clamp to min/max speeds
-    if (speed < MIN_FLYWHEEL_SPEED.in(RevolutionsPerSecond) * 60.0) {
-      return MIN_FLYWHEEL_SPEED.in(RevolutionsPerSecond) * 60.0;
-    } else if (speed > MAX_FLYWHEEL_SPEED.in(RevolutionsPerSecond) * 60.0) {
-      return MAX_FLYWHEEL_SPEED.in(RevolutionsPerSecond) * 60.0;
-    } else {
-      return speed;
-    }
+  static {
+    // Add characterization data points using the units library for clarity
+    DISTANCE_TO_SPEED_MAP.put(Meters.of(1.0).in(Meters), RPM.of(1500.0).in(RPM));
+    DISTANCE_TO_SPEED_MAP.put(Meters.of(3.0).in(Meters), RPM.of(3000.0).in(RPM));
+    // Add more data points as you characterize:
+    // DISTANCE_TO_SPEED_MAP.put(Meters.of(5.0).in(Meters), RPM.of(4500.0).in(RPM));
   }
 
   // ==================== FUEL SIM CONSTANTS ====================
@@ -288,7 +232,7 @@ public class ShooterConstants {
   public static final Distance SHOOTER_SIDE_OFFSET = Inches.of(0.0);
 
   /** Fixed hood angle from horizontal. 30° launch angle for the fuel trajectory. */
-  public static final Angle SHOOTER_HOOD_ANGLE = Degrees.of(30.0);
+  public static final Angle SHOOTER_HOOD_ANGLE = Degrees.of(20.0);
 
   /**
    * Minimum flywheel RPM threshold to trigger fuel launch visualization. Below this speed, no fuel
