@@ -35,6 +35,8 @@ public final class Constants {
     REPLAY
   }
 
+  public static final boolean INFINITE_HOPPER = true;
+
   public static boolean disableHAL = false;
 
   public static void disableHAL() {

@@ -115,8 +115,17 @@ public class VirtualHopper {
    *
    * <p><b>Safety Check:</b> This method will not decrement below zero. If the hopper is already
    * empty, calling this method has no effect.
+   *
+   * <p><b>Infinite Hopper Mode:</b> When {@link frc.robot.Constants#INFINITE_HOPPER} is true, this
+   * method does nothing - the fuel count never decreases, simulating unlimited ammunition for
+   * testing.
    */
   public void removeFuel() {
+    // If infinite hopper mode is enabled, don't remove fuel
+    if (frc.robot.Constants.INFINITE_HOPPER) {
+      return;
+    }
+
     if (fuelCount >= 1) {
       fuelCount--;
       logFuelCount();
@@ -128,9 +137,17 @@ public class VirtualHopper {
    *
    * <p>Used by the shooter to determine if there's fuel available to launch.
    *
-   * @return true if fuelCount > 0, false if the hopper is empty
+   * <p><b>Infinite Hopper Mode:</b> When {@link frc.robot.Constants#INFINITE_HOPPER} is true, this
+   * method always returns true, allowing unlimited shooting for testing purposes.
+   *
+   * @return true if fuelCount > 0 (or if INFINITE_HOPPER is enabled), false if the hopper is empty
    */
   public boolean hasFuel() {
+    // If infinite hopper mode is enabled, always have fuel
+    if (frc.robot.Constants.INFINITE_HOPPER) {
+      return true;
+    }
+
     return fuelCount > 0;
   }
 
