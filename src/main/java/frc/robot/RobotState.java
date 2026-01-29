@@ -271,6 +271,57 @@ public class RobotState {
     return AllianceFlipUtil.apply(FieldConstants.Hub.oppTopCenterPoint);
   }
 
+  /**
+   * Returns the angle the robot should face to point at the alliance hub.
+   *
+   * <p>This calculates the bearing from the robot's current position to the alliance hub target.
+   * The returned angle is automatically normalized to choose the shortest rotation path.
+   *
+   * <p><b>How it works:</b>
+   *
+   * <ol>
+   *   <li>Gets the robot's current position
+   *   <li>Gets the alliance hub target position (auto-flips for red alliance)
+   *   <li>Calculates the angle from robot to hub using atan2
+   *   <li>Returns a Rotation2d that can be passed to joystickDriveAtAngle
+   * </ol>
+   *
+   * <p><b>Continuous Input Handling:</b> The ProfiledPIDController in joystickDriveAtAngle has
+   * continuous input enabled (-π to π), so it will automatically choose the shortest rotation path.
+   * For example, if the robot is at 170° and the hub is at -170°, it will rotate 20° instead of
+   * 340°.
+   *
+   * <p><b>Usage:</b>
+   *
+   * <pre>
+   * // In a command - continuously update heading to point at hub
+   * DriveCommands.joystickDriveAtAngle(
+   *   drive,
+   *   xSupplier,
+   *   ySupplier,
+   *   () -> RobotState.getInstance().getAngleToAllianceHub()
+   * );
+   * </pre>
+   *
+   * @return The heading the robot should face to point at the alliance hub
+   */
+  @AutoLogOutput(key = "RobotState/AngleToAllianceHub")
+  public Rotation2d getAngleToAllianceHub() {
+    // Get current robot position
+    Pose2d currentPose = getEstimatedPose();
+
+    // Get alliance hub target (2D position on the field)
+    Translation3d hubTarget3d = getAllianceHubTarget();
+    Translation2d hubTarget2d = hubTarget3d.toTranslation2d();
+
+    // Calculate the vector from robot to hub
+    Translation2d robotToHub = hubTarget2d.minus(currentPose.getTranslation());
+
+    // Calculate the angle using atan2
+    // This gives us the direction we need to face to point at the hub
+    return new Rotation2d(robotToHub.getX(), robotToHub.getY());
+  }
+
   // ==================== ODOMETRY UPDATES ====================
 
   /**

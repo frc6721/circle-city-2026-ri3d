@@ -276,10 +276,20 @@ public class RobotContainer {
 
     // Right bumper is for the real controller
     // y() button on xbox on mac os
-    // Dynamic shooting: continuously adjusts flywheel speed based on distance to alliance hub
+    // Dynamic shooting with auto-aiming:
+    // - Continuously adjusts flywheel speed based on distance to alliance hub
+    // - Automatically rotates robot to face the hub
+    // - Driver maintains full control of translation (forward/back, left/right)
     controller
         .y()
-        .whileTrue(ShooterCommands.shootToHubSequence(shooter, feeder))
+        .whileTrue(
+            // Combine auto-aim driving with shooting sequence
+            DriveCommands.joystickDriveAtAngle(
+                    drive,
+                    () -> -controller.getLeftY(),
+                    () -> -controller.getLeftX(),
+                    () -> RobotState.getInstance().getAngleToAllianceHub())
+                .alongWith(ShooterCommands.shootToHubSequence(shooter, feeder)))
         .onFalse(
             FeederCommands.stopFeeder(feeder).andThen(ShooterCommands.runFlywheelsAtIdle(shooter)));
 
