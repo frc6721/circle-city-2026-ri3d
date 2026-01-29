@@ -12,7 +12,7 @@ import org.littletonrobotics.junction.Logger;
  * <p>These constants define the overall size of the robot including bumpers. They are used by
  * FuelSim to detect collisions between the robot and game pieces.
  *
- * <p><b>Robot Dimensions:</b>
+ * <p><b>Robot Robot:</b>
  *
  * <ul>
  *   <li>Frame: 26" × 26" (square frame)
@@ -21,10 +21,10 @@ import org.littletonrobotics.junction.Logger;
  *   <li>Bumper height: 6" off ground at top
  * </ul>
  */
-public final class Dimensions {
+public final class RobotDimensions {
 
   // Private constructor prevents instantiation (utility class)
-  private Dimensions() {}
+  private RobotDimensions() {}
 
   /**
    * Full robot width including bumpers (left to right, along Y-axis).
@@ -53,11 +53,8 @@ public final class Dimensions {
 
   // Log dimensions at class load
   static {
-    Logger.recordOutput("Constants/Dimensions/RobotWidth_m", ROBOT_WIDTH.in(Meters));
-    Logger.recordOutput("Constants/Dimensions/RobotLength_m", ROBOT_LENGTH.in(Meters));
-    Logger.recordOutput("Constants/Dimensions/BumperHeight_m", BUMPER_HEIGHT.in(Meters));
-    Logger.recordOutput("Constants/Dimensions/RobotWidth_in", ROBOT_WIDTH.in(Inches));
-    Logger.recordOutput("Constants/Dimensions/RobotLength_in", ROBOT_LENGTH.in(Inches));
-    Logger.recordOutput("Constants/Dimensions/BumperHeight_in", BUMPER_HEIGHT.in(Inches));
+    Logger.recordOutput("Constants/Robot/RobotWidth_in", ROBOT_WIDTH.in(Inches));
+    Logger.recordOutput("Constants/Robot/RobotLength_in", ROBOT_LENGTH.in(Inches));
+    Logger.recordOutput("Constants/Robot/BumperHeight_in", BUMPER_HEIGHT.in(Inches));
   }
 }

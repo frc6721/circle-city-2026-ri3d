@@ -15,8 +15,10 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Minute;
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 
+import com.fasterxml.jackson.databind.util.RootNameLookup;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -189,19 +191,19 @@ public class RobotContainer {
       // Register robot with FuelSim for collision detection
       // Robot pushes fuel out of the way when driving
       fuelSim.registerRobot(
-          Dimensions.ROBOT_WIDTH.in(Meters),
-          Dimensions.ROBOT_LENGTH.in(Meters),
-          Dimensions.BUMPER_HEIGHT.in(Meters),
+          RobotDimensions.ROBOT_WIDTH.in(Meters),
+          RobotDimensions.ROBOT_LENGTH.in(Meters),
+          RobotDimensions.BUMPER_HEIGHT.in(Meters),
           drive::getPose,
           drive::getFieldRelativeSpeeds);
 
       // Register intake with FuelSim
       // Fuel inside the bounding box will be "collected" when canIntakeFuel() returns true
       fuelSim.registerIntake(
-          -IntakeConstants.INTAKE_LENGTH.div(2).minus(Inches.of(10)).in(Meters),
+          -IntakeConstants.INTAKE_WIDTH.div(2).minus(RobotDimensions.ROBOT_WIDTH.div(2)).in(Meters), // Offset intake box to front of robot
+          IntakeConstants.INTAKE_WIDTH.div(2).minus(RobotDimensions.ROBOT_WIDTH.div(2)).in(Meters),
+          -IntakeConstants.INTAKE_LENGTH.div(2).in(Meters),
           IntakeConstants.INTAKE_LENGTH.div(2).in(Meters),
-          -IntakeConstants.INTAKE_WIDTH.div(2).in(Meters),
-          IntakeConstants.INTAKE_WIDTH.div(2).in(Meters),
           intake::canIntakeFuel, // BooleanSupplier - checks if intake can collect
           intake::simIntakeFuel); // Runnable - called when fuel is collected
 
