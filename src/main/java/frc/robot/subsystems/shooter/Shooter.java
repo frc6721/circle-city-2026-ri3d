@@ -84,7 +84,6 @@ public class Shooter extends SubsystemBase {
   private final ShooterIO _shooterIO;
   private final ShooterIOInputsAutoLogged _shooterInputs = new ShooterIOInputsAutoLogged();
   private AngularVelocity _targetFlywheelSpeed;
-  private final ShooterVisualizer _visualizer;
   private final SysIdRoutine sysId;
 
   private final FuelVisualizer _fuelSimVisualizer;
@@ -104,9 +103,6 @@ public class Shooter extends SubsystemBase {
   public Shooter(ShooterIO shooterIO) {
     this._shooterIO = shooterIO;
     this.stopFlywheels();
-
-    // Initialize the visualizer for Mechanism2d and 3D pose output
-    _visualizer = new ShooterVisualizer("Shooter");
 
     // Initialize FuelSim visualizer for trajectory and launch simulation
     _fuelSimVisualizer = new FuelVisualizer();
@@ -165,10 +161,6 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput(
         "Shooter/FlywheelSpeed/Desired_RPM", _targetFlywheelSpeed.in(RevolutionsPerSecond) * 60);
     Logger.recordOutput("Shooter/AtTargetSpeed", this.areFlywheelsAtTargetSpeed());
-
-    // Update visualization with current state
-    _visualizer.update(
-        _shooterInputs._flywheelMotorVelocity, _targetFlywheelSpeed, areFlywheelsAtTargetSpeed());
 
     // ==================== FUEL SIM INTEGRATION ====================
     // Update trajectory visualization every loop so driver sees real-time prediction
