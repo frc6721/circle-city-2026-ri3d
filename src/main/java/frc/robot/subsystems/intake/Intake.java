@@ -192,13 +192,13 @@ public class Intake extends SubsystemBase {
 
     // LOGGING
     Logger.recordOutput(
-        "Intake/Current-Pivot-Angle", _intakeInputs._intakeRightPivotMotorPosition.getDegrees());
-    Logger.recordOutput("Intake/Desired-Pivot-Angle", _intakePosition.getAngle().getDegrees());
+        "Intake/PivotAngle/Current_deg", _intakeInputs._intakeRightPivotMotorPosition.getDegrees());
+    Logger.recordOutput("Intake/PivotAngle/Desired_deg", _intakePosition.getAngle().getDegrees());
     Logger.recordOutput(
-        "Intake/raw-Pivot-Position",
+        "Intake/PivotAngle/RawCurrent_deg",
         _intakeInputs._intakeRightPivotMotorPosition.plus(IntakeConstants.PIVOT_ZERO_ROTATION));
     Logger.recordOutput(
-        "Intake/raw-pivot-position-desired",
+        "Intake/PivotAngle/RawDesired_deg",
         _intakePosition.getAngle().plus(IntakeConstants.PIVOT_ZERO_ROTATION));
 
     // Run PID control
@@ -219,6 +219,8 @@ public class Intake extends SubsystemBase {
                 _intakeInputs._intakeRightPivotMotorPosition.getDegrees()
                     - _intakePosition.getAngle().getDegrees())
             < IntakeConstants.INTAKE_PIVOT_DEADBAND;
+
+    Logger.recordOutput("Intake/Pivot/AtGoal", atGoal);
 
     _visualizer.update(
         _intakeInputs._intakeRightPivotMotorPosition, _intakePosition.getAngle(), atGoal);

@@ -72,8 +72,7 @@ public class FuelVisualizer {
   private double lastLaunchTime = 0.0;
 
   /**
-   * Gets the time step between trajectory points based on the total time span and number of
-   * points.
+   * Gets the time step between trajectory points based on the total time span and number of points.
    *
    * <p>This is calculated as: timeStep = totalTimeSpan / numberOfPoints
    *

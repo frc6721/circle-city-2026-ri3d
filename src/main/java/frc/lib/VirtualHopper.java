@@ -168,6 +168,6 @@ public class VirtualHopper {
    * state in AdvantageScope's real-time view.
    */
   private void logFuelCount() {
-    Logger.recordOutput("VirtualHopper/FuelCount", fuelCount);
+    Logger.recordOutput("Simulation/VirtualHopper/FuelCount", fuelCount);
   }
 }

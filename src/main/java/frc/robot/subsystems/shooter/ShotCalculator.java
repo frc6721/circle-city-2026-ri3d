@@ -107,10 +107,10 @@ public class ShotCalculator {
     double maxRPM = ShooterConstants.MAX_FLYWHEEL_SPEED.in(RevolutionsPerSecond) * 60.0;
     speedRPM = Math.max(minRPM, Math.min(maxRPM, speedRPM));
 
-    Logger.recordOutput("ShotCalculator/TargetPosition", target);
-    Logger.recordOutput("ShotCalculator/RobotPosition", robotPosition);
-    Logger.recordOutput("ShotCalculator/DistanceToTarget_m", distanceMeters);
-    Logger.recordOutput("ShotCalculator/CalculatedRPM", speedRPM);
+    Logger.recordOutput("Shooter/ShotCalculator/TargetPosition", target);
+    Logger.recordOutput("Shooter/ShotCalculator/RobotPosition", robotPosition);
+    Logger.recordOutput("Shooter/ShotCalculator/Distance_m", distanceMeters);
+    Logger.recordOutput("Shooter/ShotCalculator/CalculatedSpeed_RPM", speedRPM);
 
     return RPM.of(speedRPM);
   }
@@ -161,7 +161,7 @@ public class ShotCalculator {
     // The DISTANCE_TO_SPEED_MAP defines the range we've tested
     boolean inRange = distanceMeters >= 0.5 && distanceMeters <= 15.0;
 
-    Logger.recordOutput("ShotCalculator/InShootingRange", inRange);
+    Logger.recordOutput("Shooter/ShotCalculator/InShootingRange", inRange);
     return inRange;
   }
 }

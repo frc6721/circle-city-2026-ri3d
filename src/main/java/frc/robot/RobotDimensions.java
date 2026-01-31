@@ -52,8 +52,8 @@ public final class RobotDimensions {
 
   // Log dimensions at class load
   static {
-    Logger.recordOutput("Constants/Robot/RobotWidth_in", ROBOT_WIDTH.in(Inches));
-    Logger.recordOutput("Constants/Robot/RobotLength_in", ROBOT_LENGTH.in(Inches));
+    Logger.recordOutput("Constants/Robot/Width_in", ROBOT_WIDTH.in(Inches));
+    Logger.recordOutput("Constants/Robot/Length_in", ROBOT_LENGTH.in(Inches));
     Logger.recordOutput("Constants/Robot/BumperHeight_in", BUMPER_HEIGHT.in(Inches));
   }
 }

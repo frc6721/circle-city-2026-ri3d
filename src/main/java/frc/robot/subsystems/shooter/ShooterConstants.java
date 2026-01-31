@@ -267,20 +267,22 @@ public class ShooterConstants {
   // ==================== LOGGING ====================
 
   static {
-    Logger.recordOutput("Constants/Shooter/FLYWHEEL_GEAR_RATIO", FLYWHEEL_GEAR_RATIO);
-    Logger.recordOutput("Constants/Shooter/FLYWHEEL_MOI", FLYWHEEL_MOI.in(KilogramSquareMeters));
-    Logger.recordOutput("Constants/Shooter/FLYWHEEL_SPEED_DEADBAND", FLYWHEEL_PID_TOLERANCE);
+    // Flywheel properties
+    Logger.recordOutput("Constants/Shooter/FlywheelGearRatio", FLYWHEEL_GEAR_RATIO);
     Logger.recordOutput(
-        "Constants/Shooter/SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT",
-        SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT);
-    Logger.recordOutput(
-        "Constants/Shooter/SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT",
-        SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT);
-    Logger.recordOutput("Constants/Shooter/SHOOTER_FLYWHEEL_INVERTED", SHOOTER_FLYWHEEL_INVERTED);
+        "Constants/Shooter/FlywheelMOI_kgm2", FLYWHEEL_MOI.in(KilogramSquareMeters));
+    Logger.recordOutput("Constants/Shooter/SpeedTolerance", FLYWHEEL_PID_TOLERANCE);
+    Logger.recordOutput("Constants/Shooter/FlywheelInverted", SHOOTER_FLYWHEEL_INVERTED);
 
-    // Log FuelSim constants
+    // Current limits
     Logger.recordOutput(
-        "Constants/Shooter/FuelSim/HeightFromGround_m", SHOOTER_HEIGHT_FROM_GROUND.in(Meters));
+        "Constants/Shooter/CurrentLimit/Smart_A", SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT);
+    Logger.recordOutput(
+        "Constants/Shooter/CurrentLimit/Secondary_A", SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT);
+
+    // FuelSim constants
+    Logger.recordOutput(
+        "Constants/Shooter/FuelSim/Height_m", SHOOTER_HEIGHT_FROM_GROUND.in(Meters));
     Logger.recordOutput(
         "Constants/Shooter/FuelSim/ForwardOffset_m", SHOOTER_FORWARD_OFFSET.in(Meters));
     Logger.recordOutput("Constants/Shooter/FuelSim/SideOffset_m", SHOOTER_SIDE_OFFSET.in(Meters));

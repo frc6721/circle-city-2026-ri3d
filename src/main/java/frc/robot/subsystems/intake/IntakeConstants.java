@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -185,27 +184,31 @@ public class IntakeConstants {
   // ==================== LOGGING ====================
 
   static {
-    Logger.recordOutput("Constants/Intake/MIN_INTAKE_ANGLE", MIN_INTAKE_ANGLE_DEGREES);
-    Logger.recordOutput("Constants/Intake/MAX_INTAKE_ANGLE", MAX_INTAKE_ANGLE_DEGREES);
-    Logger.recordOutput("Constants/Intake/PIVOT_GEAR_RATIO", PIVOT_GEAR_RATIO);
-    Logger.recordOutput("Constants/Intake/ROLLER_GEAR_RATIO", ROLLER_GEAR_RATIO);
-    Logger.recordOutput("Constants/Intake/ARM_LENGTH_METERS", ARM_LENGTH.in(Meters));
-    Logger.recordOutput("Constants/Intake/PIVOT_MOI", PIVOT_MOI.in(KilogramSquareMeters));
-    Logger.recordOutput("Constants/Intake/INTAKE_PIVOT_DEADBAND", INTAKE_PIVOT_DEADBAND);
-    Logger.recordOutput(
-        "Constants/Intake/INTAKE_PIVOT_SMART_CURRENT_LIMIT", INTAKE_PIVOT_SMART_CURRENT_LIMIT);
-    Logger.recordOutput(
-        "Constants/Intake/INTAKE_PIVOT_SECONDARY_CURRENT_LIMIT",
-        INTAKE_PIVOT_SECONDARY_CURRENT_LIMIT);
-    Logger.recordOutput(
-        "Constants/Intake/INTAKE_ROLLER_SMART_CURRENT_LIMIT", INTAKE_ROLLER_SMART_CURRENT_LIMIT);
-    Logger.recordOutput(
-        "Constants/Intake/INTAKE_ROLLER_SECONDARY_CURRENT_LIMIT",
-        INTAKE_ROLLER_SECONDARY_CURRENT_LIMIT);
-    Logger.recordOutput("Constants/Intake/ZeroedPose3d", Pose3d.kZero);
+    // Pivot angle limits
+    Logger.recordOutput("Constants/Intake/PivotAngle/Min_deg", MIN_INTAKE_ANGLE_DEGREES);
+    Logger.recordOutput("Constants/Intake/PivotAngle/Max_deg", MAX_INTAKE_ANGLE_DEGREES);
 
-    // Log FuelSim constants
-    Logger.recordOutput("Constants/Intake/FuelSim/BoundingBoxMinX_m", INTAKE_WIDTH.in(Meters));
-    Logger.recordOutput("Constants/Intake/FuelSim/BoundingBoxMaxX_m", INTAKE_LENGTH.in(Meters));
+    // Gear ratios
+    Logger.recordOutput("Constants/Intake/GearRatio/Pivot", PIVOT_GEAR_RATIO);
+    Logger.recordOutput("Constants/Intake/GearRatio/Roller", ROLLER_GEAR_RATIO);
+
+    // Mechanical properties
+    Logger.recordOutput("Constants/Intake/ArmLength_m", ARM_LENGTH.in(Meters));
+    Logger.recordOutput("Constants/Intake/PivotMOI_kgm2", PIVOT_MOI.in(KilogramSquareMeters));
+    Logger.recordOutput("Constants/Intake/Deadband_deg", INTAKE_PIVOT_DEADBAND);
+
+    // Current limits
+    Logger.recordOutput(
+        "Constants/Intake/CurrentLimit/PivotSmart_A", INTAKE_PIVOT_SMART_CURRENT_LIMIT);
+    Logger.recordOutput(
+        "Constants/Intake/CurrentLimit/PivotSecondary_A", INTAKE_PIVOT_SECONDARY_CURRENT_LIMIT);
+    Logger.recordOutput(
+        "Constants/Intake/CurrentLimit/RollerSmart_A", INTAKE_ROLLER_SMART_CURRENT_LIMIT);
+    Logger.recordOutput(
+        "Constants/Intake/CurrentLimit/RollerSecondary_A", INTAKE_ROLLER_SECONDARY_CURRENT_LIMIT);
+
+    // FuelSim constants
+    Logger.recordOutput("Constants/Intake/FuelSim/BoundingBoxWidth_m", INTAKE_WIDTH.in(Meters));
+    Logger.recordOutput("Constants/Intake/FuelSim/BoundingBoxLength_m", INTAKE_LENGTH.in(Meters));
   }
 }

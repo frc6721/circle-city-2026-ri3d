@@ -165,7 +165,7 @@ public class IntakeVisualizer {
 
     // Publish to SmartDashboard for Glass/AdvantageScope Mechanism2d view
     SmartDashboard.putData(name + " Visualizer", mechanism);
-    Logger.recordOutput(name + "/Mechanism2d", mechanism);
+    Logger.recordOutput(name + "/Visualizer/Mechanism2d", mechanism);
 
     // Log the 3D pose for AdvantageScope 3D visualization
     // The rotation is around the Y axis (pitch) since the arm pivots up/down
@@ -179,16 +179,15 @@ public class IntakeVisualizer {
                     .plus(Degrees.of(measuredAngle.getDegrees())),
                 Radians.of(baseOffset.getRotation().getZ())));
 
-    Logger.recordOutput(name + "/Pose3d", pose3d);
-    Logger.recordOutput(name + "/MeasuredAngleDegrees", measuredAngle.getDegrees());
+    Logger.recordOutput(name + "/Visualizer/Pose3d", pose3d);
+    Logger.recordOutput(name + "/Visualizer/MeasuredAngle_deg", measuredAngle.getDegrees());
 
     if (setpointAngle.isPresent()) {
-      Logger.recordOutput(name + "/SetpointAngleDegrees", setpointAngle.get().getDegrees());
+      Logger.recordOutput(name + "/Visualizer/SetpointAngle_deg", setpointAngle.get().getDegrees());
     }
     if (goalAngle.isPresent()) {
-      Logger.recordOutput(name + "/GoalAngleDegrees", goalAngle.get().getDegrees());
+      Logger.recordOutput(name + "/Visualizer/GoalAngle_deg", goalAngle.get().getDegrees());
     }
-    Logger.recordOutput(name + "/AtGoal", atGoal);
   }
 
   /**

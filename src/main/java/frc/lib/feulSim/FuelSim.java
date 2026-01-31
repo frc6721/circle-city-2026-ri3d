@@ -251,7 +251,7 @@ public class FuelSim {
    */
   public void logFuels() {
     Logger.recordOutput(
-        "Fuel Simulation/Fuels",
+        "Simulation/FuelSim/Fuels",
         fuels.stream().map((fuel) -> fuel.pos).toArray(Translation3d[]::new));
   }
 

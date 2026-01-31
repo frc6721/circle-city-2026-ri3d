@@ -148,7 +148,7 @@ public class ShooterVisualizer {
 
     // Publish to SmartDashboard for Glass/AdvantageScope Mechanism2d view
     SmartDashboard.putData(name + " Visualizer", mechanism);
-    Logger.recordOutput(name + "/Mechanism2d", mechanism);
+    Logger.recordOutput(name + "/Visualizer/Mechanism2d", mechanism);
 
     // Log the 3D pose for AdvantageScope 3D visualization
     // The rotation is around the X axis (roll) since the flywheel spins on its axis
@@ -159,11 +159,13 @@ public class ShooterVisualizer {
                 Radians.of(baseOffset.getRotation().getY()),
                 Radians.of(baseOffset.getRotation().getZ())));
 
-    Logger.recordOutput(name + "/Pose3d", pose3d);
-    Logger.recordOutput(name + "/CurrentVelocityRadPerSec", currentVelocity.in(RadiansPerSecond));
-    Logger.recordOutput(name + "/TargetVelocityRadPerSec", targetVelocity.in(RadiansPerSecond));
-    Logger.recordOutput(name + "/AtTargetSpeed", atTargetSpeed);
-    Logger.recordOutput(name + "/VisualizationAngleDegrees", accumulatedAngle);
+    Logger.recordOutput(name + "/Visualizer/Pose3d", pose3d);
+    Logger.recordOutput(
+        name + "/Visualizer/CurrentVelocity_RadPerSec", currentVelocity.in(RadiansPerSecond));
+    Logger.recordOutput(
+        name + "/Visualizer/TargetVelocity_RadPerSec", targetVelocity.in(RadiansPerSecond));
+    Logger.recordOutput(name + "/Visualizer/AtTargetSpeed", atTargetSpeed);
+    Logger.recordOutput(name + "/Visualizer/VisualizationAngle_deg", accumulatedAngle);
   }
 
   /**

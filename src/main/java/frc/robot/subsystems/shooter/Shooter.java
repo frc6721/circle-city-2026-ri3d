@@ -118,7 +118,7 @@ public class Shooter extends SubsystemBase {
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+                (state) -> Logger.recordOutput("Shooter/SysId/State", state.toString())),
             new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage), null, this));
   }
 
@@ -154,17 +154,17 @@ public class Shooter extends SubsystemBase {
 
     // LOGGING
     Logger.recordOutput(
-        "Shooter/Current-Flywheel-Speed",
+        "Shooter/FlywheelSpeed/Current_RadPerSec",
         _shooterInputs._flywheelMotorVelocity.in(RadiansPerSecond));
     Logger.recordOutput(
-        "Shooter/Current-Flywheel-Speed-RPM",
+        "Shooter/FlywheelSpeed/Current_RPM",
         _shooterInputs._flywheelMotorVelocity.in(RevolutionsPerSecond) * 60);
 
     Logger.recordOutput(
-        "Shooter/Desired-Flywheel-Speed", _targetFlywheelSpeed.in(RadiansPerSecond));
+        "Shooter/FlywheelSpeed/Desired_RadPerSec", _targetFlywheelSpeed.in(RadiansPerSecond));
     Logger.recordOutput(
-        "Shooter/Desired-Flywheel-Speed-RPM", _targetFlywheelSpeed.in(RevolutionsPerSecond) * 60);
-    Logger.recordOutput("Shooter/areFlyWheelsAtTarget", this.areFlywheelsAtTargetSpeed());
+        "Shooter/FlywheelSpeed/Desired_RPM", _targetFlywheelSpeed.in(RevolutionsPerSecond) * 60);
+    Logger.recordOutput("Shooter/AtTargetSpeed", this.areFlywheelsAtTargetSpeed());
 
     // Update visualization with current state
     _visualizer.update(
@@ -177,7 +177,7 @@ public class Shooter extends SubsystemBase {
     _fuelSimVisualizer.updateTrajectory(linearSpeed, ShooterConstants.SHOOTER_HOOD_ANGLE);
 
     // Check if we should launch fuel (for visualization)
-    Logger.recordOutput("Shooter/FuelSim/ShouldVisualizeLaunch", shouldVisualizeLaunch());
+    Logger.recordOutput("Shooter/FuelSim/ShouldLaunch", shouldVisualizeLaunch());
 
     // Actually launch fuel if conditions are met
     visualizeFuelLaunch();
@@ -342,8 +342,8 @@ public class Shooter extends SubsystemBase {
     speedRPM = Math.max(minRPM, Math.min(maxRPM, speedRPM));
 
     // Log the calculation for debugging
-    Logger.recordOutput("Shooter/CalculatedDistance_meters", distanceMeters);
-    Logger.recordOutput("Shooter/CalculatedSpeed_RPM", speedRPM);
+    Logger.recordOutput("Shooter/ShotCalculator/Distance_m", distanceMeters);
+    Logger.recordOutput("Shooter/ShotCalculator/CalculatedSpeed_RPM", speedRPM);
 
     // Convert RPM to AngularVelocity and return
     return RPM.of(speedRPM);

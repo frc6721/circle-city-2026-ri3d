@@ -26,12 +26,12 @@ public class FeederConstants {
   // ==================== LOGGING ====================
 
   static {
-    Logger.recordOutput("Constants/Feeder/FEEDER_GEAR_RATIO", FEEDER_GEAR_RATIO);
+    Logger.recordOutput("Constants/Feeder/GearRatio", FEEDER_GEAR_RATIO);
+    Logger.recordOutput("Constants/Feeder/MotorInverted", FEEDER_MOTOR_INVERTED);
+
+    // Current limits
+    Logger.recordOutput("Constants/Feeder/CurrentLimit/Smart_A", FEEDER_MOTOR_SMART_CURRENT_LIMIT);
     Logger.recordOutput(
-        "Constants/Feeder/FEEDER_MOTOR_SMART_CURRENT_LIMIT", FEEDER_MOTOR_SMART_CURRENT_LIMIT);
-    Logger.recordOutput(
-        "Constants/Feeder/FEEDER_MOTOR_SECONDARY_CURRENT_LIMIT",
-        FEEDER_MOTOR_SECONDARY_CURRENT_LIMIT);
-    Logger.recordOutput("Constants/Feeder/FEEDER_MOTOR_INVERTED", FEEDER_MOTOR_INVERTED);
+        "Constants/Feeder/CurrentLimit/Secondary_A", FEEDER_MOTOR_SECONDARY_CURRENT_LIMIT);
   }
 }
