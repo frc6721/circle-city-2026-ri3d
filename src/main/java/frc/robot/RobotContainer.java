@@ -237,20 +237,20 @@ public class RobotContainer {
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
     // real controller
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
-
-    // sim controller in MAC os
     // drive.setDefaultCommand(
     //     DriveCommands.joystickDrive(
     //         drive,
     //         () -> -controller.getLeftY(),
     //         () -> -controller.getLeftX(),
-    //         () -> -(controller.getRightTriggerAxis())));
+    //         () -> -controller.getRightX()));
+
+    // sim controller in MAC os
+    drive.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> -(controller.getRightTriggerAxis())));
 
     // Always run the flywheels a little bit during the match so they can spin up quicker when we
     // need them

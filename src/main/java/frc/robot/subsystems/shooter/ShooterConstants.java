@@ -255,6 +255,15 @@ public class ShooterConstants {
   /** Number of points used to render the trajectory visualization. */
   public static final int TRAJECTORY_VISUALIZATION_POINTS = 50;
 
+  /**
+   * Total time span (in seconds) for the trajectory visualization.
+   *
+   * <p>This determines how far into the future the trajectory is calculated.
+   *
+   * <p>Increase this value if your trajectory is ending mid-air before hitting the ground.
+   */
+  public static final double TRAJECTORY_TIME_SPAN_SECONDS = 2.0;
+
   // ==================== LOGGING ====================
 
   static {
@@ -286,5 +295,7 @@ public class ShooterConstants {
     Logger.recordOutput("Constants/Shooter/FuelSim/StartingFuelCount", STARTING_FUEL_COUNT);
     Logger.recordOutput(
         "Constants/Shooter/FuelSim/TrajectoryPoints", TRAJECTORY_VISUALIZATION_POINTS);
+    Logger.recordOutput(
+        "Constants/Shooter/FuelSim/TrajectoryTimeSpan_s", TRAJECTORY_TIME_SPAN_SECONDS);
   }
 }

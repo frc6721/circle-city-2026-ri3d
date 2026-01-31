@@ -65,15 +65,26 @@ public class FuelVisualizer {
   // Gravitational acceleration (m/s²)
   private static final double GRAVITY = 9.81;
 
-  // Time step between trajectory visualization points (seconds)
-  // 50 points × 0.02s = 1 second of trajectory
-  private static final double TRAJECTORY_TIME_STEP = 0.02;
-
   // Trajectory visualization array
   private final Translation3d[] trajectory;
 
   // Timestamp of last fuel launch (microseconds converted to seconds)
   private double lastLaunchTime = 0.0;
+
+  /**
+   * Gets the time step between trajectory points based on the total time span and number of
+   * points.
+   *
+   * <p>This is calculated as: timeStep = totalTimeSpan / numberOfPoints
+   *
+   * <p>For example, with 50 points and 2 second span: 2.0 / 50 = 0.04 seconds per point
+   *
+   * @return The time step in seconds between each trajectory visualization point
+   */
+  private double getTrajectoryTimeStep() {
+    return ShooterConstants.TRAJECTORY_TIME_SPAN_SECONDS
+        / ShooterConstants.TRAJECTORY_VISUALIZATION_POINTS;
+  }
 
   /**
    * Creates a new FuelVisualizer.
@@ -299,6 +310,9 @@ public class FuelVisualizer {
     Translation3d initialPos = getShooterPosition();
     Translation3d velocity = calculateLaunchVelocity(linearVel, angle);
 
+    // Get the time step for this trajectory calculation
+    double timeStep = getTrajectoryTimeStep();
+
     // Calculate trajectory points
     boolean hitGround = false;
     Translation3d groundContactPoint = null;
@@ -311,7 +325,7 @@ public class FuelVisualizer {
       }
 
       // Time for this point
-      double t = i * TRAJECTORY_TIME_STEP;
+      double t = i * timeStep;
 
       // Apply kinematic equations
       // x = x₀ + vₓ × t (constant velocity in x)
