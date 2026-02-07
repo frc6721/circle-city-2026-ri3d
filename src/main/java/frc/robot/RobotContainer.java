@@ -50,6 +50,10 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.io.RealShooterIO;
 import frc.robot.subsystems.shooter.io.ShooterIO;
 import frc.robot.subsystems.shooter.io.SimShooterIO;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -64,6 +68,7 @@ public class RobotContainer {
   private final Intake intake;
   private final Feeder feeder;
   private final Shooter shooter;
+  private final Vision vision;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -87,8 +92,11 @@ public class RobotContainer {
         intake = new Intake(new RealIntakeIO());
         shooter = new Shooter(new RealShooterIO());
         feeder = new Feeder(new RealFeederIO());
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
         break;
-
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
         drive =
@@ -102,7 +110,13 @@ public class RobotContainer {
         intake = new Intake(new SimIntakeIO());
         shooter = new Shooter(new SimShooterIO());
         feeder = new Feeder(new SimFeederIO());
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         break;
+        // vision =
+        // new Vision(
+        //     drive::addVisionMeasurement,
+        //     new VisionIOPhotonVisionSim(VisionConstants.camera0Name,
+        // VisionConstants.robotToCamera0, drive::getPose));        break;
 
       default:
         // Replayed robot, disable IO implementations
@@ -117,6 +131,7 @@ public class RobotContainer {
         intake = new Intake(new IntakeIO() {});
         shooter = new Shooter(new ShooterIO() {});
         feeder = new Feeder(new FeederIO() {});
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         break;
     }
 
