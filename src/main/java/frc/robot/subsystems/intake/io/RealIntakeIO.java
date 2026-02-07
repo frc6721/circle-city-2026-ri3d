@@ -24,7 +24,6 @@ public class RealIntakeIO implements IntakeIO {
   private SparkMax _leftPivotMotor;
   private SparkMax _rollerMotor;
   private AbsoluteEncoder _pivotEncoder;
-  private SparkClosedLoopController _pidController;
 
   public RealIntakeIO() {
     configPivotMotors();
@@ -35,22 +34,21 @@ public class RealIntakeIO implements IntakeIO {
     // Configure right (leader) pivot motor
     _rightPivotMotor =
         new SparkMax(HardwareConstants.CanIds.RIGHT_PIVOT_MOTOR_ID, MotorType.kBrushless);
-    _pidController = _rightPivotMotor.getClosedLoopController();
 
     SparkMaxConfig rightConfig = new SparkMaxConfig();
     rightConfig
-        .inverted(IntakeConstants.INTAKE_RIGHT_PIVOT_INVERTED)
+        .inverted(IntakeConstants.Hardware.RIGHT_PIVOT_INVERTED)
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(IntakeConstants.INTAKE_PIVOT_SMART_CURRENT_LIMIT)
-        .secondaryCurrentLimit(IntakeConstants.INTAKE_PIVOT_SECONDARY_CURRENT_LIMIT)
+        .smartCurrentLimit(IntakeConstants.CurrentLimits.PIVOT_SMART)
+        .secondaryCurrentLimit(IntakeConstants.CurrentLimits.PIVOT_SECONDARY)
         .voltageCompensation(12.0);
 
     // Configure absolute encoder on right motor
     rightConfig
         .absoluteEncoder
-        .inverted(IntakeConstants.PIVOT_ENCODER_INVERTED)
-        .positionConversionFactor(IntakeConstants.PIVOT_ENCODER_POSITION_FACTOR)
-        .velocityConversionFactor(IntakeConstants.PIVOT_ENCODER_VELOCITY_FACTOR)
+        .inverted(IntakeConstants.Hardware.PIVOT_ENCODER_INVERTED)
+        .positionConversionFactor(IntakeConstants.Hardware.PIVOT_ENCODER_POSITION_FACTOR)
+        .velocityConversionFactor(IntakeConstants.Hardware.PIVOT_ENCODER_VELOCITY_FACTOR)
         .averageDepth(2);
 
     tryUntilOk(
@@ -69,8 +67,8 @@ public class RealIntakeIO implements IntakeIO {
     SparkMaxConfig leftConfig = new SparkMaxConfig();
     leftConfig
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(IntakeConstants.INTAKE_PIVOT_SMART_CURRENT_LIMIT)
-        .secondaryCurrentLimit(IntakeConstants.INTAKE_PIVOT_SECONDARY_CURRENT_LIMIT)
+        .smartCurrentLimit(IntakeConstants.CurrentLimits.PIVOT_SMART)
+        .secondaryCurrentLimit(IntakeConstants.CurrentLimits.PIVOT_SECONDARY)
         .voltageCompensation(12.0);
 
     // Configure left motor to follow right motor
@@ -89,10 +87,10 @@ public class RealIntakeIO implements IntakeIO {
 
     SparkMaxConfig config = new SparkMaxConfig();
     config
-        .inverted(IntakeConstants.INTAKE_ROLLER_INVERTED)
+        .inverted(IntakeConstants.Hardware.ROLLER_INVERTED)
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(IntakeConstants.INTAKE_ROLLER_SMART_CURRENT_LIMIT)
-        .secondaryCurrentLimit(IntakeConstants.INTAKE_ROLLER_SECONDARY_CURRENT_LIMIT)
+        .smartCurrentLimit(IntakeConstants.CurrentLimits.ROLLER_SMART)
+        .secondaryCurrentLimit(IntakeConstants.CurrentLimits.ROLLER_SECONDARY)
         .voltageCompensation(12.0);
 
     tryUntilOk(
@@ -104,7 +102,7 @@ public class RealIntakeIO implements IntakeIO {
   }
 
   public void updateInputs(IntakeIOInputs inputs) {
-    // |================= START RIGHT INTAKE PIVOT MOTOR LOGGING =================|
+    // Right pivot motor
     ifOk(
         _rightPivotMotor,
         _rightPivotMotor::getMotorTemperature,
@@ -118,7 +116,7 @@ public class RealIntakeIO implements IntakeIO {
         _pivotEncoder::getPosition,
         (value) ->
             inputs._intakeRightPivotMotorPosition =
-                new Rotation2d(value).minus(IntakeConstants.PIVOT_ZERO_ROTATION));
+                new Rotation2d(value).minus(IntakeConstants.Hardware.PIVOT_ZERO_ROTATION));
     ifOk(
         _rightPivotMotor,
         new java.util.function.DoubleSupplier[] {
@@ -129,9 +127,8 @@ public class RealIntakeIO implements IntakeIO {
         _rightPivotMotor,
         _rightPivotMotor::getOutputCurrent,
         (value) -> inputs._intakeRightPivotMotorCurrent = Amps.of(value));
-    // |================= END RIGHT INTAKE PIVOT MOTOR LOGGING =================|
 
-    // |================= START LEFT INTAKE PIVOT MOTOR LOGGING =================|
+    // Left pivot motor
     ifOk(
         _leftPivotMotor,
         _leftPivotMotor::getMotorTemperature,
@@ -154,9 +151,8 @@ public class RealIntakeIO implements IntakeIO {
         _leftPivotMotor,
         _leftPivotMotor::getOutputCurrent,
         (value) -> inputs._intakeLeftPivotMotorCurrent = Amps.of(value));
-    // |================= END LEFT INTAKE PIVOT MOTOR LOGGING =================|
 
-    // |================= START INTAKE ROLLER MOTOR LOGGING =================|
+    // Roller motor
     ifOk(
         _rollerMotor,
         _rollerMotor::getMotorTemperature,
@@ -175,19 +171,18 @@ public class RealIntakeIO implements IntakeIO {
         _rollerMotor,
         _rollerMotor::getOutputCurrent,
         (value) -> inputs._intakeRollerMotorCurrent = Amps.of(value));
-    // |================= END INTAKE ROLLER MOTOR LOGGING =================|
   }
 
-  // |============================== PIVOT MOTOR METHODS ============================== |
+  // Pivot motor methods
   public void setPivotMotorVoltage(double volts) {
     _rightPivotMotor.setVoltage(volts);
   }
 
-  public void setIntakePivotDutyCucleOutput(double output) {
+  public void setIntakePivotDutyCycleOutput(double output) {
     _rightPivotMotor.set(output);
   }
 
-  // |============================== ROLLER MOTOR METHODS ============================== |
+  // Roller motor methods
   public void setRollerMotorOutput(double output) {
     _rollerMotor.set(output);
   }

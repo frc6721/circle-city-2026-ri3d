@@ -81,8 +81,8 @@ public class FuelVisualizer {
    * @return The time step in seconds between each trajectory visualization point
    */
   private double getTrajectoryTimeStep() {
-    return ShooterConstants.TRAJECTORY_TIME_SPAN_SECONDS
-        / ShooterConstants.TRAJECTORY_VISUALIZATION_POINTS;
+    return ShooterConstants.FuelSim.TRAJECTORY_TIME_SPAN_SECONDS
+        / ShooterConstants.FuelSim.TRAJECTORY_POINTS;
   }
 
   /**
@@ -93,7 +93,7 @@ public class FuelVisualizer {
    */
   public FuelVisualizer() {
     // Initialize trajectory array with size from constants
-    this.trajectory = new Translation3d[ShooterConstants.TRAJECTORY_VISUALIZATION_POINTS];
+    this.trajectory = new Translation3d[ShooterConstants.FuelSim.TRAJECTORY_POINTS];
     for (int i = 0; i < trajectory.length; i++) {
       trajectory[i] = new Translation3d();
     }
@@ -136,7 +136,7 @@ public class FuelVisualizer {
     double omegaRadPerSec = angularVelocity.in(RadiansPerSecond);
 
     // Calculate radius from diameter (using .in() to convert Distance to double)
-    double radiusMeters = ShooterConstants.SHOOTER_WHEEL_DIAMETER.in(Meters) / 2.0;
+    double radiusMeters = ShooterConstants.FuelSim.WHEEL_DIAMETER.in(Meters) / 2.0;
 
     // v = ω × r (linear velocity = angular velocity × radius)
     double linearVelMps = omegaRadPerSec * radiusMeters;
@@ -208,9 +208,9 @@ public class FuelVisualizer {
     Pose2d robotPose = RobotState.getInstance().getEstimatedPose();
 
     // Get shooter offset from constants (robot-relative) - convert Distance to meters
-    double forwardOffset = ShooterConstants.SHOOTER_FORWARD_OFFSET.in(Meters);
-    double sideOffset = ShooterConstants.SHOOTER_SIDE_OFFSET.in(Meters);
-    double height = ShooterConstants.SHOOTER_HEIGHT_FROM_GROUND.in(Meters);
+    double forwardOffset = ShooterConstants.FuelSim.FORWARD_OFFSET.in(Meters);
+    double sideOffset = ShooterConstants.FuelSim.SIDE_OFFSET.in(Meters);
+    double height = ShooterConstants.FuelSim.HEIGHT_FROM_GROUND.in(Meters);
 
     // Create 2D offset and rotate by robot heading
     Translation2d robotRelativeOffset = new Translation2d(forwardOffset, sideOffset);
@@ -291,12 +291,12 @@ public class FuelVisualizer {
   public void updateTrajectory(LinearVelocity linearVel, Angle angle) {
     // Convert to RPM to check against threshold
     double linearVelMps = linearVel.in(MetersPerSecond);
-    double radiusMeters = ShooterConstants.SHOOTER_WHEEL_DIAMETER.in(Meters) / 2.0;
+    double radiusMeters = ShooterConstants.FuelSim.WHEEL_DIAMETER.in(Meters) / 2.0;
     double angularVelRadPerSec = linearVelMps / radiusMeters;
     double rpm = (angularVelRadPerSec * 60.0) / (2.0 * Math.PI);
 
     // If flywheel speed is below threshold, clear trajectory and return
-    if (rpm < ShooterConstants.SHOOTER_RPM_THRESHOLD_FOR_LAUNCH.in(RPM)) {
+    if (rpm < ShooterConstants.FuelSim.RPM_THRESHOLD_FOR_LAUNCH.in(RPM)) {
       // Clear all trajectory points
       for (int i = 0; i < trajectory.length; i++) {
         trajectory[i] = new Translation3d();
@@ -361,6 +361,6 @@ public class FuelVisualizer {
    */
   public boolean canLaunch() {
     double currentTime = System.currentTimeMillis() / 1000.0;
-    return (currentTime - lastLaunchTime) >= ShooterConstants.SHOOTER_LAUNCH_INTERVAL.in(Seconds);
+    return (currentTime - lastLaunchTime) >= ShooterConstants.FuelSim.LAUNCH_INTERVAL.in(Seconds);
   }
 }

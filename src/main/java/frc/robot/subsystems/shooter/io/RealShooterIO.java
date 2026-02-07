@@ -31,10 +31,10 @@ public class RealShooterIO implements ShooterIO {
 
     SparkMaxConfig config = new SparkMaxConfig();
     config
-        .inverted(ShooterConstants.SHOOTER_FLYWHEEL_INVERTED)
+        .inverted(ShooterConstants.Mechanical.INVERTED)
         .idleMode(IdleMode.kCoast)
-        .smartCurrentLimit(ShooterConstants.SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT)
-        .secondaryCurrentLimit(ShooterConstants.SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT)
+        .smartCurrentLimit(ShooterConstants.CurrentLimits.SMART)
+        .secondaryCurrentLimit(ShooterConstants.CurrentLimits.SECONDARY)
         .voltageCompensation(12.0);
     config.closedLoop.pid(
         ShooterConstants.getFlywheelKP(),
@@ -42,7 +42,7 @@ public class RealShooterIO implements ShooterIO {
         ShooterConstants.getFlywheelKD());
 
     config.closedLoop.maxMotion.maxAcceleration(
-        ShooterConstants.MAX_FLYWHEEL_ACCEL.in(RotationsPerSecond.per(Second)) * 60.0);
+        ShooterConstants.Limits.MAX_ACCEL.in(RotationsPerSecond.per(Second)) * 60.0);
 
     tryUntilOk(
         _flywheelMotor,
@@ -53,18 +53,16 @@ public class RealShooterIO implements ShooterIO {
   }
 
   public void updateInputs(ShooterIOInputs inputs) {
-    // |================= START SHOOTER FLYWHEEL MOTOR LOGGING =================|
+    // Flywheel motor
     inputs._flywheelMotorTemperature = Celsius.of(_flywheelMotor.getMotorTemperature());
     inputs._flywheelMotorVelocity =
         RotationsPerSecond.of(_flywheelMotor.getEncoder().getVelocity() / 60.0);
     inputs._flywheelMotorVoltage =
         Volts.of(_flywheelMotor.getAppliedOutput() * _flywheelMotor.getBusVoltage());
     inputs._flywheelMotorCurrent = Amps.of(_flywheelMotor.getOutputCurrent());
-    // |================= END SHOOTER FLYWHEEL MOTOR LOGGING =================|
-
   }
 
-  // |============================== FLYWHEEL MOTOR METHODS ============================== |
+  // Flywheel motor methods
   public void setFlywheelSpeed(AngularVelocity speed) {
     double targetRPM = speed.in(RotationsPerSecond) * 60.0;
 

@@ -11,37 +11,34 @@ public interface IntakeIO {
 
   @AutoLog
   public static class IntakeIOInputs {
-    // |================= START RIGHT INTAKE PIVOT MOTOR LOGGING =================|
+    // Right pivot motor
     public Temperature _intakeRightPivotMotorTemperature;
     public AngularVelocity _intakeRightPivotMotorVelocity;
     public Rotation2d _intakeRightPivotMotorPosition;
     public Voltage _intakeRightPivotMotorVoltage;
     public Current _intakeRightPivotMotorCurrent;
-    // |================= END RIGHT INTAKE PIVOT MOTOR LOGGING =================|
 
-    // |================= START LEFT INTAKE PIVOT MOTOR LOGGING =================|
+    // Left pivot motor
     public Temperature _intakeLeftPivotMotorTemperature;
     public AngularVelocity _intakeLeftPivotMotorVelocity;
     public Rotation2d _intakeLeftPivotMotorPosition;
     public Voltage _intakeLeftPivotMotorVoltage;
     public Current _intakeLeftPivotMotorCurrent;
-    // |================= END LEFT INTAKE PIVOT MOTOR LOGGING =================|
 
-    // |================= START INTAKE ROLLER MOTOR LOGGING =================|
+    // Roller motor
     public Temperature _intakeRollerMotorTemperature;
     public AngularVelocity _intakeRollerMotorVelocity;
     public Voltage _intakeRollerMotorVoltage;
     public Current _intakeRollerMotorCurrent;
-    // |================= END INTAKE ROLLER MOTOR LOGGING =================|
   }
 
   public default void updateInputs(IntakeIOInputs inputs) {}
 
-  // |============================== PIVOT MOTOR METHODS ============================== |
+  // Pivot motor methods
   public default void setPivotMotorVoltage(double volts) {}
 
-  public default void setIntakePivotDutyCucleOutput(double output) {}
+  public default void setIntakePivotDutyCycleOutput(double output) {}
 
-  // |============================== ROLLER MOTOR METHODS ============================== |
+  // Roller motor methods
   public default void setRollerMotorOutput(double output) {}
 }

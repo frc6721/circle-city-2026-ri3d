@@ -5,33 +5,34 @@ import org.littletonrobotics.junction.Logger;
 
 public class FeederConstants {
 
-  // ==================== MECHANICAL CONSTANTS ====================
+  /** Mechanical properties of the feeder mechanism. */
+  public static class Mechanical {
+    /** Gear ratio from motor to feeder mechanism (motor rotations per mechanism rotation) */
+    public static final double GEAR_RATIO = 4.0; // 4:1 AM Sport Gearbox
 
-  /** Gear ratio from motor to feeder mechanism (motor rotations per mechanism rotation) */
-  public static final double FEEDER_GEAR_RATIO = 4.0; // 4:1 AM Sport Gearbox
+    /** Motor type for the feeder (1x NEO) */
+    public static final DCMotor MOTOR = DCMotor.getNEO(1);
+  }
 
-  /** Motor type for the feeder (1x NEO) */
-  public static final DCMotor FEEDER_MOTOR = DCMotor.getNEO(1);
+  /** Motor configuration for the feeder. */
+  public static class Motor {
+    /** Motor inversion */
+    public static final boolean INVERTED = false;
+  }
 
-  // ==================== MOTOR CONFIGURATION ====================
+  /** Current limits for motor protection. */
+  public static class CurrentLimits {
+    public static final int SMART_CURRENT_LIMIT = 40;
+    public static final double SECONDARY_CURRENT_LIMIT = 55;
+  }
 
-  /** Motor inversion */
-  public static final boolean FEEDER_MOTOR_INVERTED = false;
-
-  // ==================== CURRENT LIMITS ====================
-
-  public static final int FEEDER_MOTOR_SMART_CURRENT_LIMIT = 40;
-  public static final double FEEDER_MOTOR_SECONDARY_CURRENT_LIMIT = 55;
-
-  // ==================== LOGGING ====================
-
+  // Logging
   static {
-    Logger.recordOutput("Constants/Feeder/GearRatio", FEEDER_GEAR_RATIO);
-    Logger.recordOutput("Constants/Feeder/MotorInverted", FEEDER_MOTOR_INVERTED);
+    Logger.recordOutput("Constants/Feeder/GearRatio", Mechanical.GEAR_RATIO);
+    Logger.recordOutput("Constants/Feeder/MotorInverted", Motor.INVERTED);
 
-    // Current limits
-    Logger.recordOutput("Constants/Feeder/CurrentLimit/Smart_A", FEEDER_MOTOR_SMART_CURRENT_LIMIT);
+    Logger.recordOutput("Constants/Feeder/CurrentLimit/Smart_A", CurrentLimits.SMART_CURRENT_LIMIT);
     Logger.recordOutput(
-        "Constants/Feeder/CurrentLimit/Secondary_A", FEEDER_MOTOR_SECONDARY_CURRENT_LIMIT);
+        "Constants/Feeder/CurrentLimit/Secondary_A", CurrentLimits.SECONDARY_CURRENT_LIMIT);
   }
 }

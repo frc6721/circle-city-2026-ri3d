@@ -33,7 +33,7 @@ import org.littletonrobotics.junction.Logger;
  * <ol>
  *   <li>Placing the robot at known distances from the target
  *   <li>Adjusting RPM until shots consistently score
- *   <li>Recording the (distance, RPM) pairs in ShooterConstants.DISTANCE_TO_SPEED_MAP
+ *   <li>Recording the (distance, RPM) pairs in ShooterConstants.DistanceMap.SPEED_MAP
  * </ol>
  *
  * <p><b>Future Enhancements:</b> This class is designed to be extended for shooting-while-moving.
@@ -101,10 +101,10 @@ public class ShotCalculator {
     Translation2d targetPosition2d = target.toTranslation2d();
     double distanceMeters = robotPosition.getDistance(targetPosition2d);
 
-    double speedRPM = ShooterConstants.DISTANCE_TO_SPEED_MAP.get(distanceMeters);
+    double speedRPM = ShooterConstants.DistanceMap.SPEED_MAP.get(distanceMeters);
 
-    double minRPM = ShooterConstants.MIN_FLYWHEEL_SPEED.in(RevolutionsPerSecond) * 60.0;
-    double maxRPM = ShooterConstants.MAX_FLYWHEEL_SPEED.in(RevolutionsPerSecond) * 60.0;
+    double minRPM = ShooterConstants.Limits.MIN_SPEED.in(RevolutionsPerSecond) * 60.0;
+    double maxRPM = ShooterConstants.Limits.MAX_SPEED.in(RevolutionsPerSecond) * 60.0;
     speedRPM = Math.max(minRPM, Math.min(maxRPM, speedRPM));
 
     Logger.recordOutput("Shooter/ShotCalculator/TargetPosition", target);

@@ -195,11 +195,11 @@ public class RobotContainer {
           RobotDimensions.ROBOT_WIDTH
               .div(2)
               .unaryMinus()
-              .minus(IntakeConstants.INTAKE_WIDTH.div(2))
+              .minus(IntakeConstants.FuelSim.WIDTH.div(2))
               .in(Meters),
           -RobotDimensions.ROBOT_WIDTH.div(2).in(Meters), // Offset intake box to back of robot
-          -IntakeConstants.INTAKE_LENGTH.div(2).in(Meters),
-          IntakeConstants.INTAKE_LENGTH.div(2).in(Meters),
+          -IntakeConstants.FuelSim.LENGTH.div(2).in(Meters),
+          IntakeConstants.FuelSim.LENGTH.div(2).in(Meters),
           intake::canIntakeFuel, // BooleanSupplier - checks if intake can collect
           intake::simIntakeFuel); // Runnable - called when fuel is collected
 

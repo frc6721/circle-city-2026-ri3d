@@ -33,13 +33,13 @@ import frc.robot.subsystems.feeder.FeederConstants;
 public class SimFeederIO implements FeederIO {
 
   // Simulated motor
-  private final SparkMax feederMotor;
+  private final SparkMax _feederMotor;
 
   // REV simulation wrapper
-  private final SparkMaxSim feederSim;
+  private final SparkMaxSim _feederSim;
 
   // Control state
-  private double dutyCycle = 0.0;
+  private double _dutyCycle = 0.0;
 
   /**
    * Creates a new SimFeederIO.
@@ -48,38 +48,37 @@ public class SimFeederIO implements FeederIO {
    */
   public SimFeederIO() {
     // Create simulated motor (using arbitrary CAN ID since it doesn't matter in sim)
-    feederMotor = new SparkMax(70, MotorType.kBrushless);
+    _feederMotor = new SparkMax(70, MotorType.kBrushless);
 
     // Configure the feeder motor
     SparkMaxConfig config = new SparkMaxConfig();
     config
-        .inverted(FeederConstants.FEEDER_MOTOR_INVERTED)
+        .inverted(FeederConstants.Motor.INVERTED)
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(FeederConstants.FEEDER_MOTOR_SMART_CURRENT_LIMIT)
+        .smartCurrentLimit(FeederConstants.CurrentLimits.SMART_CURRENT_LIMIT)
         .voltageCompensation(12.0);
 
-    feederMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    _feederMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     // Create REV simulation wrapper
-    feederSim = new SparkMaxSim(feederMotor, FeederConstants.FEEDER_MOTOR);
+    _feederSim = new SparkMaxSim(_feederMotor, FeederConstants.Mechanical.MOTOR);
   }
 
   @Override
   public void updateInputs(FeederIOInputs inputs) {
     // Calculate simulated values based on duty cycle
-    double appliedVoltage = dutyCycle * RoboRioSim.getVInVoltage();
+    double appliedVoltage = _dutyCycle * RoboRioSim.getVInVoltage();
 
-    // Approximate current draw based on duty cycle (no load = low current, full load = high
-    // current)
-    double simulatedCurrent = Math.abs(dutyCycle) * 15.0; // ~15A at full power
+    // Approximate current draw based on duty cycle
+    double simulatedCurrent = Math.abs(_dutyCycle) * 15.0; // ~15A at full power
 
     // Update battery simulation
     RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(simulatedCurrent));
 
     // Update the SparkMax simulation
-    feederSim.setBusVoltage(RoboRioSim.getVInVoltage());
-    feederSim.iterate(
-        dutyCycle * 5000.0, // Approximate RPM at full speed
+    _feederSim.setBusVoltage(RoboRioSim.getVInVoltage());
+    _feederSim.iterate(
+        _dutyCycle * 5000.0, // Approximate RPM at full speed
         RoboRioSim.getVInVoltage(),
         0.02);
 
@@ -91,7 +90,7 @@ public class SimFeederIO implements FeederIO {
 
   @Override
   public void setMotorSpeed(double speed) {
-    dutyCycle = Math.max(-1.0, Math.min(1.0, speed));
-    feederMotor.set(dutyCycle);
+    _dutyCycle = Math.max(-1.0, Math.min(1.0, speed));
+    _feederMotor.set(_dutyCycle);
   }
 }

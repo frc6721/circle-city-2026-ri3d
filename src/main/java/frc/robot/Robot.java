@@ -119,7 +119,7 @@ public class Robot extends LoggedRobot {
   public void autonomousInit() {
     // Initialize virtual hopper with starting fuel count
     // Robot starts each match with fuel ready to shoot
-    VirtualHopper.getInstance().setFuelCount(ShooterConstants.STARTING_FUEL_COUNT);
+    VirtualHopper.getInstance().setFuelCount(ShooterConstants.FuelSim.STARTING_FUEL_COUNT);
 
     autonomousCommand = robotContainer.getAutonomousCommand();
 
@@ -138,7 +138,7 @@ public class Robot extends LoggedRobot {
   public void teleopInit() {
     // Initialize virtual hopper with starting fuel count
     // Robot starts each match with fuel ready to shoot
-    VirtualHopper.getInstance().setFuelCount(ShooterConstants.STARTING_FUEL_COUNT);
+    VirtualHopper.getInstance().setFuelCount(ShooterConstants.FuelSim.STARTING_FUEL_COUNT);
 
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to

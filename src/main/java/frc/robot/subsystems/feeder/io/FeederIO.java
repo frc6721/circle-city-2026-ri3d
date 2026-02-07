@@ -9,11 +9,10 @@ public interface FeederIO {
 
   @AutoLog
   public static class FeederIOInputs {
-    // |================= START FEEDER MOTOR LOGGING =================|
+    // Feeder motor
     public Temperature _feederMotorTemperature;
     public Voltage _feederMotorVoltage;
     public Current _feederMotorCurrent;
-    // |================= END FEEDER MOTOR LOGGING =================|
   }
 
   /** Updates the set of loggable inputs. */

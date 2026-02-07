@@ -27,10 +27,10 @@ public class RealFeederIO implements FeederIO {
 
     SparkMaxConfig config = new SparkMaxConfig();
     config
-        .inverted(FeederConstants.FEEDER_MOTOR_INVERTED)
+        .inverted(FeederConstants.Motor.INVERTED)
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(FeederConstants.FEEDER_MOTOR_SMART_CURRENT_LIMIT)
-        .secondaryCurrentLimit(FeederConstants.FEEDER_MOTOR_SECONDARY_CURRENT_LIMIT)
+        .smartCurrentLimit(FeederConstants.CurrentLimits.SMART_CURRENT_LIMIT)
+        .secondaryCurrentLimit(FeederConstants.CurrentLimits.SECONDARY_CURRENT_LIMIT)
         .voltageCompensation(12.0);
 
     tryUntilOk(
@@ -43,12 +43,11 @@ public class RealFeederIO implements FeederIO {
 
   @Override
   public void updateInputs(FeederIOInputs inputs) {
-    // |================= START FEEDER MOTOR LOGGING =================|
+    // Feeder motor
     inputs._feederMotorTemperature = Celsius.of(_feederMotor.getMotorTemperature());
     inputs._feederMotorVoltage =
         Volts.of(_feederMotor.getAppliedOutput() * _feederMotor.getBusVoltage());
     inputs._feederMotorCurrent = Amps.of(_feederMotor.getOutputCurrent());
-    // |================= END FEEDER MOTOR LOGGING =================|
   }
 
   @Override

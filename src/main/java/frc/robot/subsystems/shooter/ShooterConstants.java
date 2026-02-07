@@ -25,279 +25,236 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ShooterConstants {
 
-  // ==================== MECHANICAL CONSTANTS ====================
+  /** Physical/mechanical properties of the flywheel. */
+  public static class Mechanical {
+    /** Gear ratio from motor to flywheel (motor rotations per flywheel rotation) */
+    public static final double GEAR_RATIO = 1.0;
 
-  /** Gear ratio from motor to flywheel (motor rotations per flywheel rotation) */
-  public static final double FLYWHEEL_GEAR_RATIO = 1.0;
+    /** Flywheel diameter (4" urethane wheel) */
+    public static final Distance DIAMETER = Inches.of(4.0);
 
-  /** Flywheel diameter (4" urethane wheel) */
-  public static final Distance FLYWHEEL_DIAMETER = Inches.of(4.0);
+    /**
+     * Moment of inertia for the flywheel. Estimated for 4" urethane wheel + custom aluminum
+     * flywheel. A typical 4" wheel + aluminum disc is approximately 0.003-0.005 kg⋅m²
+     */
+    public static final MomentOfInertia MOI = KilogramSquareMeters.of(0.0004);
 
-  /**
-   * Moment of inertia for the flywheel. Estimated for 4" urethane wheel + custom aluminum flywheel.
-   * A typical 4" wheel + aluminum disc is approximately 0.003-0.005 kg⋅m²
-   */
-  public static final MomentOfInertia FLYWHEEL_MOI = KilogramSquareMeters.of(0.0004);
+    /** Motor type for the flywheel (1x NEO) */
+    public static final DCMotor MOTOR = DCMotor.getNEO(1);
 
-  /** Motor type for the flywheel (1x NEO) */
-  public static final DCMotor FLYWHEEL_MOTOR = DCMotor.getNEO(1);
+    /** Motor inversion */
+    public static final boolean INVERTED = false;
+  }
 
-  /** Motor inversion */
-  public static final boolean SHOOTER_FLYWHEEL_INVERTED = false;
+  /** Velocity and acceleration limits for the flywheel. */
+  public static class Limits {
+    public static final AngularVelocity MIN_SPEED = RevolutionsPerSecond.of(100 / 60.0); // 100 RPM
 
-  // ==================== VELOCITY LIMITS ====================
+    public static final AngularVelocity MAX_SPEED =
+        RevolutionsPerSecond.of(5600 / 60.0); // 5600 RPM
 
-  public static final AngularVelocity MIN_FLYWHEEL_SPEED =
-      RevolutionsPerSecond.of(100 / 60.0); // 100 RPM
+    public static final AngularAcceleration MAX_ACCEL =
+        RevolutionsPerSecond.per(Second).of(5600 / 60.0); // 5600 RPM/s
+  }
 
-  public static final AngularVelocity MAX_FLYWHEEL_SPEED =
-      RevolutionsPerSecond.of(5600 / 60.0); // 5600 RPM
+  /** PID and feedforward tuning constants. */
+  public static class PID {
+    /** Real robot PID values - tuned for actual hardware (on motor controller) */
+    public static class Real {
+      public static final LoggedNetworkNumber KP =
+          new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kP", 0.000500);
 
-  // ==================== ACCELERATION LIMITS ====================
+      public static final LoggedNetworkNumber KI =
+          new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kI", 0.0);
+      public static final LoggedNetworkNumber KD =
+          new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kD", 0.0000);
+      public static final LoggedNetworkNumber FF =
+          new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kFF", 0.000100);
+    }
 
-  public static final AngularAcceleration MAX_FLYWHEEL_ACCEL =
-      RevolutionsPerSecond.per(Second).of(5600 / 60.0); // 5600 RPM
+    /** Simulation PID values */
+    public static class Sim {
+      public static final LoggedNetworkNumber KP =
+          new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kP", 0.0001);
 
-  // ==================== PID CONSTANTS (REAL ROBOT) ====================
+      public static final LoggedNetworkNumber KI =
+          new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kI", 0.0);
+      public static final LoggedNetworkNumber KD =
+          new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kD", 0.0);
+      public static final LoggedNetworkNumber FF =
+          new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kV", 0.0);
+    }
+  }
 
-  /** Real robot PID values - tuned for actual hardware (on motor controller) */
-  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KP_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kP", 0.000500);
+  /** Feedforward constants for velocity control. */
+  public static class Feedforward {
+    /** Real robot feedforward values */
+    public static class Real {
+      /** Static friction voltage (voltage to overcome friction) */
+      public static final LoggedNetworkNumber KS =
+          new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Real/kS", 0.18554);
 
-  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KI_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kI", 0.0);
-  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KD_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kD", 0.0000);
-  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_FF_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Real/kFF", 0.000100);
+      /** Velocity feedforward constant (Volts per RPM) */
+      public static final LoggedNetworkNumber KV =
+          new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Real/kV", 0.002);
+    }
 
-  // ==================== FEEDFORWARD CONSTANTS (REAL ROBOT) ====================
+    /** Simulation feedforward values */
+    public static class Sim {
+      public static final LoggedNetworkNumber KS =
+          new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Sim/kS", 0.0);
+      public static final LoggedNetworkNumber KV =
+          new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Sim/kV", 0.0018);
+    }
+  }
 
-  /** Static friction voltage (voltage to overcome friction) */
-  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_KS_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Real/kS", 0.18554);
-
-  /** Velocity feedforward constant (Volts per RPM) */
-  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_KV_REAL =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Real/kV", 0.002);
-
-  // ==================== FEEDFORWARD CONSTANTS (SIMULATION) ====================
-  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_KS_SIM =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Sim/kS", 0.0);
-  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_KV_SIM =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_FF/Sim/kV", 0.0018);
-
-  // ==================== PID CONSTANTS (SIMULATION) ====================
-
-  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KP_SIM =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kP", 0.0001);
-  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KI_SIM =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kI", 0.0);
-  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_KD_SIM =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kD", 0.0);
-  public static final LoggedNetworkNumber SHOOTER_FLYWHEEL_PID_FF_SIM =
-      new LoggedNetworkNumber("Shooter/FLYWHEEL_PID/Sim/kV", 0.0);
-
-  // ==================== MODE-SELECTED CONSTANTS ====================
+  // Mode-selected getters
 
   /** Returns the appropriate PID kP based on current mode */
   public static double getFlywheelKP() {
-    return Constants.currentMode == Constants.Mode.SIM
-        ? SHOOTER_FLYWHEEL_PID_KP_SIM.get()
-        : SHOOTER_FLYWHEEL_PID_KP_REAL.get();
+    return Constants.currentMode == Constants.Mode.SIM ? PID.Sim.KP.get() : PID.Real.KP.get();
   }
 
   /** Returns the appropriate PID kI based on current mode */
   public static double getFlywheelKI() {
-    return Constants.currentMode == Constants.Mode.SIM
-        ? SHOOTER_FLYWHEEL_PID_KI_SIM.get()
-        : SHOOTER_FLYWHEEL_PID_KI_REAL.get();
+    return Constants.currentMode == Constants.Mode.SIM ? PID.Sim.KI.get() : PID.Real.KI.get();
   }
 
   /** Returns the appropriate PID kD based on current mode */
   public static double getFlywheelKD() {
-    return Constants.currentMode == Constants.Mode.SIM
-        ? SHOOTER_FLYWHEEL_PID_KD_SIM.get()
-        : SHOOTER_FLYWHEEL_PID_KD_REAL.get();
+    return Constants.currentMode == Constants.Mode.SIM ? PID.Sim.KD.get() : PID.Real.KD.get();
   }
 
   /** Returns the appropriate PID FF based on current mode */
   public static double getFlywheelFF() {
-    return Constants.currentMode == Constants.Mode.SIM
-        ? SHOOTER_FLYWHEEL_PID_FF_SIM.get()
-        : SHOOTER_FLYWHEEL_PID_FF_REAL.get();
+    return Constants.currentMode == Constants.Mode.SIM ? PID.Sim.FF.get() : PID.Real.FF.get();
   }
 
   /** Returns the appropriate feedforward kS based on current mode */
   public static double getFlywheelKS() {
     return Constants.currentMode == Constants.Mode.SIM
-        ? SHOOTER_FLYWHEEL_KS_SIM.get()
-        : SHOOTER_FLYWHEEL_KS_REAL.get();
+        ? Feedforward.Sim.KS.get()
+        : Feedforward.Real.KS.get();
   }
 
   /** Returns the appropriate feedforward kV based on current mode */
   public static double getFlywheelKV() {
     return Constants.currentMode == Constants.Mode.SIM
-        ? SHOOTER_FLYWHEEL_KV_SIM.get()
-        : SHOOTER_FLYWHEEL_KV_REAL.get();
+        ? Feedforward.Sim.KV.get()
+        : Feedforward.Real.KV.get();
   }
 
-  // ==================== CURRENT LIMITS ====================
-
-  public static final int SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT = 100;
-  public static final double SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT = 100;
-
-  // ==================== SOFTWARE SETTINGS ====================
-
-  /** Tolerance as a percentage (0.05 = 5%) for determining if flywheel is at target speed */
-  public static final double FLYWHEEL_PID_TOLERANCE = 0.05;
-
-  /** Idle duty cycle when shooter is not actively shooting */
-  public static final double SHOOTER_IDLE_DUTY_CYCLE_OUTPUT = 0.0;
-
-  // ==================== VISUALIZATION CONSTANTS ====================
-
-  /**
-   * 3D offset from robot origin to flywheel center. TODO: Update these values based on CAD or
-   * measurements. X = forward/back, Y = up/down, Z = left/right (meters)
-   */
-  public static final Translation3d VISUALIZATION_OFFSET =
-      new Translation3d(
-          Inches.of(26 / 2).in(Meters), Inches.of(20).in(Meters), Inches.of(6).in(Meters));
-
-  /** 3D rotation offset for visualization orientation */
-  public static final Rotation3d VISUALIZATION_ROTATION = new Rotation3d(0.0, 0.0, 0.0);
-
-  /** Visualization flywheel radius in meters for Mechanism2d display */
-  public static final double VISUALIZATION_FLYWHEEL_RADIUS = FLYWHEEL_DIAMETER.in(Meters) / 2.0;
-
-  // ==================== DISTANCE TO SPEED LOOKUP TABLE ====================
-
-  /**
-   * Distance-based shooting lookup table.
-   *
-   * <p>Maps distance to target (meters) → required shooter speed (RPM)
-   *
-   * <p>Characterize your shooter by:
-   *
-   * <ol>
-   *   <li>Shooting from various known distances
-   *   <li>Recording the RPM needed for successful shots
-   *   <li>Adding those data points here using Meters.of() and RPM.of()
-   * </ol>
-   *
-   * <p>InterpolatingDoubleTreeMap automatically interpolates between points for any distance.
-   */
-  public static final InterpolatingDoubleTreeMap DISTANCE_TO_SPEED_MAP =
-      new InterpolatingDoubleTreeMap();
-
-  static {
-    // Add characterization data points using the units library for clarity
-    DISTANCE_TO_SPEED_MAP.put(Meters.of(1.0).in(Meters), RPM.of(1000.0).in(RPM));
-    DISTANCE_TO_SPEED_MAP.put(Meters.of(3.0).in(Meters), RPM.of(1500.0).in(RPM));
-    // Add more data points as you characterize:
-    // DISTANCE_TO_SPEED_MAP.put(Meters.of(5.0).in(Meters), RPM.of(4500.0).in(RPM));
+  /** Current limits for motor protection. */
+  public static class CurrentLimits {
+    public static final int SMART = 100;
+    public static final double SECONDARY = 100;
   }
 
-  // ==================== FUEL SIM CONSTANTS ====================
+  /** Software tuning settings. */
+  public static class Software {
+    /** Tolerance as a percentage (0.05 = 5%) for determining if flywheel is at target speed */
+    public static final double PID_TOLERANCE = 0.05;
 
-  /**
-   * FuelSim constants for shooter trajectory visualization.
-   *
-   * <p>These constants define the shooter's physical position on the robot and launch parameters.
-   * They are used by the FuelSimVisualizer to calculate realistic projectile trajectories.
-   *
-   * <p><b>Coordinate System:</b> Robot-relative coordinates with origin at robot center.
-   *
-   * <ul>
-   *   <li>X-axis: forward (positive ahead of robot)
-   *   <li>Y-axis: left/right (positive to left)
-   *   <li>Z-axis: up (positive above ground)
-   * </ul>
-   */
+    /** Idle duty cycle when shooter is not actively shooting */
+    public static final double IDLE_DUTY_CYCLE = 0.0;
+  }
 
-  /** Height of the shooter exit point above the ground. 18" = 0.457 m */
-  public static final Distance SHOOTER_HEIGHT_FROM_GROUND = Inches.of(18.0);
+  /** 3D visualization constants for AdvantageScope. */
+  public static class Visualization {
+    /**
+     * 3D offset from robot origin to flywheel center. TODO: Update based on CAD or measurements.
+     */
+    public static final Translation3d OFFSET =
+        new Translation3d(
+            Inches.of(26 / 2).in(Meters), Inches.of(20).in(Meters), Inches.of(6).in(Meters));
 
-  /** Forward offset of shooter from robot center. 8" ahead of center. */
-  public static final Distance SHOOTER_FORWARD_OFFSET = Inches.of(8.0);
+    /** 3D rotation offset for visualization orientation */
+    public static final Rotation3d ROTATION = new Rotation3d(0.0, 0.0, 0.0);
 
-  /** Side offset of shooter from robot center. Centered left/right = 0.0. */
-  public static final Distance SHOOTER_SIDE_OFFSET = Inches.of(0.0);
+    /** Visualization flywheel radius in meters for Mechanism2d display */
+    public static final double FLYWHEEL_RADIUS = Mechanical.DIAMETER.in(Meters) / 2.0;
+  }
 
-  /** Fixed hood angle from horizontal. 70° launch angle for the fuel trajectory. */
-  public static final Angle SHOOTER_HOOD_ANGLE = Degrees.of(70.0);
+  /** Distance-to-speed lookup table for automatic shooting. */
+  public static class DistanceMap {
+    /**
+     * Maps distance to target (meters) → required shooter speed (RPM). Characterize by shooting
+     * from various distances and recording the RPM needed.
+     */
+    public static final InterpolatingDoubleTreeMap SPEED_MAP = new InterpolatingDoubleTreeMap();
 
-  /**
-   * Minimum flywheel RPM threshold to trigger fuel launch visualization. Below this speed, no fuel
-   * will be visualized as launching.
-   */
-  public static final AngularVelocity SHOOTER_RPM_THRESHOLD_FOR_LAUNCH = RPM.of(200.0);
+    static {
+      SPEED_MAP.put(Meters.of(1.0).in(Meters), RPM.of(1000.0).in(RPM));
+      SPEED_MAP.put(Meters.of(3.0).in(Meters), RPM.of(1500.0).in(RPM));
+    }
+  }
 
-  /**
-   * Time between consecutive fuel launches. Limits visualization rate to one fuel every 0.5
-   * seconds.
-   */
-  public static final Time SHOOTER_LAUNCH_INTERVAL = Seconds.of(0.5);
+  /** FuelSim constants for shooter trajectory visualization. */
+  public static class FuelSim {
+    /** Height of the shooter exit point above the ground. */
+    public static final Distance HEIGHT_FROM_GROUND = Inches.of(18.0);
 
-  /**
-   * Diameter of the shooter wheel for velocity conversion. Uses the same 4" wheel as
-   * FLYWHEEL_DIAMETER.
-   */
-  public static final Distance SHOOTER_WHEEL_DIAMETER = FLYWHEEL_DIAMETER;
+    /** Forward offset of shooter from robot center. */
+    public static final Distance FORWARD_OFFSET = Inches.of(8.0);
 
-  /** Maximum number of fuel pieces the robot can hold. */
-  public static final int MAX_HOPPER_CAPACITY = 30;
+    /** Side offset of shooter from robot center. */
+    public static final Distance SIDE_OFFSET = Inches.of(0.0);
 
-  /** Number of fuel pieces robot starts with when enabled. */
-  public static final int STARTING_FUEL_COUNT = 8;
+    /** Fixed hood angle from horizontal. */
+    public static final Angle HOOD_ANGLE = Degrees.of(70.0);
 
-  /** Number of points used to render the trajectory visualization. */
-  public static final int TRAJECTORY_VISUALIZATION_POINTS = 50;
+    /** Minimum flywheel RPM threshold to trigger fuel launch visualization. */
+    public static final AngularVelocity RPM_THRESHOLD_FOR_LAUNCH = RPM.of(200.0);
 
-  /**
-   * Total time span (in seconds) for the trajectory visualization.
-   *
-   * <p>This determines how far into the future the trajectory is calculated.
-   *
-   * <p>Increase this value if your trajectory is ending mid-air before hitting the ground.
-   */
-  public static final double TRAJECTORY_TIME_SPAN_SECONDS = 2.0;
+    /** Time between consecutive fuel launches. */
+    public static final Time LAUNCH_INTERVAL = Seconds.of(0.5);
 
-  // ==================== LOGGING ====================
+    /** Diameter of the shooter wheel for velocity conversion. */
+    public static final Distance WHEEL_DIAMETER = Mechanical.DIAMETER;
 
+    /** Maximum number of fuel pieces the robot can hold. */
+    public static final int MAX_HOPPER_CAPACITY = 30;
+
+    /** Number of fuel pieces robot starts with when enabled. */
+    public static final int STARTING_FUEL_COUNT = 8;
+
+    /** Number of points used to render the trajectory visualization. */
+    public static final int TRAJECTORY_POINTS = 50;
+
+    /**
+     * Total time span (in seconds) for the trajectory visualization. Increase if trajectory ends
+     * mid-air before hitting the ground.
+     */
+    public static final double TRAJECTORY_TIME_SPAN_SECONDS = 2.0;
+  }
+
+  // Logging
   static {
-    // Flywheel properties
-    Logger.recordOutput("Constants/Shooter/FlywheelGearRatio", FLYWHEEL_GEAR_RATIO);
+    Logger.recordOutput("Constants/Shooter/FlywheelGearRatio", Mechanical.GEAR_RATIO);
     Logger.recordOutput(
-        "Constants/Shooter/FlywheelMOI_kgm2", FLYWHEEL_MOI.in(KilogramSquareMeters));
-    Logger.recordOutput("Constants/Shooter/SpeedTolerance", FLYWHEEL_PID_TOLERANCE);
-    Logger.recordOutput("Constants/Shooter/FlywheelInverted", SHOOTER_FLYWHEEL_INVERTED);
+        "Constants/Shooter/FlywheelMOI_kgm2", Mechanical.MOI.in(KilogramSquareMeters));
+    Logger.recordOutput("Constants/Shooter/SpeedTolerance", Software.PID_TOLERANCE);
+    Logger.recordOutput("Constants/Shooter/FlywheelInverted", Mechanical.INVERTED);
 
-    // Current limits
-    Logger.recordOutput(
-        "Constants/Shooter/CurrentLimit/Smart_A", SHOOTER_FLYWHEEL_SMART_CURRENT_LIMIT);
-    Logger.recordOutput(
-        "Constants/Shooter/CurrentLimit/Secondary_A", SHOOTER_FLYWHEEL_SECONDARY_CURRENT_LIMIT);
+    Logger.recordOutput("Constants/Shooter/CurrentLimit/Smart_A", CurrentLimits.SMART);
+    Logger.recordOutput("Constants/Shooter/CurrentLimit/Secondary_A", CurrentLimits.SECONDARY);
 
-    // FuelSim constants
     Logger.recordOutput(
-        "Constants/Shooter/FuelSim/Height_m", SHOOTER_HEIGHT_FROM_GROUND.in(Meters));
+        "Constants/Shooter/FuelSim/Height_m", FuelSim.HEIGHT_FROM_GROUND.in(Meters));
     Logger.recordOutput(
-        "Constants/Shooter/FuelSim/ForwardOffset_m", SHOOTER_FORWARD_OFFSET.in(Meters));
-    Logger.recordOutput("Constants/Shooter/FuelSim/SideOffset_m", SHOOTER_SIDE_OFFSET.in(Meters));
-    Logger.recordOutput("Constants/Shooter/FuelSim/HoodAngle_deg", SHOOTER_HOOD_ANGLE.in(Degrees));
+        "Constants/Shooter/FuelSim/ForwardOffset_m", FuelSim.FORWARD_OFFSET.in(Meters));
+    Logger.recordOutput("Constants/Shooter/FuelSim/SideOffset_m", FuelSim.SIDE_OFFSET.in(Meters));
+    Logger.recordOutput("Constants/Shooter/FuelSim/HoodAngle_deg", FuelSim.HOOD_ANGLE.in(Degrees));
     Logger.recordOutput(
-        "Constants/Shooter/FuelSim/RPMThreshold", SHOOTER_RPM_THRESHOLD_FOR_LAUNCH.in(RPM));
+        "Constants/Shooter/FuelSim/RPMThreshold", FuelSim.RPM_THRESHOLD_FOR_LAUNCH.in(RPM));
     Logger.recordOutput(
-        "Constants/Shooter/FuelSim/LaunchInterval_s", SHOOTER_LAUNCH_INTERVAL.in(Seconds));
+        "Constants/Shooter/FuelSim/LaunchInterval_s", FuelSim.LAUNCH_INTERVAL.in(Seconds));
     Logger.recordOutput(
-        "Constants/Shooter/FuelSim/WheelDiameter_m", SHOOTER_WHEEL_DIAMETER.in(Meters));
-    Logger.recordOutput("Constants/Shooter/FuelSim/MaxHopperCapacity", MAX_HOPPER_CAPACITY);
-    Logger.recordOutput("Constants/Shooter/FuelSim/StartingFuelCount", STARTING_FUEL_COUNT);
+        "Constants/Shooter/FuelSim/WheelDiameter_m", FuelSim.WHEEL_DIAMETER.in(Meters));
+    Logger.recordOutput("Constants/Shooter/FuelSim/MaxHopperCapacity", FuelSim.MAX_HOPPER_CAPACITY);
+    Logger.recordOutput("Constants/Shooter/FuelSim/StartingFuelCount", FuelSim.STARTING_FUEL_COUNT);
+    Logger.recordOutput("Constants/Shooter/FuelSim/TrajectoryPoints", FuelSim.TRAJECTORY_POINTS);
     Logger.recordOutput(
-        "Constants/Shooter/FuelSim/TrajectoryPoints", TRAJECTORY_VISUALIZATION_POINTS);
-    Logger.recordOutput(
-        "Constants/Shooter/FuelSim/TrajectoryTimeSpan_s", TRAJECTORY_TIME_SPAN_SECONDS);
+        "Constants/Shooter/FuelSim/TrajectoryTimeSpan_s", FuelSim.TRAJECTORY_TIME_SPAN_SECONDS);
   }
 }

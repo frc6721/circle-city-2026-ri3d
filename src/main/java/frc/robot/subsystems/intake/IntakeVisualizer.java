@@ -55,9 +55,9 @@ public class IntakeVisualizer {
    */
   public IntakeVisualizer(String name) {
     this.name = name;
-    this.armLength = IntakeConstants.VISUALIZATION_ARM_LENGTH;
+    this.armLength = IntakeConstants.Visualization.ARM_LENGTH;
     this.baseOffset =
-        new Pose3d(IntakeConstants.VISUALIZATION_OFFSET, IntakeConstants.VISUALIZATION_ROTATION);
+        new Pose3d(IntakeConstants.Visualization.OFFSET, IntakeConstants.Visualization.ROTATION);
 
     // Create the Mechanism2d canvas
     mechanism = new LoggedMechanism2d(WIDTH, HEIGHT, new Color8Bit(Color.kBlack));
@@ -69,9 +69,9 @@ public class IntakeVisualizer {
     // Create min/max angle boundary indicators
     // Transform from robot frame to Mechanism2d frame
     double minAngleMech2d =
-        90.0 - IntakeConstants.MAX_INTAKE_ANGLE_DEGREES; // Note: min robot = max visual
+        90.0 - IntakeConstants.Mechanical.MAX_ANGLE_DEGREES; // Note: min robot = max visual
     double maxAngleMech2d =
-        90.0 - IntakeConstants.MIN_INTAKE_ANGLE_DEGREES; // Note: max robot = min visual
+        90.0 - IntakeConstants.Mechanical.MIN_ANGLE_DEGREES; // Note: max robot = min visual
 
     lowerBound =
         new LoggedMechanismLigament2d(
@@ -86,7 +86,9 @@ public class IntakeVisualizer {
         new LoggedMechanismLigament2d(
             name + "_Measured",
             armLength,
-            90.0 - IntakeConstants.STARTING_ANGLE_DEGREES, // Transform to Mechanism2d frame
+            90.0
+                - IntakeConstants.Mechanical
+                    .STARTING_ANGLE_DEGREES, // Transform to Mechanism2d frame
             6,
             new Color8Bit(Color.kGreen));
 
@@ -95,7 +97,9 @@ public class IntakeVisualizer {
         new LoggedMechanismLigament2d(
             name + "_Setpoint",
             armLength * 0.9, // Slightly shorter to see both
-            90.0 - IntakeConstants.STARTING_ANGLE_DEGREES, // Transform to Mechanism2d frame
+            90.0
+                - IntakeConstants.Mechanical
+                    .STARTING_ANGLE_DEGREES, // Transform to Mechanism2d frame
             4,
             new Color8Bit(Color.kYellow));
 
@@ -104,7 +108,9 @@ public class IntakeVisualizer {
         new LoggedMechanismLigament2d(
             name + "_Goal",
             armLength * 0.8, // Even shorter to see all three
-            90.0 - IntakeConstants.STARTING_ANGLE_DEGREES, // Transform to Mechanism2d frame
+            90.0
+                - IntakeConstants.Mechanical
+                    .STARTING_ANGLE_DEGREES, // Transform to Mechanism2d frame
             3,
             new Color8Bit(Color.kRed));
 
