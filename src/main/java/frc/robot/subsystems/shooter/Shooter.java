@@ -93,9 +93,6 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput(
         "Shooter/FlywheelSpeed/Current_RadPerSec",
         _shooterInputs._flywheelMotorVelocity.in(RadiansPerSecond));
-    Logger.recordOutput(
-        "Shooter/FlywheelSpeed/Current_RPM",
-        _shooterInputs._flywheelMotorVelocity.in(RevolutionsPerSecond) * 60);
 
     Logger.recordOutput(
         "Shooter/FlywheelSpeed/Desired_RadPerSec", _targetFlywheelSpeed.in(RadiansPerSecond));
@@ -184,39 +181,6 @@ public class Shooter extends SubsystemBase {
     _shooterIO.setFlywheelSpeed(speed);
   }
 
-  /**
-   * Calculates the required flywheel speed for a given distance using an interpolating lookup
-   * table.
-   *
-   * <p>Uses WPILib's InterpolatingDoubleTreeMap which linearly interpolates between characterized
-   * data points stored in {@link ShooterConstants.DistanceMap#SPEED_MAP}. The result is clamped to
-   * configured min/max speeds for safety.
-   *
-   * <p><b>To characterize:</b> Place robot at known distances, adjust RPM until shots score, and
-   * add (distance, RPM) pairs to SPEED_MAP. Repeat for 5-7 distances across your shooting range.
-   *
-   * @param distance Distance to the target (use Meters.of() or similar)
-   * @return Required flywheel speed as an AngularVelocity
-   */
-  public AngularVelocity getSpeedForDistance(Distance distance) {
-    // Convert distance to meters for lookup table
-    double distanceMeters = distance.in(Meters);
-
-    // Get interpolated speed from lookup table (returns RPM)
-    double speedRPM = ShooterConstants.DistanceMap.SPEED_MAP.get(distanceMeters);
-
-    // Clamp to min/max speeds for safety
-    double minRPM = ShooterConstants.Limits.MIN_SPEED.in(RevolutionsPerSecond) * 60.0;
-    double maxRPM = ShooterConstants.Limits.MAX_SPEED.in(RevolutionsPerSecond) * 60.0;
-    speedRPM = Math.max(minRPM, Math.min(maxRPM, speedRPM));
-
-    // Log the calculation for debugging
-    Logger.recordOutput("Shooter/ShotCalculator/Distance_m", distanceMeters);
-    Logger.recordOutput("Shooter/ShotCalculator/CalculatedSpeed_RPM", speedRPM);
-
-    // Convert RPM to AngularVelocity and return
-    return RPM.of(speedRPM);
-  }
 
   /**
    * Checks if the flywheel has reached its target speed within a percentage tolerance.
@@ -300,6 +264,17 @@ public class Shooter extends SubsystemBase {
    */
   public void updateSpeedForTarget(Translation3d target) {
     AngularVelocity targetSpeed = ShotCalculator.getInstance().getFlywheelSpeedForTarget(target);
+    setFlywheelSpeed(targetSpeed);
+  }
+
+  /**
+   * Updates the flywheel speed based on the distance to the target. Calculates the required speed
+   * and sets the flywheel accordingly.
+   *
+   * @param distance Distance to the target (from odometry or vision)
+   */
+  public void updateSpeedForDistance(Distance distance) {
+    AngularVelocity targetSpeed = ShotCalculator.getInstance().getFlywheelSpeedForDistance(distance);
     setFlywheelSpeed(targetSpeed);
   }
 

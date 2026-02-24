@@ -101,14 +101,30 @@ public class ShotCalculator {
     Translation2d targetPosition2d = target.toTranslation2d();
     double distanceMeters = robotPosition.getDistance(targetPosition2d);
 
+    Logger.recordOutput("Shooter/ShotCalculator/TargetPosition", target);
+    Logger.recordOutput("Shooter/ShotCalculator/RobotPosition", robotPosition);
+
+    return getFlywheelSpeedForDistance(Meters.of(distanceMeters));
+  }
+
+  /**
+   * Calculates the required flywheel speed to hit a target at a specific distance.
+   *
+   * <p>This is a lower-level method that can be used for testing or for shooting at specific
+   * distances without relying on RobotState. It looks up the required RPM from the interpolation
+   * table and clamps it to safe limits.
+   *
+   * @param distance The horizontal distance to the target
+   * @return The required flywheel angular velocity
+   */
+  public AngularVelocity getFlywheelSpeedForDistance(Distance distance) {
+    double distanceMeters = distance.in(Meters);
     double speedRPM = ShooterConstants.DistanceMap.SPEED_MAP.get(distanceMeters);
 
     double minRPM = ShooterConstants.Limits.MIN_SPEED.in(RevolutionsPerSecond) * 60.0;
     double maxRPM = ShooterConstants.Limits.MAX_SPEED.in(RevolutionsPerSecond) * 60.0;
     speedRPM = Math.max(minRPM, Math.min(maxRPM, speedRPM));
 
-    Logger.recordOutput("Shooter/ShotCalculator/TargetPosition", target);
-    Logger.recordOutput("Shooter/ShotCalculator/RobotPosition", robotPosition);
     Logger.recordOutput("Shooter/ShotCalculator/Distance_m", distanceMeters);
     Logger.recordOutput("Shooter/ShotCalculator/CalculatedSpeed_RPM", speedRPM);
 

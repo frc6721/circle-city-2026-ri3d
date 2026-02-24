@@ -92,8 +92,7 @@ public class ShooterCommands {
   public static Command setFlywheelSpeedForDistance(Shooter shooter, Distance distance) {
     return Commands.runOnce(
         () -> {
-          AngularVelocity targetSpeed = shooter.getSpeedForDistance(distance);
-          shooter.setFlywheelSpeed(targetSpeed);
+          shooter.updateSpeedForDistance(distance);
         },
         shooter);
   }
